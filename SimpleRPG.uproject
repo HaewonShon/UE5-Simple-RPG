@@ -7,7 +7,12 @@
 		{
 			"Name": "SimpleRPG",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"GameplayAbilities",
+				"CoreUObject"
+			]
 		}
 	],
 	"Plugins": [

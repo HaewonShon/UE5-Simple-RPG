@@ -59,6 +59,13 @@ Plugins/*/Binaries/
 # Ignore local asset packs (ex: 유료 애셋)
 # 팀 내부적으로 관리하지 않을 경우
 Content/StoreAssets/
+Content/__ExternalActors__/
+Content/__ExternalObjects__/
+Content/Characters/
+Content/LevelPrototyping/
+Content/Fab/
+Content/ThirdPerson/
+
 
 # If using Rider
 .idea/

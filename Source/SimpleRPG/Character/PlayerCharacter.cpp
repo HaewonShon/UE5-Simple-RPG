@@ -1,0 +1,164 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "PlayerCharacter.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+
+
+#include "AbilitySystemComponent.h"
+#include "CharacterAttributeSet.h"
+#include "Abilities/GA_GreatSwordComboAttack.h"
+
+DEFINE_LOG_CATEGORY(LogCharacter);
+
+// Sets default values
+APlayerCharacter::APlayerCharacter()
+{
+ 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
+	SpringArm->SetupAttachment(GetCapsuleComponent());
+	SpringArm->TargetArmLength = DefaultArmLength;
+	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+	Camera->SetupAttachment(SpringArm);
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+
+	AttributeSet = CreateDefaultSubobject<UCharacterAttributeSet>(TEXT("AttributeSet"));
+	AbilitySystemComponent->AddAttributeSetSubobject(AttributeSet.Get());
+}
+
+// Called when the game starts or when spawned
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();	
+
+	// ASC init
+	InitializeAttributes();
+	AddCharacterAbilities();	
+}
+
+void APlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	}
+}
+
+// Called every frame
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Called to bind functionality to input
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+		EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
+
+		//EIC->BindAction(DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		//EIC->BindAction(ConsumeAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		//EIC->BindAction(SkillAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+			{
+				InputSystem->AddMappingContext(DefaultMapping, 0);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogCharacter, Error, TEXT("PlayerCharacter requires EnhancedInputComponent"));
+	}
+}
+
+void APlayerCharacter::Move(const FInputActionValue& Value)
+{
+	const FVector2D MovementVector = Value.Get<FVector2D>();
+
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(ForwardDirection, MovementVector.X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(RightDirection, MovementVector.Y);
+}
+
+void APlayerCharacter::Look(const FInputActionValue& Value)
+{
+	const FVector2D LookAxisVector = Value.Get<FVector2D>();
+	AddControllerYawInput(-LookAxisVector.X);
+	AddControllerPitchInput(LookAxisVector.Y);
+}
+
+void APlayerCharacter::Attack()
+{
+	// Currently in attack -> set next combo if possible
+	if (AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Ability.GreatSword")))
+	{
+		if (UGA_GreatSwordComboAttack* ComboAttack = Cast<UGA_GreatSwordComboAttack>(AbilitySystemComponent->GetAnimatingAbility()))
+		{
+			ComboAttack->SetNextComboFlag(true);
+		}
+	}
+	else // Otherwise run 1st attack of the combo series
+	{
+		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.GreatSword.Attack1").GetSingleTagContainer());
+	}
+}
+
+void APlayerCharacter::InitializeAttributes()
+{
+	if (!AbilitySystemComponent.Get() || !DefaultAttributeSet.Get())
+		return;
+
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(*DefaultAttributeSet, 1.0f, EffectContext);
+
+	if (NewHandle.IsValid())
+	{
+		UE_LOG(LogCharacter, Log, TEXT("Applied Default attribute to the character"));
+		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
+	}
+}
+
+void APlayerCharacter::AddCharacterAbilities()
+{
+	if (!AbilitySystemComponent)
+		return;
+
+	for (TSubclassOf<UGameplayAbility>& Ability : OwningAbilities)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, -1, this));
+	}
+}
+
+UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
