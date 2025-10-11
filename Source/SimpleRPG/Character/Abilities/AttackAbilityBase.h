@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "GA_GreatSwordComboAttack.generated.h"
+#include "AttackAbilityBase.generated.h"
 
 /**
- *	Base class For Melee Attack Combo Ability
- *  Melee Attack 1, 2, 3 will derive this class
+ *	Base class For Attack Abilities
+ *  Support flexible combo attack system by FGameplayTag, Damage Application based on DamageMultiplier
  */
 UCLASS()
-class SIMPLERPG_API UGA_GreatSwordComboAttack : public UGameplayAbility
+class SIMPLERPG_API UAttackAbilityBase : public UGameplayAbility
 {
 	GENERATED_BODY()
 	
@@ -19,23 +19,28 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-
-	//virtual void ActivateAbility() override;
 	UFUNCTION()
-	void OnCompleted();
-
+	virtual void OnCompleted();	
 	UFUNCTION()
-	void OnAnimEvent(FGameplayEventData EventData);
-
+	virtual void OnAnimEvent(FGameplayEventData EventData);
+	
 	void SetNextComboFlag(bool flag);
 
 protected:
+	virtual void OnAttack();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Animation")
 	UAnimMontage* MontageToPlay;
 
 	// Optional - tag 구분하여 event 처리
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
 	FGameplayTag NextAttackTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
+	float DamageMultiplier;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
+	TObjectPtr<class UAttackHitModule> AttackHitModule;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
 	bool bIsFinalCombo;

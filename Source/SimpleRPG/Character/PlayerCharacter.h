@@ -23,7 +23,6 @@ public:
 	APlayerCharacter();
 
 	virtual void PossessedBy(AController* NewController);
-	virtual void Tick(float DeltaTime) override;
 
 	/*******************************************
 	*	Input
@@ -56,7 +55,7 @@ public:
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
 	*******************************************/
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	// OnHealthChanged
 
@@ -93,11 +92,10 @@ protected:
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
 	*******************************************/
-	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
-
 	void InitializeAttributes();
 	void AddCharacterAbilities();
 
+	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TObjectPtr<class UAttributeSet> AttributeSet;

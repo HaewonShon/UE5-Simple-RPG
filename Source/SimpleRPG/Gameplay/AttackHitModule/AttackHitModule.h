@@ -15,15 +15,24 @@ class SIMPLERPG_API UAttackHitModule : public UObject
 	GENERATED_BODY()
 
 public:
-    UFUNCTION()
-    virtual TArray<AActor*> GetHitTargets(AActor* Instigator) PURE_VIRTUAL(UAttackHitModule::GetHitTargets, TArray<AActor*>());
+    UAttackHitModule();
 
     UFUNCTION()
-    virtual void DebugDraw() PURE_VIRTUAL(UAttackHitModule::DebugDraw, );
+    virtual TArray<AActor*> GetHitTargets(AActor* Instigator) PURE_VIRTUAL(UAttackHitModule::GetHitTargets, return TArray<AActor*>(); );
+
+    UFUNCTION()
+    virtual void DebugDraw(FVector Location) PURE_VIRTUAL(UAttackHitModule::DebugDraw, );
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TEnumAsByte<ECollisionChannel> ChannelToHit;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TSubclassOf<APawn> TargetClass;
 
     UPROPERTY(EditAnywhere, Category = "Debug")
     bool bShouldDrawDebugInfo;
 
     UPROPERTY(EditAnywhere, Category = "Debug")
     FColor DebugDrawColor;
+
 };

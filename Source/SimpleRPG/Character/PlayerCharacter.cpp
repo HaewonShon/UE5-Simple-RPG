@@ -10,8 +10,8 @@
 
 
 #include "AbilitySystemComponent.h"
-#include "CharacterAttributeSet.h"
-#include "Abilities/GA_GreatSwordComboAttack.h"
+#include "../Gameplay/CharacterAttributeSet.h"
+#include "Abilities/AttackAbilityBase.h"
 
 DEFINE_LOG_CATEGORY(LogCharacter);
 
@@ -40,10 +40,6 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();	
-
-	// ASC init
-	InitializeAttributes();
-	AddCharacterAbilities();	
 }
 
 void APlayerCharacter::PossessedBy(AController* NewController)
@@ -53,14 +49,11 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		// ASC init
+		InitializeAttributes();
+		AddCharacterAbilities();
 	}
-}
-
-// Called every frame
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -118,9 +111,9 @@ void APlayerCharacter::Attack()
 	// Currently in attack -> set next combo if possible
 	if (AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Ability.GreatSword")))
 	{
-		if (UGA_GreatSwordComboAttack* ComboAttack = Cast<UGA_GreatSwordComboAttack>(AbilitySystemComponent->GetAnimatingAbility()))
+		if (UAttackAbilityBase* AttackAbility = Cast<UAttackAbilityBase>(AbilitySystemComponent->GetAnimatingAbility()))
 		{
-			ComboAttack->SetNextComboFlag(true);
+			AttackAbility->SetNextComboFlag(true);
 		}
 	}
 	else // Otherwise run 1st attack of the combo series
@@ -138,11 +131,9 @@ void APlayerCharacter::InitializeAttributes()
 	EffectContext.AddSourceObject(this);
 
 	FGameplayEffectSpecHandle NewHandle = AbilitySystemComponent->MakeOutgoingSpec(*DefaultAttributeSet, 1.0f, EffectContext);
-
 	if (NewHandle.IsValid())
 	{
-		UE_LOG(LogCharacter, Log, TEXT("Applied Default attribute to the character"));
-		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*NewHandle.Data.Get(), AbilitySystemComponent.Get());
+		FActiveGameplayEffectHandle ActiveGEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*NewHandle.Data.Get());
 	}
 }
 

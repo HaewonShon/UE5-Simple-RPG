@@ -17,7 +17,7 @@ class SIMPLERPG_API USphereAttackHitModule : public UAttackHitModule
 public:
     virtual TArray<AActor*> GetHitTargets(AActor* Instigator) override;
 
-    virtual void DebugDraw() override;
+    virtual void DebugDraw(FVector Location) override;
 
     UPROPERTY(EditAnywhere, Category = "Hit")
     float Range;

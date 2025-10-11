@@ -35,21 +35,17 @@ public:
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(UCharacterAttributeSet, Health)
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(UCharacterAttributeSet, MaxHealth)
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData HealthRegen;
 	ATTRIBUTE_ACCESSORS(UCharacterAttributeSet, HealthRegen)
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData AttackPower;
 	ATTRIBUTE_ACCESSORS(UCharacterAttributeSet, AttackPower)
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData Defense;

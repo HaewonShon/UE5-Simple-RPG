@@ -12,3 +12,14 @@ void UAnimNotify_SendGameplayTagEvent::Notify(USkeletalMeshComponent* MeshComp, 
         UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Owner, EventTag, Data);
     }
 }
+
+FString UAnimNotify_SendGameplayTagEvent::GetNotifyName_Implementation() const
+{
+    FString EventTagString = "";
+    if (EventTag.IsValid())
+    {
+        EventTagString = EventTag.ToString();
+    }
+    
+    return EventTagString.IsEmpty() ? FString("SendGameplayTagEvent") : EventTagString;
+}

@@ -20,4 +20,6 @@ public:
 	FGameplayTag EventTag;
 
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+	virtual FString GetNotifyName_Implementation() const override;
 };
