@@ -30,7 +30,7 @@ protected:
 	virtual void OnAttack();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Animation")
-	UAnimMontage* MontageToPlay;
+	TObjectPtr<UAnimMontage> MontageToPlay;
 
 	// Optional - tag 구분하여 event 처리
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")

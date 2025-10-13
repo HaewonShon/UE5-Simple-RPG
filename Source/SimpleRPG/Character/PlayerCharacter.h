@@ -88,6 +88,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Attack();
+	void Dash();
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM

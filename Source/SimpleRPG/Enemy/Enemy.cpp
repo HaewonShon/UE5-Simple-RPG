@@ -4,6 +4,7 @@
 #include "Enemy.h"
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "../UI/EnemyHPDisplayWidgetComponent.h"
+#include "../Gameplay/DamageTextActor.h"
 
 DEFINE_LOG_CATEGORY(LogEnemy);
 // Sets default values
@@ -39,6 +40,26 @@ void AEnemy::PossessedBy(AController* NewController)
 		// ASC init
 		InitializeAttributes();
 		AddCharacterAbilities();
+
+		FGameplayAttribute HealthAttribute = UCharacterAttributeSet::GetHealthAttribute();
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &AEnemy::OnHealthChanged);
+	}
+}
+
+void AEnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
+{
+	float Damage = Data.OldValue - Data.NewValue;
+	if(Damage > 0)
+	{ 
+		ADamageTextActor* DamageTextActor = GetWorld()->SpawnActor<ADamageTextActor>(DamageTextClass, GetActorLocation() + FVector(0.f, 0.f, 100.f), GetActorRotation());
+		if (DamageTextActor)
+		{
+			DamageTextActor->SetDamageValue(Damage, false);
+		}
+		else
+		{
+			UE_LOG(LogEnemy, Warning, TEXT("Failed to set damage value for damageactor"));
+		}
 	}
 }
 

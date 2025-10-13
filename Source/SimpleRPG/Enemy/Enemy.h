@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayEffectTypes.h"
 #include "Enemy.generated.h"
 
 // Define Log Category for enemy-specific logs
@@ -19,6 +20,8 @@ public:
 	AEnemy();
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController);
+
+	void OnHealthChanged(const FOnAttributeChangeData& Data);
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
@@ -44,4 +47,7 @@ public:
 	*******************************************/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TObjectPtr<class UEnemyHPDisplayWidgetComponent> HPDisplayWidgetComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class ADamageTextActor> DamageTextClass;
 };

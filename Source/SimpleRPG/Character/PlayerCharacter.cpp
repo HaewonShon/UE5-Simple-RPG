@@ -66,8 +66,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 		EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
-
-		//EIC->BindAction(DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		EIC->BindAction(DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Dash);
 		//EIC->BindAction(ConsumeAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		//EIC->BindAction(SkillAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 
@@ -120,6 +119,11 @@ void APlayerCharacter::Attack()
 	{
 		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.GreatSword.Attack1").GetSingleTagContainer());
 	}
+}
+
+void APlayerCharacter::Dash()
+{
+	AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.Dash").GetSingleTagContainer());
 }
 
 void APlayerCharacter::InitializeAttributes()
