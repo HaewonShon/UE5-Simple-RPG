@@ -11,7 +11,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "../Gameplay/CharacterAttributeSet.h"
-#include "Abilities/AttackAbilityBase.h"
+#include "Abilities/PlayerAttackAbilityBase.h"
 
 DEFINE_LOG_CATEGORY(LogCharacter);
 
@@ -53,6 +53,10 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 		// ASC init
 		InitializeAttributes();
 		AddCharacterAbilities();
+
+		//temp : add sword tag
+		//AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
+		//AbilitySystemComponent->gameplaytag
 	}
 }
 
@@ -68,7 +72,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
 		EIC->BindAction(DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Dash);
 		//EIC->BindAction(ConsumeAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-		//EIC->BindAction(SkillAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+		EIC->BindAction(SkillAction, ETriggerEvent::Triggered, this, &APlayerCharacter::SkillAttack);
 
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
@@ -108,22 +112,27 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 void APlayerCharacter::Attack()
 {
 	// Currently in attack -> set next combo if possible
-	if (AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Ability.GreatSword")))
+	if (AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Combo")))
 	{
-		if (UAttackAbilityBase* AttackAbility = Cast<UAttackAbilityBase>(AbilitySystemComponent->GetAnimatingAbility()))
+		if (UPlayerAttackAbilityBase* AttackAbility = Cast<UPlayerAttackAbilityBase>(AbilitySystemComponent->GetAnimatingAbility()))
 		{
 			AttackAbility->SetNextComboFlag(true);
 		}
 	}
 	else // Otherwise run 1st attack of the combo series
 	{
-		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.GreatSword.Attack1").GetSingleTagContainer());
+		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Combo.1").GetSingleTagContainer());
 	}
 }
 
 void APlayerCharacter::Dash()
 {
 	AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.Dash").GetSingleTagContainer());
+}
+
+void APlayerCharacter::SkillAttack()
+{
+	AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Skill").GetSingleTagContainer());
 }
 
 void APlayerCharacter::InitializeAttributes()
@@ -146,9 +155,27 @@ void APlayerCharacter::AddCharacterAbilities()
 	if (!AbilitySystemComponent)
 		return;
 
-	for (TSubclassOf<UGameplayAbility>& Ability : OwningAbilities)
+	for (TSubclassOf<USimpleRPGGameplayAbility>& Ability : CommonAbilitySet)
 	{
 		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, -1, this));
+	}
+
+	AddWeaponAbilities();
+}
+
+void APlayerCharacter::AddWeaponAbilities()
+{
+	FGameplayTag CurrentWeaponTag = AbilitySystemComponent->GetOwnedGameplayTags().Filter(FGameplayTag::RequestGameplayTag("Weapon").GetSingleTagContainer()).First();
+
+	for (FWeaponAbilitySet& AbilitySet : WeaponAbilitySets)
+	{
+		if (AbilitySet.WeaponTag == CurrentWeaponTag)
+		{
+			for (TSubclassOf<USimpleRPGGameplayAbility>& Ability : AbilitySet.Abilities)
+			{
+				WeaponAbilitySpecHandles.Add(AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, -1, this)));
+			}
+		}
 	}
 }
 

@@ -16,6 +16,7 @@ class SIMPLERPG_API ASimpleRPGPlayerController : public APlayerController
 	
 public:
 	virtual void BeginPlay() override;
+	virtual void AddPitchInput(float Val) override;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> HUDWidget;

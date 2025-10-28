@@ -4,24 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "AttackHitModule.h"
-#include "SphereAttackHitModule.generated.h"
+#include "ConeAttackHitModule.generated.h"
 
 /**
- *  Sphere-Shape attack check module
+ * Cone-shape attack check module
  */
 UCLASS()
-class SIMPLERPG_API USphereAttackHitModule : public UAttackHitModule
+class SIMPLERPG_API UConeAttackHitModule : public UAttackHitModule
 {
 	GENERATED_BODY()
 
 public:
     virtual TArray<AActor*> GetHitTargets(AActor* Instigator) override;
 
-    void DebugDraw(const FVector& Location);
+    void DebugDraw(const FVector& Location, const FVector& Forward);
 
     UPROPERTY(EditAnywhere, Category = "Hit")
     float Range;
 
     UPROPERTY(EditAnywhere, Category = "Hit")
-    float Radius;
+    float Angle;
+	
+private:
+    bool IsInside(AActor* Target, const FVector& Location, const FVector& Forward) const;
 };

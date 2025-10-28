@@ -21,3 +21,9 @@ void ASimpleRPGPlayerController::BeginPlay()
         UE_LOG(LogTemp, Warning, TEXT("HUDWidget in PlayerController not registered."));
     }
 }
+
+void ASimpleRPGPlayerController::AddPitchInput(float Val)
+{
+    Super::AddPitchInput(Val);
+    
+}

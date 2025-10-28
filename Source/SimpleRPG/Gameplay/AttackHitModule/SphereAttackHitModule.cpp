@@ -51,12 +51,11 @@ TArray<AActor*> USphereAttackHitModule::GetHitTargets(AActor* Instigator)
             HitEnemies.Add(HitActor);
         }
     }
-    UE_LOG(LogTemp, Log, TEXT("Hit res : %i actors"), HitEnemies.Num());
 
 	return HitEnemies;
 }
 
-void USphereAttackHitModule::DebugDraw(FVector Location)
+void USphereAttackHitModule::DebugDraw(const FVector& Location)
 {
     DrawDebugSphere(GetWorld(), Location, Radius, 16, DebugDrawColor, false, 2.0f);
 }

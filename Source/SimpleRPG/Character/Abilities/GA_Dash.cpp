@@ -40,8 +40,3 @@ void UGA_Dash::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamepl
 		}
 	}
 }
-
-void UGA_Dash::OnCompleted()
-{
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
-}

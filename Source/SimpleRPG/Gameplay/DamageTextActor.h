@@ -36,4 +36,6 @@ protected:
 	float Damage;
 	float LocalLifetime;
 	bool bIsCrit;
+
+	TWeakObjectPtr<class APlayerCameraManager> CamManager;
 };

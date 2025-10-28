@@ -51,7 +51,7 @@ void AEnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
 	float Damage = Data.OldValue - Data.NewValue;
 	if(Damage > 0)
 	{ 
-		ADamageTextActor* DamageTextActor = GetWorld()->SpawnActor<ADamageTextActor>(DamageTextClass, GetActorLocation() + FVector(0.f, 0.f, 100.f), GetActorRotation());
+		ADamageTextActor* DamageTextActor = GetWorld()->SpawnActor<ADamageTextActor>(DamageTextClass, GetActorLocation() + FVector(0.f, 0.f, 200.f), GetActorRotation());
 		if (DamageTextActor)
 		{
 			DamageTextActor->SetDamageValue(Damage, false);

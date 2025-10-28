@@ -24,11 +24,4 @@ void UDamageTextWidget::InitializeText(float Damage, bool bIsCrit)
 void UDamageTextWidget::SetOpacity(float Opacity)
 {
 	SetRenderOpacity(Opacity);
-
-	//if (DamageText)
-	//{
-	//	FColor Color = DamageText->GetColorAndOpacity().GetSpecifiedColor().ToFColor(false);
-	//	Color.A = Opacity;
-	//	DamageText->SetColorAndOpacity(Color);
-	//}
 }

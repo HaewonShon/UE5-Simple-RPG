@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../../Gameplay/SimpleRPGGameplayAbility.h"
-#include "GA_Dash.generated.h"
+#include "Abilities/GameplayAbility.h"
+#include "SimpleRPGGameplayAbility.generated.h"
 
 /**
- *	Ability for Player Dash
+ *	A Base class for all GameplayAbility in this project
  */
-UCLASS()
-class SIMPLERPG_API UGA_Dash : public USimpleRPGGameplayAbility
+UCLASS(BlueprintType)
+class SIMPLERPG_API USimpleRPGGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -18,7 +18,14 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
+	UFUNCTION()
+	virtual void OnCompleted();
+	UFUNCTION()
+	virtual void OnAnimEvent(FGameplayEventData EventData);
+
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Dash")
-	FVector DashPower;
+	virtual void OnExecution();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimMontage> MontageToPlay;
 };

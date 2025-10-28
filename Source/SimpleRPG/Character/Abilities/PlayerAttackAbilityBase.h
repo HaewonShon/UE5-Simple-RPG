@@ -3,38 +3,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Abilities/GameplayAbility.h"
-#include "AttackAbilityBase.generated.h"
+#include "../../Gameplay/SimpleRPGGameplayAbility.h"
+#include "PlayerAttackAbilityBase.generated.h"
 
 /**
- *	Base class For Attack Abilities
+ *	Base class For Player Attack Abilities
  *  Support flexible combo attack system by FGameplayTag, Damage Application based on DamageMultiplier
  */
 UCLASS()
-class SIMPLERPG_API UAttackAbilityBase : public UGameplayAbility
+class SIMPLERPG_API UPlayerAttackAbilityBase : public USimpleRPGGameplayAbility
 {
 	GENERATED_BODY()
 	
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
-
-	UFUNCTION()
-	virtual void OnCompleted();	
-	UFUNCTION()
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled);
 	virtual void OnAnimEvent(FGameplayEventData EventData);
 	
 	void SetNextComboFlag(bool flag);
 
 protected:
-	virtual void OnAttack();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Animation")
-	TObjectPtr<UAnimMontage> MontageToPlay;
-
-	// Optional - tag 备盒窍咯 event 贸府
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
-	FGameplayTag NextAttackTag;
+	virtual void OnExecution();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
 	float DamageMultiplier;
@@ -42,9 +31,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
 	TObjectPtr<class UAttackHitModule> AttackHitModule;
 
+	// Optional - tag 备盒窍咯 event 贸府
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
+	FGameplayTag NextAttackTag;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Combat")
 	bool bIsFinalCombo;
 
 	bool bCanSetNextCombo;
+	
 	bool bNextComboQueued;
 };

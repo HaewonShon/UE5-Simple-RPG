@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AttackAbilityBase.h"
-#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
-#include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "PlayerAttackAbilityBase.h"
 #include "../PlayerCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -14,19 +12,12 @@
 // temp for hitmodule creation
 #include "../../Gameplay/AttackHitModule/SphereAttackHitModule.h"
 
-void UAttackAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UPlayerAttackAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	UAbilityTask_WaitGameplayEvent* QueueComboWaitEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, FGameplayTag::RequestGameplayTag("Anim.Event"), nullptr, false, false);
-	UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay);
-
-	QueueComboWaitEventTask->EventReceived.AddDynamic(this, &UAttackAbilityBase::OnAnimEvent);
-	PlayMontageTask->OnBlendOut.AddDynamic(this, &UAttackAbilityBase::OnCompleted);
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 	bCanSetNextCombo = false;
 	bNextComboQueued = false;
-
-	QueueComboWaitEventTask->ReadyForActivation();
-	PlayMontageTask->ReadyForActivation();
 
 	if (ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo()))
 	{
@@ -39,18 +30,16 @@ void UAttackAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	}
 }
 
-void UAttackAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+void UPlayerAttackAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	if (bNextComboQueued && !bIsFinalCombo)
+	if (!bIsFinalCombo && bNextComboQueued)
 	{
-		UE_LOG(LogCharacter, Log, TEXT("Combo next called"));
 		ActorInfo->AbilitySystemComponent->TryActivateAbilitiesByTag(NextAttackTag.GetSingleTagContainer());
 	}
 	else
 	{
-		UE_LOG(LogCharacter, Log, TEXT("Combo next NOT called"));
 		if (ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo()))
 		{
 			if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
@@ -63,15 +52,11 @@ void UAttackAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle, con
 	}
 }
 
-void UAttackAbilityBase::OnCompleted()
+void UPlayerAttackAbilityBase::OnAnimEvent(FGameplayEventData EventData)
 {
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
-}
+	Super::OnAnimEvent(EventData);
 
-void UAttackAbilityBase::OnAnimEvent(FGameplayEventData EventData)
-{
 	FGameplayTag ReceivedTag = EventData.EventTag;
-
 	if (ReceivedTag == FGameplayTag::RequestGameplayTag("Anim.Event.QueueNextCombo"))
 	{
 		bCanSetNextCombo = true;
@@ -87,13 +72,9 @@ void UAttackAbilityBase::OnAnimEvent(FGameplayEventData EventData)
 			bCanSetNextCombo = false;
 		}
 	}
-	else if (ReceivedTag == FGameplayTag::RequestGameplayTag("Anim.Event.OnAttack"))
-	{
-		OnAttack();
-	}
 }
 
-void UAttackAbilityBase::SetNextComboFlag(bool flag)
+void UPlayerAttackAbilityBase::SetNextComboFlag(bool flag)
 {
 	if (bCanSetNextCombo)
 	{
@@ -101,7 +82,7 @@ void UAttackAbilityBase::SetNextComboFlag(bool flag)
 	}
 }
 
-void UAttackAbilityBase::OnAttack()
+void UPlayerAttackAbilityBase::OnExecution()
 {
 	if (!AttackHitModule)
 	{

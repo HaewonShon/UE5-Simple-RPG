@@ -18,10 +18,13 @@ class SIMPLERPG_API UEnemyHPDisplayWidgetComponent : public UWidgetComponent
 public:
 	UEnemyHPDisplayWidgetComponent();
 
+	virtual void TickComponent(float DeltaTime,	ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void BeginPlay() override;
 
 	void OnHealthChanged(const FOnAttributeChangeData& Data);
 
 protected:
 	TWeakObjectPtr<class UProgressDisplayWidget> DisplayWidget;
+
+	TWeakObjectPtr<class APlayerCameraManager> CamManager;
 };

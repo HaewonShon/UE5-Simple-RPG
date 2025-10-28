@@ -27,10 +27,6 @@ void ADamageTextActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector Location = GetActorLocation();
-	Location.Z += FloatingSpeed * DeltaTime;
-	SetActorLocation(Location);
-
 	LocalLifetime -= DeltaTime;
 	if (LocalLifetime < 0.f)
 	{
@@ -41,14 +37,13 @@ void ADamageTextActor::Tick(float DeltaTime)
 		float Alpha = FMath::Clamp(LocalLifetime / Lifetime, 0.f, 1.f);
 		float Opacity = FMath::InterpEaseInOut(0.f, 1.f, Alpha, 1.f);
 		DamageTextWidget->SetOpacity(Opacity);
+
+		FVector Location = GetActorLocation();
+		FRotator LookAt = CamManager->GetCameraRotation();
+		LookAt.Add(0.f, 180.f, 0.f);
+		LookAt.Pitch = 360.f - LookAt.Pitch;
+		SetActorLocationAndRotation(Location + FVector(0.f, 0.f, FloatingSpeed * DeltaTime), LookAt);
 	}
-
-	/*APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	FVector CameraLocation = CameraManager->GetCameraLocation();
-
-	FRotator LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CameraLocation);
-	LookAt.Pitch = 0.f;
-	SetActorRotation(LookAt);*/
 }
 
 void ADamageTextActor::BeginPlay()
@@ -59,6 +54,12 @@ void ADamageTextActor::BeginPlay()
 	InitializeText();
 
 	LocalLifetime = Lifetime;
+
+	// get local camera to track
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		CamManager = PC->PlayerCameraManager.Get();
+	}
 }
 
 void ADamageTextActor::SetDamageValue(float DamageValue, bool bCrit)

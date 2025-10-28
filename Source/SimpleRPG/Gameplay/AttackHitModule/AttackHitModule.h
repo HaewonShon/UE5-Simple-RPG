@@ -20,9 +20,6 @@ public:
     UFUNCTION()
     virtual TArray<AActor*> GetHitTargets(AActor* Instigator) PURE_VIRTUAL(UAttackHitModule::GetHitTargets, return TArray<AActor*>(); );
 
-    UFUNCTION()
-    virtual void DebugDraw(FVector Location) PURE_VIRTUAL(UAttackHitModule::DebugDraw, );
-
     UPROPERTY(EditAnywhere, Category = "Combat")
     TEnumAsByte<ECollisionChannel> ChannelToHit;
 

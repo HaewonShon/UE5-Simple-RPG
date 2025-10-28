@@ -6,15 +6,29 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "InputAction.h"
+#include "Abilities/GameplayAbility.h"
 #include "PlayerCharacter.generated.h"
 
 // Define Log Category for character-specific logs
 DECLARE_LOG_CATEGORY_EXTERN(LogCharacter, Log, All)
 
+USTRUCT(BlueprintType)
+struct FWeaponAbilitySet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	FGameplayTag WeaponTag;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TArray<TSubclassOf<class USimpleRPGGameplayAbility>> Abilities;
+};
+
 UCLASS()
 class SIMPLERPG_API APlayerCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
+
 
 public:
 	/*******************************************
@@ -89,12 +103,14 @@ protected:
 	void Look(const FInputActionValue& Value);
 	void Attack();
 	void Dash();
+	void SkillAttack();
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
 	*******************************************/
 	void InitializeAttributes();
 	void AddCharacterAbilities();
+	void AddWeaponAbilities();
 
 	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
 
@@ -102,8 +118,14 @@ protected:
 	TObjectPtr<class UAttributeSet> AttributeSet;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
-	TArray<TSubclassOf<class UGameplayAbility>> OwningAbilities;
+	TArray<TSubclassOf<class USimpleRPGGameplayAbility>> CommonAbilitySet;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
+	TArray<FWeaponAbilitySet> WeaponAbilitySets;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeSet;
+
+	// used to manage weapon-specific ability managment
+	TArray<FGameplayAbilitySpecHandle> WeaponAbilitySpecHandles;
 };
