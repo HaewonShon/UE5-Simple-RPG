@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "DamageGE.h"
+#include "GE_Damage.h"
 #include "GEExecCalculation.h"
 
-UDamageGE::UDamageGE()
+UGE_Damage::UGE_Damage()
 {
     DurationPolicy = EGameplayEffectDurationType::Instant;
 

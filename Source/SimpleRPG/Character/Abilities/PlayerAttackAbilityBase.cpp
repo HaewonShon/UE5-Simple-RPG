@@ -7,7 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "../../Gameplay/AttackHitModule/AttackHitModule.h"
 #include "../../Enemy/Enemy.h"
-#include "../../Gameplay/DamageGE.h"
+#include "../../Gameplay/GE_Damage.h"
 
 // temp for hitmodule creation
 #include "../../Gameplay/AttackHitModule/SphereAttackHitModule.h"
@@ -99,19 +99,19 @@ void UPlayerAttackAbilityBase::OnExecution()
 	UAbilitySystemComponent* SourceASC = CurrentActorInfo->AbilitySystemComponent.Get();
 	FGameplayEffectContextHandle EffectContext = CurrentActorInfo->AbilitySystemComponent->MakeEffectContext();
 	EffectContext.AddSourceObject(SourceASC->GetAvatarActor());
+	FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(UGE_Damage::StaticClass(), 1.0f, EffectContext);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.DamageMultiplier"), DamageMultiplier);
 
 	for (AActor* Actor : HitActors)
 	{
 		AEnemy* Enemy = Cast<AEnemy>(Actor);
 		if (UAbilitySystemComponent* TargetASC = Enemy->GetAbilitySystemComponent())
 		{
-			FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(UDamageGE::StaticClass(), 1.0f, EffectContext);
 			if (SpecHandle.IsValid())
 			{
 				// Set Damage Multiplier from Ability using SetByCaller
-				SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.DamageMultiplier"), DamageMultiplier);
 				SourceASC->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), TargetASC);
-				UE_LOG(LogCharacter, Log, TEXT("Hit Enemy"));
+				UE_LOG(LogCharacter, Verbose, TEXT("Hit Enemy %s"), *Enemy->GetName());
 			}
 		}		
 	}

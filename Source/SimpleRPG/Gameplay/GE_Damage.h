@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
-#include "DamageGE.generated.h"
+#include "GE_Damage.generated.h"
 
 /**
- * 
+ *  GE for applying damage multiplier
  */
 UCLASS()
-class SIMPLERPG_API UDamageGE : public UGameplayEffect
+class SIMPLERPG_API UGE_Damage : public UGameplayEffect
 {
 	GENERATED_BODY()
 public:
-    UDamageGE();
+	UGE_Damage();
 };
