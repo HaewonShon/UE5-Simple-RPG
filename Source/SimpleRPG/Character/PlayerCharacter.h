@@ -71,7 +71,7 @@ public:
 	*******************************************/
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	// OnHealthChanged
+	void OnHealthChanged(const FOnAttributeChangeData& Data);
 
 
 protected:
@@ -112,10 +112,7 @@ protected:
 	void AddCharacterAbilities();
 	void AddWeaponAbilities();
 
-	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
-	TObjectPtr<class UAttributeSet> AttributeSet;
+	TWeakObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TArray<TSubclassOf<class USimpleRPGGameplayAbility>> CommonAbilitySet;

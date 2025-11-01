@@ -11,18 +11,14 @@ void UGA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay);
-	PlayMontageTask->OnBlendOut.AddDynamic(this, &UGA_Dash::OnCompleted);
-	PlayMontageTask->ReadyForActivation();
-
 	if (ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo()))
 	{
 		if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 		{
 			UE_LOG(LogTemp, Log, TEXT("Dash Activated"));
 			MovementComponent->SetMovementMode(MOVE_Flying);
-			DashPower.Z = 0.0f; // prevent jumping
-			Character->LaunchCharacter(DashPower, true, true);
+			Character->bUseControllerRotationYaw = false;
+			MovementComponent->bOrientRotationToMovement = false;
 		}
 	}
 }
@@ -36,7 +32,9 @@ void UGA_Dash::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamepl
 		if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 		{
 			UE_LOG(LogTemp, Log, TEXT("Dash End"));
-			MovementComponent->SetMovementMode(MOVE_Walking);
+			MovementComponent->SetMovementMode(MOVE_Falling);
+			Character->bUseControllerRotationYaw = true;
+			MovementComponent->bOrientRotationToMovement = true;
 		}
 	}
 }

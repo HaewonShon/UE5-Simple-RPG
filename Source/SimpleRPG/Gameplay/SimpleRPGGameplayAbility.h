@@ -29,6 +29,7 @@ public:
 
 protected:
 	virtual void OnExecution();
+	virtual float GetRootMotionTranslationScale() const { return 1.f; }
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<UAnimMontage> MontageToPlay;
