@@ -32,6 +32,7 @@ APlayerCharacter::APlayerCharacter()
 	Camera->SetupAttachment(SpringArm);
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate *= 2.f;
 }
 
 // Called when the game starts or when spawned
