@@ -16,9 +16,7 @@ void UGA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 		if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 		{
 			UE_LOG(LogTemp, Log, TEXT("Dash Activated"));
-			MovementComponent->SetMovementMode(MOVE_Flying);
-			Character->bUseControllerRotationYaw = false;
-			MovementComponent->bOrientRotationToMovement = false;
+			MovementComponent->SetMovementMode(MOVE_Falling);
 		}
 	}
 }
@@ -32,9 +30,6 @@ void UGA_Dash::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamepl
 		if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 		{
 			UE_LOG(LogTemp, Log, TEXT("Dash End"));
-			MovementComponent->SetMovementMode(MOVE_Falling);
-			Character->bUseControllerRotationYaw = true;
-			MovementComponent->bOrientRotationToMovement = true;
 		}
 	}
 }
