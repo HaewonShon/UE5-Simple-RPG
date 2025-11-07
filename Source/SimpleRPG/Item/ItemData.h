@@ -7,7 +7,7 @@
 #include "ItemData.generated.h"
 
 /**
- *
+ *    Item Data
  */
 
 UENUM(BlueprintType)
@@ -20,33 +20,12 @@ enum class EItemCategory : uint8
 	ITEM_CATEGORY_COUNT
 };
 
-USTRUCT(BlueprintType)
-struct FItemStat
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	int32 AttackPower;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	int32 Defense;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	int32 Health;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	int32 CritChance;
-};
-
-UCLASS()
+UCLASS(BlueprintType)
 class SIMPLERPG_API UItemData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	FName ItemID;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	FText DisplayName;
 
@@ -57,7 +36,25 @@ public:
 	UTexture2D* Icon;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	FItemStat Stat;
+	bool bIsStackable;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
+	int32 MaxStackSize;
 
 	// TSubclassOf<class UGameplayEffect> StatEffect; - dynamicalliy generated
+};
+
+USTRUCT(BlueprintType)
+struct FItemInstance
+{
+	GENERATED_BODY()
+
+	void SetItem(UItemData* Item);
+
+	FPrimaryAssetId ItemID;
+
+	UPROPERTY(EditAnywhere)
+	TWeakObjectPtr<UItemData> ItemData;
+
+	int32 StackCount;
 };

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "../../Item/ItemData.h"
 #include "Inventory.generated.h"
 
 /**
@@ -22,7 +23,8 @@ USTRUCT(BlueprintType)
 struct FInventorySlot
 {
 	GENERATED_BODY()
-	TObjectPtr<class UItemData> Item;
+
+	FItemInstance Item;
 };
 
 USTRUCT(BlueprintType)
@@ -32,7 +34,12 @@ struct FInventoryPage
 
 	FInventoryPage();
 
+	FInventoryPage(EInventoryCategory PageCategory);
+
+	bool AddItem(FItemInstance Item);
+
 	EInventoryCategory Category;
 
-	TMap <TPair<int, int>, FInventorySlot > Slots;
+	TArray<FInventorySlot> Slots;
+	//TMap <TPair<int32, int32>, FInventorySlot > Slots;
 };
