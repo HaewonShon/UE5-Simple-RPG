@@ -19,7 +19,7 @@ void USimpleRPGGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	}
 
 	UAbilityTask_WaitGameplayEvent* WaitAnimEventTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this, FGameplayTag::RequestGameplayTag("Anim.Event"), nullptr, false, false);
-	UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay);
+	UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, MontageToPlay, 1.f, NAME_None, true, GetRootMotionTranslationScale());
 
 	WaitAnimEventTask->EventReceived.AddDynamic(this, &USimpleRPGGameplayAbility::OnAnimEvent);
 	PlayMontageTask->OnBlendOut.AddDynamic(this, &USimpleRPGGameplayAbility::OnCompleted);

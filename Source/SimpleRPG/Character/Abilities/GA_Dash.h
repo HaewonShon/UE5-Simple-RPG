@@ -19,6 +19,8 @@ public:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 protected:
+	virtual float GetRootMotionTranslationScale() const override { return 1.f; }
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Dash")
 	FVector DashPower;
 };

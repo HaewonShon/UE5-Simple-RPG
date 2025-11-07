@@ -23,9 +23,7 @@ void UPlayerAttackAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle 
 	{
 		if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 		{
-			Character->bUseControllerRotationYaw = false;
 			MovementComponent->DisableMovement();
-			MovementComponent->bOrientRotationToMovement = false;
 		}
 	}
 }
@@ -44,9 +42,7 @@ void UPlayerAttackAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handl
 		{
 			if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 			{
-				Character->bUseControllerRotationYaw = true;
 				MovementComponent->SetMovementMode(MOVE_Walking);
-				MovementComponent->bOrientRotationToMovement = true;
 			}
 		}
 	}

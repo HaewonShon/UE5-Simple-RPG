@@ -8,10 +8,11 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
-
 #include "AbilitySystemComponent.h"
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "Abilities/PlayerAttackAbilityBase.h"
+#include "SimpleRPGPlayerState.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 DEFINE_LOG_CATEGORY(LogCharacter);
 
@@ -30,29 +31,38 @@ APlayerCharacter::APlayerCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	Camera->SetupAttachment(SpringArm);
 
-	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-
-	AttributeSet = CreateDefaultSubobject<UCharacterAttributeSet>(TEXT("AttributeSet"));
-	AbilitySystemComponent->AddAttributeSetSubobject(AttributeSet.Get());
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate *= 2.f;
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
+	this->AnimRootMotionTranslationScale = 0.1f;
+	this->SetAnimRootMotionTranslationScale(0.1f);
 }
 
 void APlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if (AbilitySystemComponent)
+	if (ASimpleRPGPlayerState* PS = Cast<ASimpleRPGPlayerState>(GetPlayerState()))
+	{
+		UE_LOG(LogCharacter, Log, TEXT("PlayerState initialized"));
+		AbilitySystemComponent = PS->GetAbilitySystemComponent();
+	}
+
+	if (AbilitySystemComponent.IsValid())
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
 		// ASC init
 		InitializeAttributes();
 		AddCharacterAbilities();
+
+		FGameplayAttribute HealthAttribute = UCharacterAttributeSet::GetHealthAttribute();
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &APlayerCharacter::OnHealthChanged);
 
 		//temp : add sword tag
 		//AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
@@ -137,7 +147,7 @@ void APlayerCharacter::SkillAttack()
 
 void APlayerCharacter::InitializeAttributes()
 {
-	if (!AbilitySystemComponent.Get() || !DefaultAttributeSet.Get())
+	if (!AbilitySystemComponent.IsValid() || !DefaultAttributeSet.Get())
 		return;
 
 	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
@@ -152,7 +162,7 @@ void APlayerCharacter::InitializeAttributes()
 
 void APlayerCharacter::AddCharacterAbilities()
 {
-	if (!AbilitySystemComponent)
+	if (!AbilitySystemComponent.IsValid())
 		return;
 
 	for (TSubclassOf<USimpleRPGGameplayAbility>& Ability : CommonAbilitySet)
@@ -181,6 +191,11 @@ void APlayerCharacter::AddWeaponAbilities()
 
 UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const
 {
-	return AbilitySystemComponent;
+	return AbilitySystemComponent.Get();
+}
+
+void APlayerCharacter::OnHealthChanged(const FOnAttributeChangeData& Data)
+{
+
 }
 
