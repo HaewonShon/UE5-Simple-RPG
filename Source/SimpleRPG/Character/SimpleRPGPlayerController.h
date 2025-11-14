@@ -18,6 +18,18 @@ public:
 	virtual void BeginPlay() override;
 	virtual void AddPitchInput(float Val) override;
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UUserWidget> HUDWidget;
+	void ToggleInventory();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
+	TSubclassOf<class USimpleRPGHUDWidget> HUDWidgetClass;
+
+	TObjectPtr<class USimpleRPGHUDWidget>  HUDWidget;
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputMappingContext* UIMapping;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputAction* InventoryToggleAction;
 };

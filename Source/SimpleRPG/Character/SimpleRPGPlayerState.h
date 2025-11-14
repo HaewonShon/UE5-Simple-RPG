@@ -21,5 +21,5 @@ public:
 protected:
 	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
 	TObjectPtr<class UAttributeSet> AttributeSet;
-	//TObjectPtr<class UInventoryComponent> InventoryComponent;
+	TObjectPtr<class UInventoryComponent> InventoryComponent;
 };
