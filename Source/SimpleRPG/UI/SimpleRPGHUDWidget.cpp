@@ -3,6 +3,7 @@
 
 #include "SimpleRPGHUDWidget.h"
 #include "InventoryWidget.h"
+#include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 
 void USimpleRPGHUDWidget::NativeConstruct()
@@ -18,7 +19,11 @@ void USimpleRPGHUDWidget::NativeConstruct()
         InventoryWidget->AddToViewport();
         InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 
+        UCanvasPanelSlot* InventorySlot = MainCanvas->AddChildToCanvas(InventoryWidget);
 
+        InventorySlot->SetAnchors(FAnchors(1.f, 1.f));
+        InventorySlot->SetAlignment(FVector2D(1.f, 1.f));
+        InventorySlot->SetOffsets(FMargin(-20.f, -20.f, 640, 900));
     }
     else
     {

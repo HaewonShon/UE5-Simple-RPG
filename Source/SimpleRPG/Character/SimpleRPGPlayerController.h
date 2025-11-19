@@ -32,4 +32,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputAction* InventoryToggleAction;
+
+	bool bIsInvenetoryOn;
 };

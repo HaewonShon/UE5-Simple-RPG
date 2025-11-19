@@ -18,3 +18,8 @@ UAbilitySystemComponent* ASimpleRPGPlayerState::GetAbilitySystemComponent()
 {
 	return AbilitySystemComponent;
 }
+
+TWeakObjectPtr<class UInventoryComponent> ASimpleRPGPlayerState::GetInventoryComponent()
+{
+	return InventoryComponent;
+}

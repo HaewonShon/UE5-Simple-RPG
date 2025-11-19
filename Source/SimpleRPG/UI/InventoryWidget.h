@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "../Character/Inventory/Inventory.h"
 #include "InventoryWidget.generated.h"
 
 /**
@@ -37,6 +38,12 @@ protected:
 
 
 protected:
+	/* Update Inventory manually when interface opened */
+	UFUNCTION()
+	void OnContentChanged(EInventoryCategory ChangedPageCategory);
+
+	UFUNCTION()
+	void UpdateCurrentPageContents();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	int32 PageWidth;
@@ -45,7 +52,7 @@ protected:
 	int32 PageHeight;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
-	TSubclassOf<UUserWidget> SlotWidgetClass;
+	TSubclassOf<class UInventorySlotWidget> SlotWidgetClass;
 
 	//UPROPERTY()
 	//TArray<TObjectPtr<class UBorder>> Slots;
@@ -53,4 +60,9 @@ protected:
 	UPROPERTY(meta = (BindWidget), EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
 
+	UPROPERTY()
+	TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
+
+	UPROPERTY()
+	EInventoryCategory SelectedPage;
 };

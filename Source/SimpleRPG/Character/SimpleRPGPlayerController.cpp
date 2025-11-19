@@ -47,6 +47,8 @@ void ASimpleRPGPlayerController::BeginPlay()
     {
         UE_LOG(LogTemp, Warning, TEXT("HUDWidget in PlayerController not registered."));
     }
+
+	bIsInvenetoryOn = false;
 }
 
 void ASimpleRPGPlayerController::AddPitchInput(float Val)
@@ -62,5 +64,17 @@ void ASimpleRPGPlayerController::ToggleInventory()
 	if (HUDWidget)
 	{
 		HUDWidget->ToggleInventory();
+		bIsInvenetoryOn = !bIsInvenetoryOn;
+
+		if(bIsInvenetoryOn)
+		{
+			bShowMouseCursor = true;
+			SetInputMode(FInputModeGameAndUI());
+		}
+		else
+		{
+			bShowMouseCursor = false;
+			SetInputMode(FInputModeGameOnly());
+		}
 	}
 }

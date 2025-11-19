@@ -11,6 +11,7 @@
 // Define Log Inventory for Inventory-specific logs
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All)
 
+DECLARE_DELEGATE_OneParam(FInventoryContentChangedDelegate, EInventoryCategory)
 
 UCLASS(ClassGroup = (SimpleRPG), meta = (BlueprintSpawnableComponent))
 class SIMPLERPG_API UInventoryComponent : public UActorComponent
@@ -21,13 +22,20 @@ public:
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
-	bool AddItem(UItemData* Item);
+	bool AddItem(FItemInstance ItemInstance);
 	//void RemoveItem(UItemData* Item);
 	//bool EquipItem(UItemData* Item);
 	//bool UnequipItem(UItemData* Item);
 	//bool UseItem(UItemData* Item);
 
+	FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
+
+	FInventoryContentChangedDelegate OnInventoryContentChanged;
+
 protected:
 	UPROPERTY()
 	TArray<FInventoryPage> InventoryPages;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	int32 InventoryPageSize;
 };

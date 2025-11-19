@@ -18,6 +18,7 @@ public:
 	ASimpleRPGPlayerState();
 
 	class UAbilitySystemComponent* GetAbilitySystemComponent();
+	TWeakObjectPtr<class UInventoryComponent> GetInventoryComponent();
 protected:
 	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
 	TObjectPtr<class UAttributeSet> AttributeSet;

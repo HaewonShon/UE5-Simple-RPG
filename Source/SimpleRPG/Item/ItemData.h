@@ -44,12 +44,24 @@ public:
 	// TSubclassOf<class UGameplayEffect> StatEffect; - dynamicalliy generated
 };
 
+/**
+ *    Item Instance that used in the game actually
+ */
+
 USTRUCT(BlueprintType)
 struct FItemInstance
 {
 	GENERATED_BODY()
 
-	void SetItem(UItemData* Item);
+	FItemInstance();
+
+	FItemInstance(UItemData* Item, int32 StackCount = 1);
+
+	/* Set item data for Instance */
+	bool SetItem(UItemData* Item, int32 StackCount = 1);
+
+	/* Combine 2 Instances */
+	bool AddStack(FItemInstance& OtherInstance);
 
 	FPrimaryAssetId ItemID;
 

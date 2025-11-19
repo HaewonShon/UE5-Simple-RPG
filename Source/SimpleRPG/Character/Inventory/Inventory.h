@@ -24,6 +24,8 @@ struct FInventorySlot
 {
 	GENERATED_BODY()
 
+	bool IsEmpty() const;
+
 	FItemInstance Item;
 };
 
@@ -34,12 +36,15 @@ struct FInventoryPage
 
 	FInventoryPage();
 
-	FInventoryPage(EInventoryCategory PageCategory);
+	FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountPerPage);
 
 	bool AddItem(FItemInstance Item);
+	bool HasEmptySlot() const;
 
 	EInventoryCategory Category;
 
 	TArray<FInventorySlot> Slots;
-	//TMap <TPair<int32, int32>, FInventorySlot > Slots;
+
+	int32 CountMaxSlot;
+	int32 CountFilledSlot;
 };

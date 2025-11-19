@@ -20,6 +20,9 @@ public:
 	void ToggleInventory();
 
 protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UCanvasPanel> MainCanvas;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
 	TSubclassOf<class UInventoryWidget> InventoryWidgetClass;
 
