@@ -23,6 +23,9 @@ protected:
 	/**************************
 	 * Inventory Functions 
 	 **************************/
+	UFUNCTION()
+	void OnInventoryToggled(ESlateVisibility ChangedVisibility);
+
 	UFUNCTION(BlueprintCallable)
 	void OnPageSelected(int32 PageIndex);
 
@@ -45,6 +48,10 @@ protected:
 	UFUNCTION()
 	void UpdateCurrentPageContents();
 
+
+	/*
+	*   Widget Properties 
+	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	int32 PageWidth;
 
@@ -54,15 +61,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
 	TSubclassOf<class UInventorySlotWidget> SlotWidgetClass;
 
-	//UPROPERTY()
-	//TArray<TObjectPtr<class UBorder>> Slots;
-
+	/*
+	*   Bind Widgets
+	*/
 	UPROPERTY(meta = (BindWidget), EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UInvalidationBox> InvalidationBox;
+
+	/*
+	*   Other members for inventory widget
+	*/
 	UPROPERTY()
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
 
 	UPROPERTY()
 	EInventoryCategory SelectedPage;
+
+	UPROPERTY()
+	TMap<EInventoryCategory, bool> bIsPageContentChanged;
 };

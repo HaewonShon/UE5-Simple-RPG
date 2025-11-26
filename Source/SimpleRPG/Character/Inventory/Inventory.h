@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../../Item/ItemData.h"
+#include "Misc/EnumRange.h"
 #include "Inventory.generated.h"
 
 /**
@@ -16,8 +17,10 @@ enum class EInventoryCategory : uint8
 	Equipment,
 	Consumable,
 	Material,
-	INVENTORY_CATEGORY_COUNT
+	Count UMETA(Hidden)
 };
+
+ENUM_RANGE_BY_COUNT(EInventoryCategory, EInventoryCategory::Count); // Register Enum Range using Count
 
 USTRUCT(BlueprintType)
 struct FInventorySlot

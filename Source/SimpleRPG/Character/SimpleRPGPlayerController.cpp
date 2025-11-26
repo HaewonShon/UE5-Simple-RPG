@@ -11,20 +11,27 @@
 void ASimpleRPGPlayerController::BeginPlay()
 {
     Super::BeginPlay();
+	FDebug::DumpStackTraceToLog(ELogVerbosity::Warning);
 
-    // Input setup for UI
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	check(LocalPlayer);
+	UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(InputSystem)
+	// Input setup for UI
 	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
 		EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
+		InputSystem->AddMappingContext(UIMapping, 1);
+		
+#if !UE_BUILD_SHIPPING
+		ensure(CheatAction.Num() >= 4);
+		EIC->BindAction(CheatAction[0], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction1);
+		EIC->BindAction(CheatAction[1], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction2);
+		EIC->BindAction(CheatAction[2], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction3);
+		EIC->BindAction(CheatAction[3], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction4);
+		InputSystem->AddMappingContext(CheatMapping, 0);
+#endif
 
-		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
-		{
-			if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
-			{
-				UE_LOG(LogTemp, Error, TEXT("PlayerController UI Input added"));
-				InputSystem->AddMappingContext(UIMapping, 1);
-			}
-		}
 	}
 	else
 	{
@@ -34,9 +41,12 @@ void ASimpleRPGPlayerController::BeginPlay()
     if (HUDWidgetClass)
     {
         HUDWidget = CreateWidget<USimpleRPGHUDWidget>(this, HUDWidgetClass);
+		UE_LOG(LogTemp, Log, TEXT("Widget Added1"));
         if (HUDWidget)
         {
+			UE_LOG(LogTemp, Log, TEXT("Widget Added2"));
 			HUDWidget->AddToViewport();
+			UE_LOG(LogTemp, Log, TEXT("Widget Added3"));
         }
 		else
 		{
@@ -78,3 +88,39 @@ void ASimpleRPGPlayerController::ToggleInventory()
 		}
 	}
 }
+
+#if !UE_BUILD_SHIPPING
+#include "../ItemTestCheatManager.h"
+void ASimpleRPGPlayerController::CheatFunction1()
+{
+	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cheat1 Called from controller"));
+		ItemCheatManager->GiveItem(0);
+	}
+}
+
+void ASimpleRPGPlayerController::CheatFunction2()
+{
+	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cheat2 Called from controller"));
+		ItemCheatManager->GiveItem(1);
+	}
+}
+
+void ASimpleRPGPlayerController::CheatFunction3()
+{
+	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cheat3 Called from controller"));
+		ItemCheatManager->GiveItem(2);
+	}
+}
+
+void ASimpleRPGPlayerController::CheatFunction4()
+{
+	UE_LOG(LogTemp, Log, TEXT("Cheat4 Called from controller"));
+
+}
+#endif

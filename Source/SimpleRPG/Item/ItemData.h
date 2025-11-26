@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Misc/EnumRange.h"
 #include "ItemData.generated.h"
 
 /**
@@ -17,8 +18,10 @@ enum class EItemCategory : uint8
 	Armor,
 	Consumable,
 	Material,
-	ITEM_CATEGORY_COUNT
+	Count UMETA(Hidden)
 };
+
+ENUM_RANGE_BY_COUNT(EItemCategory, EItemCategory::Count); // Register Enum Range using Count
 
 UCLASS(BlueprintType)
 class SIMPLERPG_API UItemData : public UPrimaryDataAsset

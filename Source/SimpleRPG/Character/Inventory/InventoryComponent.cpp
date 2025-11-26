@@ -2,16 +2,25 @@
 
 
 #include "InventoryComponent.h"
+#include "Misc/EnumRange.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
-	for (int8 i = 0; i < static_cast<int8>(EInventoryCategory::INVENTORY_CATEGORY_COUNT); ++i)
+	UE_LOG(LogInventory, Log, TEXT("Inventory Init"));
+}
+
+void UInventoryComponent::BeginPlay()
+{
+	const int32 SlotCountPerPage = 24;
+
+	for (EInventoryCategory Category : TEnumRange<EInventoryCategory>())
 	{
-		InventoryPages.Add(FInventoryPage(static_cast<EInventoryCategory>(i), InventoryPageSize));
+		InventoryPages.Add({ Category, FInventoryPage(Category, SlotCountPerPage) });
 	}
+	UE_LOG(LogInventory, Log, TEXT("Inventory pages size: %i"), InventoryPages.Num());
 }
 
 bool UInventoryComponent::AddItem(FItemInstance ItemInstance)
@@ -23,7 +32,7 @@ bool UInventoryComponent::AddItem(FItemInstance ItemInstance)
 	}
 
 	EItemCategory ItemCategory = ItemInstance.ItemData->Category;
-	EInventoryCategory InventoryCategory;
+	EInventoryCategory InventoryCategory = EInventoryCategory::Count;
 	switch (ItemCategory)
 	{
 	case EItemCategory::Weapon:
@@ -38,13 +47,10 @@ bool UInventoryComponent::AddItem(FItemInstance ItemInstance)
 		break;
 	}
 	
-	if (!InventoryPages.IsValidIndex(static_cast<int32>(InventoryCategory)))
-	{
-		UE_LOG(LogInventory, Warning, TEXT("Inventory Page is not valid"));
-		return false;
-	}
+	check(InventoryCategory != EInventoryCategory::Count);
 
-	FInventoryPage& TargetPage = InventoryPages[static_cast<int32>(InventoryCategory)];
+	FInventoryPage& TargetPage = InventoryPages[InventoryCategory];
+	UE_LOG(LogInventory, Log, TEXT("Selected page: %i"), TargetPage.Category);
 	if (TargetPage.AddItem(ItemInstance) && OnInventoryContentChanged.IsBound())
 	{
 		OnInventoryContentChanged.Execute(InventoryCategory);
@@ -54,11 +60,7 @@ bool UInventoryComponent::AddItem(FItemInstance ItemInstance)
 	return false;
 }
 
-FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const
+const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const
 {
-	if (!InventoryPages.IsValidIndex(static_cast<int32>(PageCategory)))
-	{
-		return InventoryPages[static_cast<int32>(PageCategory)];
-	}
-
+	return InventoryPages[PageCategory];
 }

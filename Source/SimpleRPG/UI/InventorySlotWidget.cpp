@@ -13,9 +13,20 @@ void UInventorySlotWidget::SetItem(const FItemInstance* Item)
 		return;
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("Set Item image"));
+
 	ItemImage->SetBrushFromTexture(Item->ItemData->Icon);
+	ItemImage->SetBrushTintColor(FSlateColor(FColor::White));
 	if (Item->StackCount > 1)
 	{
 		StackText->SetText(FText::AsNumber(Item->StackCount));
 	}
+
+	this->InvalidateLayoutAndVolatility();
+}
+
+void UInventorySlotWidget::ClearItem()
+{
+	ItemImage->SetBrushTintColor(FSlateColor(FColor::Transparent));
+	StackText->SetText(FText());
 }

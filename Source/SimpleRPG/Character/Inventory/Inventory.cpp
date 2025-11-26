@@ -5,12 +5,12 @@
 
 bool FInventorySlot::IsEmpty() const
 {
-	return !Item.ItemID.IsValid();
+	return Item.ItemData == nullptr;
 }
 
 FInventoryPage::FInventoryPage()
 {
-	Slots.Add(FInventorySlot());
+	//Slots.Add(FInventorySlot());
 }
 
 FInventoryPage::FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountPerPage)
@@ -18,9 +18,9 @@ FInventoryPage::FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountP
 	Category = PageCategory;
 
 	CountMaxSlot = SlotCountPerPage;
-	CountFilledSlot = CountMaxSlot;
+	CountFilledSlot = 0;
 	
-	for (int32 i = 0; i < CountMaxSlot; ++CountMaxSlot)
+	for (int32 i = 0; i < CountMaxSlot; ++i)
 	{
 		Slots.Add(FInventorySlot());
 	}
@@ -30,11 +30,13 @@ bool FInventoryPage::AddItem(FItemInstance ItemInstance)
 {
 	if (!ItemInstance.ItemData.IsValid())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ItemInstance not valid"));
 		return false;
 	}
 
-	if (!ItemInstance.ItemData->bIsStackable && HasEmptySlot())
+	if (!ItemInstance.ItemData->bIsStackable && !HasEmptySlot())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("no empty slot"));
 		return false;
 	}
 

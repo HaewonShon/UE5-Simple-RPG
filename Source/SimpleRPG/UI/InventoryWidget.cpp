@@ -4,9 +4,12 @@
 #include "InventoryWidget.h"
 #include "Components/Border.h"
 #include "Components/UniformGridPanel.h"
+#include "Components/InvalidationBox.h"
 #include "InventorySlotWidget.h"
 #include "../Character/SimpleRPGPlayerState.h"
 #include "../Character/Inventory/InventoryComponent.h"
+
+#include "Misc/OutputDeviceDebug.h"
 
 UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
 	: UUserWidget(ObjectInitializer)
@@ -44,15 +47,20 @@ void UInventoryWidget::NativeConstruct()
 			InventoryComponent->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::OnContentChanged);
 			UE_LOG(LogInventory, Log, TEXT("Inventory Component bound to ui"));
 		}
+		OnNativeVisibilityChanged.AddUObject(this, &UInventoryWidget::OnInventoryToggled);
 	}
 
 	SelectedPage = EInventoryCategory::Equipment;
+	for (EInventoryCategory InventoryCategory : TEnumRange<EInventoryCategory>())
+	{
+		bIsPageContentChanged.Add({InventoryCategory, true});
+	}
 }
 
 void UInventoryWidget::OnPageSelected(int32 PageIndex)
 {
 	SelectedPage = static_cast<EInventoryCategory>(PageIndex);
-
+	UpdateCurrentPageContents();
 }
 
 void UInventoryWidget::OnCurrentPageSort()
@@ -60,15 +68,20 @@ void UInventoryWidget::OnCurrentPageSort()
 
 }
 
+void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
+{
+	if (bIsPageContentChanged[SelectedPage])
+	{
+		UpdateCurrentPageContents();
+	}
+}
+
 void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
 {
 	UE_LOG(LogInventory, Log, TEXT("Inventory Widget OnChanged Called"));
-	if (GetVisibility() == ESlateVisibility::Collapsed)
-	{
-		return;
-	}
 
-	if (ChangedPageCategory == SelectedPage)
+	bIsPageContentChanged[ChangedPageCategory] = true;
+	if (GetVisibility() != ESlateVisibility::Collapsed && ChangedPageCategory == SelectedPage)
 	{
 		UpdateCurrentPageContents();
 	}
@@ -81,13 +94,20 @@ void UInventoryWidget::UpdateCurrentPageContents()
 		return;
 	}
 
-	FInventoryPage& Page = InventoryComponent->GetPage(SelectedPage);
+	const FInventoryPage& Page = InventoryComponent->GetPage(SelectedPage);
 	for (int32 Index = 0; Index < PageWidth * PageHeight; ++Index)
 	{
+		UInventorySlotWidget* SlotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(Index));
 		if (!Page.Slots[Index].IsEmpty())
 		{
-			UInventorySlotWidget* SlotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(Index));
 			SlotWidget->SetItem(&Page.Slots[Index].Item);
 		}
+		else
+		{
+			SlotWidget->ClearItem();
+		}
 	}
+	UE_LOG(LogInventory, Log, TEXT("Inventory Widget Updated page %i"), SelectedPage);
+	bIsPageContentChanged[SelectedPage] = false;
+
 }

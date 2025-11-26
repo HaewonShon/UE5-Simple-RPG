@@ -22,20 +22,19 @@ public:
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
+	virtual void BeginPlay() override;
+
 	bool AddItem(FItemInstance ItemInstance);
 	//void RemoveItem(UItemData* Item);
 	//bool EquipItem(UItemData* Item);
 	//bool UnequipItem(UItemData* Item);
 	//bool UseItem(UItemData* Item);
 
-	FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
+	const FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
 
 protected:
 	UPROPERTY()
-	TArray<FInventoryPage> InventoryPages;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	int32 InventoryPageSize;
+	TMap<EInventoryCategory, FInventoryPage> InventoryPages;
 };

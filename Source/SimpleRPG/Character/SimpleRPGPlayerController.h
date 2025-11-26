@@ -26,12 +26,24 @@ protected:
 
 	TObjectPtr<class USimpleRPGHUDWidget>  HUDWidget;
 
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* UIMapping;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputAction* InventoryToggleAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputMappingContext* CheatMapping;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TArray<class UInputAction*> CheatAction;
+
 	bool bIsInvenetoryOn;
+
+#if !UE_BUILD_SHIPPING
+	void CheatFunction1();
+	void CheatFunction2();
+	void CheatFunction3();
+	void CheatFunction4();
+#endif
 };

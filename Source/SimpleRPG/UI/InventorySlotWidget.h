@@ -18,6 +18,8 @@ public:
 	/* Setter for Item Image and stack count text */
 	void SetItem(const struct FItemInstance* Item);
 
+	void ClearItem();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UImage> ItemImage;

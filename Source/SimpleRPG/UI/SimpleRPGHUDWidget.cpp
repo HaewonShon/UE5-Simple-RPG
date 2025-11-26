@@ -16,7 +16,6 @@ void USimpleRPGHUDWidget::NativeConstruct()
             CanvasSlot->SetSize(FVector2D(800.f, 1200.f));
         }
 
-        InventoryWidget->AddToViewport();
         InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
 
         UCanvasPanelSlot* InventorySlot = MainCanvas->AddChildToCanvas(InventoryWidget);
