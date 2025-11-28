@@ -22,12 +22,14 @@ public:
 	virtual void PossessedBy(AController* NewController);
 
 	void OnHealthChanged(const FOnAttributeChangeData& Data);
+	void OnDeath();
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
 	*******************************************/
 	virtual class UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+protected:
 	void InitializeAttributes();
 	void AddCharacterAbilities();
 
@@ -41,6 +43,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeSet;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<class UAnimMontage> DeathAnimMontage;
 
 	/*******************************************
 	*	UI

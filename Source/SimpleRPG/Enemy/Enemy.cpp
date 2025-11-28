@@ -63,6 +63,21 @@ void AEnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
 	}
 }
 
+void AEnemy::OnDeath()
+{
+	if (DeathAnimMontage)
+	{
+		constexpr float CorpseRemainingTime = 0.5f;
+		float AnimPlaytime = PlayAnimMontage(DeathAnimMontage);
+
+		SetLifeSpan(AnimPlaytime + CorpseRemainingTime);
+		
+		// Item drop logic
+		// ADroppedItem* ItemActor = SpawnActor<ADroppedItem>(ADroppedItem::StaticClass(), GetActorLocation());
+		// ItemActor->SetItemInfo(RequestRandomItem);
+	}
+}
+
 void AEnemy::InitializeAttributes()
 {
 	if (!AbilitySystemComponent.Get() || !DefaultAttributeSet.Get())
