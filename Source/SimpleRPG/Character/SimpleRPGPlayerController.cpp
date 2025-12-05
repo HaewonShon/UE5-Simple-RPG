@@ -11,12 +11,12 @@
 void ASimpleRPGPlayerController::BeginPlay()
 {
     Super::BeginPlay();
-	FDebug::DumpStackTraceToLog(ELogVerbosity::Warning);
 
 	ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	check(LocalPlayer);
 	UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(InputSystem)
+
 	// Input setup for UI
 	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{

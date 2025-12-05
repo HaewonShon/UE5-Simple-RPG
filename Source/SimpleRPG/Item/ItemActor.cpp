@@ -30,6 +30,8 @@ AItemActor::AItemActor()
 
 	ElapsedTime = 0.0f;
 	bIsFloating = false;
+
+	ItemInstance = FItemInstance();
 }
 
 void AItemActor::BeginPlay()
@@ -37,6 +39,7 @@ void AItemActor::BeginPlay()
 	Super::BeginPlay();
 
 	MeshComponent->OnComponentSleep.AddDynamic(this, &AItemActor::OnActorSleep);
+	LaunchRandomDirection();
 }
 
 // Called every frame
@@ -94,3 +97,9 @@ void AItemActor::SetItem(FItemInstance Item)
 	}
 }
 
+void AItemActor::LaunchRandomDirection()
+{
+	constexpr float LaunchZForce = 100.f;
+	FVector LaunchDirection(FMath::RandRange(-10.f, 10.f), FMath::RandRange(-10.f, 10.f), LaunchZForce);
+	MeshComponent->BodyInstance.AddForce(LaunchDirection);
+}

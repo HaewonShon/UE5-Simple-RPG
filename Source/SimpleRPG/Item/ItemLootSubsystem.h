@@ -1,0 +1,70 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "GameplayTagContainer.h"
+#include "ItemLootSubsystem.generated.h"
+
+DECLARE_LOG_CATEGORY_EXTERN(LogItemLootSubsystem, Log, All)
+
+/**
+ *	Subsystem manages item loot table & determine item to drop
+ */
+
+USTRUCT(BlueprintType)
+struct FLootItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	FPrimaryAssetId ItemId;
+
+	UPROPERTY(EditAnywhere)
+	float Weight;
+};
+
+USTRUCT()
+struct FLootInfo
+{
+	GENERATED_BODY()
+
+	TArray<FLootItem> Item;
+	float TotalWeight;
+	int32 ItemCount;
+};
+
+USTRUCT(BlueprintType)
+struct FLootTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTag EnemyTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FLootItem> LootItemList;
+};
+
+UCLASS(Blueprintable)
+class SIMPLERPG_API UItemLootSubsystem : public UGameInstanceSubsystem
+{
+	GENERATED_BODY()
+	
+public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	void SpawnItem(FGameplayTag EnemyTag, FVector Location);
+
+private:
+	void ReadLootTable();
+
+	const class UItemData* SelectRandomItem(FGameplayTag EnemyTag);
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AItemActor> ItemActor;
+
+	UPROPERTY()
+	TMap<FGameplayTag, FLootInfo> Cache;
+};

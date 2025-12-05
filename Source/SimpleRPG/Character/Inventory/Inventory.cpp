@@ -28,12 +28,6 @@ FInventoryPage::FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountP
 
 bool FInventoryPage::AddItem(FItemInstance ItemInstance)
 {
-	if (!ItemInstance.ItemData.IsValid())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ItemInstance not valid"));
-		return false;
-	}
-
 	if (!ItemInstance.ItemData->bIsStackable && !HasEmptySlot())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("no empty slot"));

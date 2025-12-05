@@ -22,7 +22,6 @@ public:
 	virtual void PossessedBy(AController* NewController);
 
 	void OnHealthChanged(const FOnAttributeChangeData& Data);
-	void OnDeath();
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
@@ -33,7 +32,12 @@ protected:
 	void InitializeAttributes();
 	void AddCharacterAbilities();
 
+	void OnDeath();
+
 	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Enemy")
+	FGameplayTag EnemyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TObjectPtr<class UAttributeSet> AttributeSet;

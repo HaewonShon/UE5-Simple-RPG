@@ -5,6 +5,7 @@
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "../UI/EnemyHPDisplayWidgetComponent.h"
 #include "../Gameplay/DamageTextActor.h"
+#include "../Item/ItemLootSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEnemy);
 // Sets default values
@@ -60,6 +61,11 @@ void AEnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
 		{
 			UE_LOG(LogEnemy, Warning, TEXT("Failed to set damage value for damageactor"));
 		}
+
+		if (Data.NewValue <= 0.f)
+		{
+			OnDeath();
+		}
 	}
 }
 
@@ -71,10 +77,17 @@ void AEnemy::OnDeath()
 		float AnimPlaytime = PlayAnimMontage(DeathAnimMontage);
 
 		SetLifeSpan(AnimPlaytime + CorpseRemainingTime);
-		
-		// Item drop logic
-		// ADroppedItem* ItemActor = SpawnActor<ADroppedItem>(ADroppedItem::StaticClass(), GetActorLocation());
-		// ItemActor->SetItemInfo(RequestRandomItem);
+	}
+	else
+	{
+		SetLifeSpan(0.1f);
+	}
+
+	// Item Drop Request
+	if (UItemLootSubsystem* ItemLootSubsystem = GetGameInstance()->GetSubsystem<UItemLootSubsystem>())
+	{
+		UE_LOG(LogEnemy, Log, TEXT("Item spawn requested"));
+		ItemLootSubsystem->SpawnItem(EnemyTag, GetActorLocation());
 	}
 }
 

@@ -7,21 +7,29 @@
 USimpleRPGAssetManager& USimpleRPGAssetManager::Get()
 {
 	check(GEngine);
-	USimpleRPGAssetManager* Self = Cast<USimpleRPGAssetManager>(GEngine->AssetManager);
-	check(Self);
+	USimpleRPGAssetManager* Self = CastChecked<USimpleRPGAssetManager>(GEngine->AssetManager);
 	return *Self;
 }
 
-UItemData* USimpleRPGAssetManager::GetItemData(const FPrimaryAssetId& AssetId)
+void USimpleRPGAssetManager::StartInitialLoading()
 {
-	UObject* Asset = GetPrimaryAssetObject(AssetId);
+	Super::StartInitialLoading();
 
-	// Asset이 로드되지 않음
-	if (!Asset)
+	bAreItemsLoaded = false;
+	UE_LOG(LogTemp, Log, TEXT("AssetManager InitialLoading"));
+	
+	// Item Load
+	LoadPrimaryAssetsWithType(FPrimaryAssetType("ItemData"), {},
+		FStreamableDelegate::CreateUObject(this, &USimpleRPGAssetManager::OnItemsLoaded)
+	);
+}
+
+void USimpleRPGAssetManager::OnItemsLoaded()
+{
+	UE_LOG(LogTemp, Log, TEXT("AssetManager ItemData Loaded"));
+	bAreItemsLoaded = true;
+	if (OnItemAssetsLoaded.IsBound())
 	{
-		LoadPrimaryAsset(AssetId);
-		Asset = GetPrimaryAssetObject(AssetId);
+		OnItemAssetsLoaded.Execute();
 	}
-
-	return Cast<UItemData>(Asset);
 }

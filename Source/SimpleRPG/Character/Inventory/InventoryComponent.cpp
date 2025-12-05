@@ -14,6 +14,8 @@ UInventoryComponent::UInventoryComponent()
 
 void UInventoryComponent::BeginPlay()
 {
+	Super::BeginPlay();
+
 	const int32 SlotCountPerPage = 24;
 
 	for (EInventoryCategory Category : TEnumRange<EInventoryCategory>())
@@ -25,7 +27,7 @@ void UInventoryComponent::BeginPlay()
 
 bool UInventoryComponent::AddItem(FItemInstance ItemInstance)
 {
-	if (!ItemInstance.ItemData.IsValid())
+	if (!ItemInstance.ItemData)
 	{
 		UE_LOG(LogInventory, Log, TEXT("Item is not valid"));
 		return false;

@@ -28,6 +28,8 @@ public:
 	void SetItem(FItemInstance Item);
 
 protected:
+	void LaunchRandomDirection();
+
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UStaticMeshComponent> MeshComponent;
 

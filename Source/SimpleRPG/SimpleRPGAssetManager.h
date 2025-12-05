@@ -10,6 +10,8 @@
  *	AssetManager class for global data management(item)
  */
 
+DECLARE_DELEGATE(FOnAssetLoaded);
+
 UCLASS(BlueprintType)
 class SIMPLERPG_API USimpleRPGAssetManager : public UAssetManager
 {
@@ -18,5 +20,12 @@ class SIMPLERPG_API USimpleRPGAssetManager : public UAssetManager
 public:
 	static USimpleRPGAssetManager& Get();
 
-	class UItemData* GetItemData(const FPrimaryAssetId& AssetId);
+	virtual void StartInitialLoading() override;
+
+	bool AreItemsLoaded() const { return bAreItemsLoaded; }
+	FOnAssetLoaded OnItemAssetsLoaded;
+
+protected:
+	void OnItemsLoaded();
+	bool bAreItemsLoaded;
 };
