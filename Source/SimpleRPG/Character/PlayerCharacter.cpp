@@ -12,6 +12,7 @@
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "Abilities/PlayerAttackAbilityBase.h"
 #include "SimpleRPGPlayerState.h"
+#include "Inventory/InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 DEFINE_LOG_CATEGORY(LogCharacter);
@@ -68,6 +69,19 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 		//AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 		//AbilitySystemComponent->gameplaytag
 	}
+}
+
+bool APlayerCharacter::AddItem(FItemInstance& Item)
+{
+	if (ASimpleRPGPlayerState* PS = Cast<ASimpleRPGPlayerState>(GetPlayerState()))
+	{
+		TWeakObjectPtr<UInventoryComponent> InventoryComponent = PS->GetInventoryComponent();
+		if (InventoryComponent.IsValid())
+		{
+			return InventoryComponent->AddItem(Item);
+		}
+	}
+	return false;
 }
 
 // Called to bind functionality to input

@@ -7,6 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "InputAction.h"
 #include "Abilities/GameplayAbility.h"
+#include "../Item/ItemData.h"
 #include "PlayerCharacter.generated.h"
 
 // Define Log Category for character-specific logs
@@ -32,11 +33,13 @@ class SIMPLERPG_API APlayerCharacter : public ACharacter, public IAbilitySystemI
 
 public:
 	/*******************************************
-	*	BASE COMPONENTS FOR CHARACTER
+	*	BASE COMPONENTS FOR CHARACTER & Interface
 	*******************************************/
 	APlayerCharacter();
 
 	virtual void PossessedBy(AController* NewController);
+
+	bool AddItem(FItemInstance& Item);
 
 	/*******************************************
 	*	Input

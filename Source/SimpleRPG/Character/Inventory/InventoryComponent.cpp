@@ -25,7 +25,7 @@ void UInventoryComponent::BeginPlay()
 	UE_LOG(LogInventory, Log, TEXT("Inventory pages size: %i"), InventoryPages.Num());
 }
 
-bool UInventoryComponent::AddItem(FItemInstance ItemInstance)
+bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 {
 	if (!ItemInstance.ItemData)
 	{

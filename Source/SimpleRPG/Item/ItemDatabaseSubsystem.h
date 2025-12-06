@@ -20,5 +20,5 @@ public:
 protected:
 	void BuildCache();
 
-	TMap<FPrimaryAssetId, TObjectPtr<class UItemData>> ItemCache;
+	TMap<FPrimaryAssetId, class UItemData*> ItemCache;
 };

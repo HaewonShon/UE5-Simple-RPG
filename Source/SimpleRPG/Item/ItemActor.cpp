@@ -3,6 +3,7 @@
 
 #include "ItemActor.h"
 #include "NiagaraComponent.h"
+#include "../Character/PlayerCharacter.h"
 #include "Components/SphereComponent.h"	
 
 // Sets default values
@@ -25,7 +26,8 @@ AItemActor::AItemActor()
 	MeshComponent->SetCollisionObjectType(ECC_PhysicsBody);
 	MeshComponent->SetCollisionResponseToAllChannels(ECR_Block); 
 	MeshComponent->BodyInstance.SleepFamily = ESleepFamily::Custom;
-	MeshComponent->BodyInstance.CustomSleepThresholdMultiplier = 10.f;
+	MeshComponent->BodyInstance.CustomSleepThresholdMultiplier = 0.1f;
+	MeshComponent->BodyInstance.bNotifyRigidBodyCollision = true;
 	MeshComponent->SetSimulatePhysics(true);
 
 	ElapsedTime = 0.0f;
@@ -38,7 +40,7 @@ void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MeshComponent->OnComponentSleep.AddDynamic(this, &AItemActor::OnActorSleep);
+	MeshComponent->OnComponentHit.AddDynamic(this, &AItemActor::OnFloorHit);
 	LaunchRandomDirection();
 }
 
@@ -46,30 +48,56 @@ void AItemActor::BeginPlay()
 void AItemActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Log, TEXT("Sleeping? : %i"), !MeshComponent->IsAnyRigidBodyAwake());
 
 	if (bIsFloating)
 	{
 		ElapsedTime += DeltaTime;
 
-		SetActorRotation(FRotator(0.f, 0.f, ElapsedTime * RotationRate));
-		SetActorLocation(BaseLocation + FVector(0.f, 0.f, -FMath::Cos(ElapsedTime * FloatingRate) * FloatingRange));
+		SetActorRotation(FRotator(0.f, ElapsedTime * RotationRate, 0.f));
+		bool bRes = SetActorLocation(BaseLocation + FVector(0.f, 0.f, FloatingRange / 2.f - FMath::Cos(ElapsedTime * FloatingRate) * FloatingRange));
 	}
 }
 
 void AItemActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Item Overlapped"));
+	UE_LOG(LogTemp, Log, TEXT("Item Overlapped with %s"), *(OtherActor->GetFName().ToString()));
+
+	if (APlayerCharacter* Character = Cast<APlayerCharacter>(OtherActor))
+	{
+		bool bResult = Character->AddItem(ItemInstance);
+		if (bResult)
+		{
+			this->Destroy();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Failed to add items"));
+		}
+	}
 }
 
-UFUNCTION()
-void AItemActor::OnActorSleep(UPrimitiveComponent* SleepingComponent, FName BoneName)
+void AItemActor::OnFloorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UE_LOG(LogTemp, Log, TEXT("Item Sleep"));
+	UE_LOG(LogTemp, Log, TEXT("OnFloorHit"));
 
-	MeshComponent->SetSimulatePhysics(false);
-	bIsFloating = true;
-	BaseLocation = GetActorLocation();
+	if (bIsFloating || !OtherComp)
+	{
+		return;
+	}
+
+	if (Hit.ImpactNormal.Z <= 0.75f) // not floor hit normal 
+	{
+		return;
+	}
+
+	ECollisionChannel Channel = OtherComp->GetCollisionObjectType();
+	if (Channel == ECC_WorldStatic)
+	{
+		if (!bIsFloating)
+		{
+			StartFloating();
+		}
+	}
 }
 
 void AItemActor::SetItem(FItemInstance Item)
@@ -77,7 +105,7 @@ void AItemActor::SetItem(FItemInstance Item)
 	ItemInstance = Item;
 
 	if (NiagaraComponent)
-	{
+	{	
 		FLinearColor VFXColor = FLinearColor::White;
 
 		switch (Item.ItemData->Category)
@@ -99,7 +127,21 @@ void AItemActor::SetItem(FItemInstance Item)
 
 void AItemActor::LaunchRandomDirection()
 {
-	constexpr float LaunchZForce = 100.f;
+	UE_LOG(LogTemp, Log, TEXT("Item Launched!"));
+	constexpr float LaunchZForce = 500.f;
 	FVector LaunchDirection(FMath::RandRange(-10.f, 10.f), FMath::RandRange(-10.f, 10.f), LaunchZForce);
-	MeshComponent->BodyInstance.AddForce(LaunchDirection);
+	MeshComponent->BodyInstance.AddForce(LaunchDirection * 50.f);
+}
+
+void AItemActor::StartFloating()
+{
+	UE_LOG(LogTemp, Log, TEXT("StartFloating"));
+
+	bIsFloating = true;
+	BaseLocation = GetActorLocation();
+
+	MeshComponent->SetSimulatePhysics(false);
+	MeshComponent->SetEnableGravity(false);
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//MeshComponent->SyncComponentToRBPhysics();
 }

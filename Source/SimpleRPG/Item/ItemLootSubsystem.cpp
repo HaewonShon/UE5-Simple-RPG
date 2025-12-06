@@ -9,6 +9,19 @@
 
 DEFINE_LOG_CATEGORY(LogItemLootSubsystem);
 
+UItemLootSubsystem::UItemLootSubsystem()
+{
+	static ConstructorHelpers::FClassFinder<AItemActor> BPClass(TEXT("/Game/Items/BP_ItemActor2.BP_ItemActor2_C"));
+	if (BPClass.Succeeded())
+	{
+		ItemActor = BPClass.Class;
+	}
+	else
+	{
+		UE_LOG(LogItemLootSubsystem, Warning, TEXT("Could not find Game/Items/BP_ItemActor2.BP_ItemActor2_C"));
+	}
+}
+
 void UItemLootSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	ReadLootTable();
@@ -30,8 +43,15 @@ void UItemLootSubsystem::SpawnItem(FGameplayTag EnemyTag, FVector Location)
 		ItemInstance.SetItem(ItemData);
 
 		AItemActor* ItemActorInWorld = GetWorld()->SpawnActor<AItemActor>(ItemActor, Location, FRotator());
-		ItemActorInWorld->SetItem(ItemInstance);
-		UE_LOG(LogItemLootSubsystem, Log, TEXT("Item spawned: %s"), *(ItemData->DisplayName.ToString()));
+		if (ItemActorInWorld)
+		{
+			ItemActorInWorld->SetItem(ItemInstance);
+			UE_LOG(LogItemLootSubsystem, Log, TEXT("Item spawned: %s"), *(ItemData->DisplayName.ToString()));
+		}
+		else
+		{
+			UE_LOG(LogItemLootSubsystem, Warning, TEXT("Failed to spawn Item Actor"));
+		}
 	}
 	else
 	{

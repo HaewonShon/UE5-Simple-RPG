@@ -53,6 +53,8 @@ class SIMPLERPG_API UItemLootSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 	
 public:
+	UItemLootSubsystem();
+
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	void SpawnItem(FGameplayTag EnemyTag, FVector Location);
@@ -62,7 +64,6 @@ private:
 
 	const class UItemData* SelectRandomItem(FGameplayTag EnemyTag);
 
-	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AItemActor> ItemActor;
 
 	UPROPERTY()

@@ -20,15 +20,19 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
-	UFUNCTION()
-	void OnActorSleep(UPrimitiveComponent* SleepingComponent, FName BoneName);
-
 	void SetItem(FItemInstance Item);
 
 protected:
+	UFUNCTION()
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	UFUNCTION()
+	void OnFloorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+		const FHitResult& Hit);
+
 	void LaunchRandomDirection();
+	void StartFloating();
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UStaticMeshComponent> MeshComponent;

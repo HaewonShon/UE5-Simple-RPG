@@ -26,7 +26,7 @@ FInventoryPage::FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountP
 	}
 }
 
-bool FInventoryPage::AddItem(FItemInstance ItemInstance)
+bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 {
 	if (!ItemInstance.ItemData->bIsStackable && !HasEmptySlot())
 	{
@@ -47,6 +47,10 @@ bool FInventoryPage::AddItem(FItemInstance ItemInstance)
 				if (ItemInstance.StackCount == 0)
 				{
 					return true;
+				}
+				else
+				{
+					return false;
 				}
 			}
 			else if(EmptySlot == nullptr)

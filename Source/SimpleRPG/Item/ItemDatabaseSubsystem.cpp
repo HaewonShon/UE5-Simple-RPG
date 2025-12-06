@@ -8,6 +8,7 @@
 void UItemDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+    USimpleRPGAssetManager::Get().LoadPrimaryAssetsWithType("ItemData");
 
     if (USimpleRPGAssetManager::Get().AreItemsLoaded())
     {
@@ -31,18 +32,11 @@ void UItemDatabaseSubsystem::BuildCache()
     USimpleRPGAssetManager::Get().GetPrimaryAssetIdList(FPrimaryAssetType("ItemData"), ItemIds);
 
     UE_LOG(LogTemp, Warning, TEXT("UItemDatabaseSubsystem buildcache called, res: %i"), ItemIds.Num());
-
-    USimpleRPGAssetManager::Get().LoadPrimaryAssetsWithType("ItemData");
     for (const FPrimaryAssetId& Id : ItemIds)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Id.Type = %s, Id.Name = %s"),
-            *Id.PrimaryAssetType.ToString(),
-            *Id.PrimaryAssetName.ToString());
+        UItemData* ItemData = USimpleRPGAssetManager::Get().GetPrimaryAssetObject<UItemData>(Id);
 
-        UItemData* AssetObj = USimpleRPGAssetManager::Get().GetPrimaryAssetObject<UItemData>(Id);
-        //UItemData* ItemData = Cast<UItemData>(AssetObj);
-
-        //ItemCache.Add(Id, ItemData);
-        UE_LOG(LogTemp, Log, TEXT("UItemDatabaseSubsystem Data added to cache: %s, res: %i"), *Id.ToString(), AssetObj != nullptr);
+        ItemCache.Add(Id, ItemData);
+        UE_LOG(LogTemp, Log, TEXT("UItemDatabaseSubsystem Data added to cache: %s, res: %i"), *Id.ToString(), ItemData != nullptr);
     }
 }

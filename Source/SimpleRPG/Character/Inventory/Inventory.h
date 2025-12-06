@@ -41,7 +41,7 @@ struct FInventoryPage
 
 	FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountPerPage);
 
-	bool AddItem(FItemInstance Item);
+	bool AddItem(FItemInstance& Item);
 	bool HasEmptySlot() const;
 
 	EInventoryCategory Category;
