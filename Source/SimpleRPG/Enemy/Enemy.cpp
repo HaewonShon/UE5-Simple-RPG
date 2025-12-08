@@ -5,6 +5,7 @@
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "../UI/EnemyHPDisplayWidgetComponent.h"
 #include "../Gameplay/DamageTextActor.h"
+#include "EnemyAnimInstance.h"
 #include "../Item/ItemLootSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEnemy);
@@ -73,14 +74,19 @@ void AEnemy::OnDeath()
 {
 	if (DeathAnimMontage)
 	{
-		constexpr float CorpseRemainingTime = 0.5f;
-		float AnimPlaytime = PlayAnimMontage(DeathAnimMontage);
+		if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+		{
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted) { Destroy(); });
 
-		SetLifeSpan(AnimPlaytime + CorpseRemainingTime);
-	}
-	else
-	{
-		SetLifeSpan(0.1f);
+			AnimInstance->Montage_Play(DeathAnimMontage);
+			AnimInstance->Montage_SetEndDelegate(EndDelegate, DeathAnimMontage);
+			OnEnemyDeath.Broadcast();
+		}
+		else
+		{
+			UE_LOG(LogEnemy, Warning, TEXT("%s cannot find EnemyAnimInstance"), *GetFName().ToString());
+		}
 	}
 
 	// Item Drop Request

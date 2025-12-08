@@ -10,6 +10,7 @@
 
 // Define Log Category for enemy-specific logs
 DECLARE_LOG_CATEGORY_EXTERN(LogEnemy, Log, All)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDeath);
 
 UCLASS()
 class SIMPLERPG_API AEnemy : public ACharacter, public IAbilitySystemInterface
@@ -22,6 +23,9 @@ public:
 	virtual void PossessedBy(AController* NewController);
 
 	void OnHealthChanged(const FOnAttributeChangeData& Data);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEnemyDeath OnEnemyDeath;
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM

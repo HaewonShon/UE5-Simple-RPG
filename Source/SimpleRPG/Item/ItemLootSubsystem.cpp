@@ -29,7 +29,7 @@ void UItemLootSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UItemLootSubsystem::SpawnItem(FGameplayTag EnemyTag, FVector Location)
 {
-	UE_LOG(LogItemLootSubsystem, Log, TEXT("Spawn called"));
+	UE_LOG(LogItemLootSubsystem, Verbose, TEXT("Item Spawn called for enemy %s"), *EnemyTag.ToString());
 	if (!EnemyTag.MatchesTag(FGameplayTag::RequestGameplayTag("Enemy")))
 	{
 		UE_LOG(LogItemLootSubsystem, Warning, TEXT("Given Enemy Tag is not valid. Tag: %s"), *EnemyTag.ToString());
@@ -46,7 +46,7 @@ void UItemLootSubsystem::SpawnItem(FGameplayTag EnemyTag, FVector Location)
 		if (ItemActorInWorld)
 		{
 			ItemActorInWorld->SetItem(ItemInstance);
-			UE_LOG(LogItemLootSubsystem, Log, TEXT("Item spawned: %s"), *(ItemData->DisplayName.ToString()));
+			UE_LOG(LogItemLootSubsystem, Verbose, TEXT("Item Actor spawned: %s"), *(ItemData->DisplayName.ToString()));
 		}
 		else
 		{
@@ -74,7 +74,7 @@ void UItemLootSubsystem::ReadLootTable()
 	}
 
 	LootTable->ForeachRow<FLootTableRow>(TEXT("Caching LootTable Info..."), [this](const FName& RowName, const FLootTableRow& Row) {
-		UE_LOG(LogItemLootSubsystem, Log, TEXT("For Row - EnemyTag %s, ItemList Size: %i"), *(Row.EnemyTag.ToString()), Row.LootItemList.Num());
+		UE_LOG(LogItemLootSubsystem, Verbose, TEXT("For Row - EnemyTag %s, ItemList Size: %i"), *(Row.EnemyTag.ToString()), Row.LootItemList.Num());
 		FLootInfo& LootInfo = Cache.Add({ Row.EnemyTag, FLootInfo() });
 		for (const FLootItem& Item : Row.LootItemList)
 		{
@@ -83,13 +83,11 @@ void UItemLootSubsystem::ReadLootTable()
 			++LootInfo.ItemCount;
 		}
 	});
-
-	UE_LOG(LogItemLootSubsystem, Log, TEXT("Item Load 3"));
 }
 
 const UItemData* UItemLootSubsystem::SelectRandomItem(FGameplayTag EnemyTag)
 {
-	UE_LOG(LogItemLootSubsystem, Warning, TEXT("SelectRandomItem with tag: %s"), *(EnemyTag.ToString()));
+	UE_LOG(LogItemLootSubsystem, Verbose, TEXT("SelectRandomItem with enemy tag: %s"), *(EnemyTag.ToString()));
 	UItemDatabaseSubsystem* ItemDB = GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
 	const FLootInfo& LootInfo = Cache.FindRef(EnemyTag);
 
@@ -109,10 +107,8 @@ const UItemData* UItemLootSubsystem::SelectRandomItem(FGameplayTag EnemyTag)
 		if (Sum >= RandomValue)
 		{
 			return ItemDB->Get(Item.ItemId);
-			//return USimpleRPGAssetManager::Get().GetItemData(Item.ItemId);
 		}
 	}
 
 	return ItemDB->Get(LootInfo.Item[LootInfo.ItemCount-1].ItemId);
-	//return USimpleRPGAssetManager::Get().GetItemData(LootInfo.Item[LootInfo.ItemCount-1].ItemId);
 }

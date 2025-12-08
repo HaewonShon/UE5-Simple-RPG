@@ -60,8 +60,6 @@ void AItemActor::Tick(float DeltaTime)
 
 void AItemActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Log, TEXT("Item Overlapped with %s"), *(OtherActor->GetFName().ToString()));
-
 	if (APlayerCharacter* Character = Cast<APlayerCharacter>(OtherActor))
 	{
 		bool bResult = Character->AddItem(ItemInstance);
@@ -78,8 +76,6 @@ void AItemActor::NotifyActorBeginOverlap(AActor* OtherActor)
 
 void AItemActor::OnFloorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	UE_LOG(LogTemp, Log, TEXT("OnFloorHit"));
-
 	if (bIsFloating || !OtherComp)
 	{
 		return;
@@ -127,7 +123,7 @@ void AItemActor::SetItem(FItemInstance Item)
 
 void AItemActor::LaunchRandomDirection()
 {
-	UE_LOG(LogTemp, Log, TEXT("Item Launched!"));
+	UE_LOG(LogTemp, Verbose, TEXT("Item Launched!"));
 	constexpr float LaunchZForce = 500.f;
 	FVector LaunchDirection(FMath::RandRange(-10.f, 10.f), FMath::RandRange(-10.f, 10.f), LaunchZForce);
 	MeshComponent->BodyInstance.AddForce(LaunchDirection * 50.f);
@@ -135,7 +131,7 @@ void AItemActor::LaunchRandomDirection()
 
 void AItemActor::StartFloating()
 {
-	UE_LOG(LogTemp, Log, TEXT("StartFloating"));
+	UE_LOG(LogTemp, Verbose, TEXT("StartFloating"));
 
 	bIsFloating = true;
 	BaseLocation = GetActorLocation();
