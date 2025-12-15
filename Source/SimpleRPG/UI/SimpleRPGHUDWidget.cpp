@@ -2,7 +2,7 @@
 
 
 #include "SimpleRPGHUDWidget.h"
-#include "InventoryWidget.h"
+#include "Inventory/InventoryWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 
@@ -44,4 +44,9 @@ void USimpleRPGHUDWidget::ToggleInventory()
             InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
         }
     }
+}
+
+TWeakObjectPtr<UUserWidget> USimpleRPGHUDWidget::GetInventoryWidget() const
+{
+    return InventoryWidget;
 }

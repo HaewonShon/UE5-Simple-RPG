@@ -24,8 +24,12 @@ public:
 
 	virtual void BeginPlay() override;
 
+	/* Add Item to inventory */
 	bool AddItem(FItemInstance& ItemInstance);
-	// RemoveItem(UItemData* Item);
+
+	/* Remove Item From slot. ex) throw out, quest.. */
+	void RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem);
+
 	//bool EquipItem(UItemData* Item);
 	//bool UnequipItem(UItemData* Item);
 	//bool UseItem(UItemData* Item);

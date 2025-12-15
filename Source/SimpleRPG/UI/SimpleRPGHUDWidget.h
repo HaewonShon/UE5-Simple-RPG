@@ -19,6 +19,8 @@ public:
 	
 	void ToggleInventory();
 
+	TWeakObjectPtr<UUserWidget> GetInventoryWidget() const;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UCanvasPanel> MainCanvas;

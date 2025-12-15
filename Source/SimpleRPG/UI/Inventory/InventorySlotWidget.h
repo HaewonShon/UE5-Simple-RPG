@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "InventorySlotWidget.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnDragBegin, class UInventorySlotWidget*);
+
 /**
  *	 Widget for each item slot in inventory.
  */
@@ -20,10 +22,21 @@ public:
 
 	void ClearItem();
 
+	FOnDragBegin OnDragBegin;
+
 protected:
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UImage> ItemImage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> StackText;
+
+	bool bIsSlotFilled;
+	UDragDropOperation* DragDropOperationRef;
+	FVector2f DragOffset;
 };

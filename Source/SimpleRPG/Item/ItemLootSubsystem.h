@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GameplayTagContainer.h"
+#include "ItemData.h"
 #include "ItemLootSubsystem.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogItemLootSubsystem, Log, All)
 
 /**
- *	Subsystem manages item loot table & determine item to drop
+ *	Subsystem manages item loot table & determine item to drop, spawn item
  */
 
 USTRUCT(BlueprintType)
@@ -57,7 +58,11 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	/* Item spawn by request from enemy death event */
 	void SpawnItem(FGameplayTag EnemyTag, FVector Location);
+
+	/* Item spawn by request from inventory item drop */
+	void SpawnItem(const FItemInstance& ItemInstance, FVector Location);
 
 private:
 	void ReadLootTable();

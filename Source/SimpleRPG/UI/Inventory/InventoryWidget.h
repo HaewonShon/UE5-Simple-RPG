@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "../Character/Inventory/Inventory.h"
+#include "../../Character/Inventory/Inventory.h"
 #include "InventoryWidget.generated.h"
 
 /**
@@ -38,7 +38,8 @@ protected:
 	//UFUNCTION(BlueprintCallable)
 	//void OnItemDragAndDropped();
 
-
+	UFUNCTION()
+	void OnSlotDragBegin(class UInventorySlotWidget* SlotWidget);
 
 protected:
 	/* Update Inventory manually when interface opened */

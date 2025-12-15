@@ -3,13 +3,14 @@
 
 #include "InventoryComponent.h"
 #include "Misc/EnumRange.h"
+#include "../../Item/ItemLootSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
-	UE_LOG(LogInventory, Log, TEXT("Inventory Init"));
+	//UE_LOG(LogInventory, Log, TEXT("Inventory Init"));
 }
 
 void UInventoryComponent::BeginPlay()
@@ -22,44 +23,64 @@ void UInventoryComponent::BeginPlay()
 	{
 		InventoryPages.Add({ Category, FInventoryPage(Category, SlotCountPerPage) });
 	}
-	UE_LOG(LogInventory, Log, TEXT("Inventory pages size: %i"), InventoryPages.Num());
+	UE_LOG(LogInventory, Verbose, TEXT("Initialized inventory pages size: %i"), InventoryPages.Num());
 }
 
 bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 {
 	if (!ItemInstance.ItemData)
 	{
-		UE_LOG(LogInventory, Log, TEXT("Item is not valid"));
+		UE_LOG(LogInventory, Warning, TEXT("AddItem: Item is not valid"));
 		return false;
 	}
 
 	EItemCategory ItemCategory = ItemInstance.ItemData->Category;
-	EInventoryCategory InventoryCategory = EInventoryCategory::Count;
+	EInventoryCategory PageCategory = EInventoryCategory::Count;
 	switch (ItemCategory)
 	{
 	case EItemCategory::Weapon:
 	case EItemCategory::Armor:
-		InventoryCategory = EInventoryCategory::Equipment;
+		PageCategory = EInventoryCategory::Equipment;
 		break;
 	case EItemCategory::Consumable:
-		InventoryCategory = EInventoryCategory::Consumable;
+		PageCategory = EInventoryCategory::Consumable;
 		break;
 	case EItemCategory::Material:
-		InventoryCategory = EInventoryCategory::Material;
+		PageCategory = EInventoryCategory::Material;
 		break;
 	}
 	
-	check(InventoryCategory != EInventoryCategory::Count);
+	check(PageCategory != EInventoryCategory::Count);
 
-	FInventoryPage& TargetPage = InventoryPages[InventoryCategory];
-	UE_LOG(LogInventory, Log, TEXT("Selected page: %i"), TargetPage.Category);
+	FInventoryPage& TargetPage = InventoryPages[PageCategory];
+	UE_LOG(LogInventory, Verbose, TEXT("Selected page: %i"), TargetPage.Category);
 	if (TargetPage.AddItem(ItemInstance) && OnInventoryContentChanged.IsBound())
 	{
-		OnInventoryContentChanged.Execute(InventoryCategory);
+		OnInventoryContentChanged.Execute(PageCategory);
 		return true;
 	}
 	
 	return false;
+}
+
+void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem)
+{
+	FInventoryPage& TargetPage = InventoryPages[PageCategory];
+	if (TargetPage.IsSlotEmpty(SlotIndex))
+	{
+		return;
+	}
+
+	if (bShouldDropItem)
+	{
+		const FItemInstance& ItemInstance = TargetPage.GetItemInstance(SlotIndex);
+
+		// spawn actor
+		
+
+	}
+
+	TargetPage.RemoveItem(SlotIndex);
 }
 
 const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const

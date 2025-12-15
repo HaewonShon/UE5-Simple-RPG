@@ -6,8 +6,8 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/InvalidationBox.h"
 #include "InventorySlotWidget.h"
-#include "../Character/SimpleRPGPlayerState.h"
-#include "../Character/Inventory/InventoryComponent.h"
+#include "../../Character/SimpleRPGPlayerState.h"
+#include "../../Character/Inventory/InventoryComponent.h"
 
 #include "Misc/OutputDeviceDebug.h"
 
@@ -28,7 +28,16 @@ void UInventoryWidget::NativeConstruct()
 		{
 			for (int32 w = 0; w < PageWidth; ++w)
 			{
-				SlotGridPanel->AddChildToUniformGrid(CreateWidget<UUserWidget>(this, SlotWidgetClass), h, w);
+				UUserWidget* Widget = CreateWidget<UUserWidget>(this, SlotWidgetClass);
+				SlotGridPanel->AddChildToUniformGrid(Widget, h, w);
+				if (UInventorySlotWidget* SlotWidget = Cast<UInventorySlotWidget>(Widget))
+				{
+					SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
+				}
+				else
+				{
+					UE_LOG(LogInventory, Warning, TEXT("Failed to bind drag function."));
+				}
 			}
 		}
 	}
@@ -65,7 +74,7 @@ void UInventoryWidget::OnPageSelected(int32 PageIndex)
 
 void UInventoryWidget::OnCurrentPageSort()
 {
-
+	
 }
 
 void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
@@ -74,6 +83,11 @@ void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
 	{
 		UpdateCurrentPageContents();
 	}
+}
+
+void UInventoryWidget::OnSlotDragBegin(UInventorySlotWidget* SlotWidget)
+{
+	UE_LOG(LogInventory, Log, TEXT("Slot Drag detected"));
 }
 
 void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)

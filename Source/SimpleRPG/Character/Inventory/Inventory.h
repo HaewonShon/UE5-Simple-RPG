@@ -38,10 +38,13 @@ struct FInventoryPage
 	GENERATED_BODY()
 
 	FInventoryPage();
-
 	FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountPerPage);
 
+	const FItemInstance& GetItemInstance(int32 SlotIndex);
+	bool IsSlotEmpty(int32 SlotIndex) const;
+
 	bool AddItem(FItemInstance& Item);
+	void RemoveItem(int32 SlotIndex);
 	bool HasEmptySlot() const;
 
 	EInventoryCategory Category;

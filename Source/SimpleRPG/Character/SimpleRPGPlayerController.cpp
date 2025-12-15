@@ -12,6 +12,9 @@ void ASimpleRPGPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
+	bEnableClickEvents = true;
+	bEnableMouseOverEvents = true;
+
 	ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	check(LocalPlayer);
 	UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -41,12 +44,9 @@ void ASimpleRPGPlayerController::BeginPlay()
     if (HUDWidgetClass)
     {
         HUDWidget = CreateWidget<USimpleRPGHUDWidget>(this, HUDWidgetClass);
-		UE_LOG(LogTemp, Log, TEXT("Widget Added1"));
         if (HUDWidget)
         {
-			UE_LOG(LogTemp, Log, TEXT("Widget Added2"));
 			HUDWidget->AddToViewport();
-			UE_LOG(LogTemp, Log, TEXT("Widget Added3"));
         }
 		else
 		{
@@ -69,7 +69,8 @@ void ASimpleRPGPlayerController::AddPitchInput(float Val)
 
 void ASimpleRPGPlayerController::ToggleInventory()
 {
-	UE_LOG(LogTemp, Log, TEXT("Inventory Toggle activation"));
+	ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 	if (HUDWidget)
 	{
@@ -78,11 +79,21 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 		if(bIsInvenetoryOn)
 		{
+			InputSystem->RemoveMappingContext(GameInputMaapping);
+
 			bShowMouseCursor = true;
-			SetInputMode(FInputModeGameAndUI());
+
+			FInputModeUIOnly InputMode;
+			//InputMode.SetHideCursorDuringCapture(false);
+			//InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			//InputMode.SetWidgetToFocus(HUDWidget->GetInventoryWidget()->TakeWidget());
+
+			SetInputMode(InputMode);
 		}
 		else
 		{
+			InputSystem->AddMappingContext(GameInputMaapping, 0);
+
 			bShowMouseCursor = false;
 			SetInputMode(FInputModeGameOnly());
 		}

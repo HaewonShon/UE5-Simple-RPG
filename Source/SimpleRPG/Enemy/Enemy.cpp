@@ -5,7 +5,6 @@
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "../UI/EnemyHPDisplayWidgetComponent.h"
 #include "../Gameplay/DamageTextActor.h"
-#include "EnemyAnimInstance.h"
 #include "../Item/ItemLootSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEnemy);

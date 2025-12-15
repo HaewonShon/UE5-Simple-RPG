@@ -59,10 +59,30 @@ void UItemLootSubsystem::SpawnItem(FGameplayTag EnemyTag, FVector Location)
 	}
 }
 
+void UItemLootSubsystem::SpawnItem(const FItemInstance& ItemInstance, FVector Location)
+{
+	if (ItemInstance.ItemData == nullptr)
+	{
+		UE_LOG(LogItemLootSubsystem, Warning, TEXT("SpawnItem: Given ItemInstance is not valid"));
+		return;
+	}
+
+	AItemActor* ItemActorInWorld = GetWorld()->SpawnActor<AItemActor>(ItemActor, Location, FRotator());
+	if (ItemActorInWorld)
+	{
+		ItemActorInWorld->SetItem(ItemInstance);
+		UE_LOG(LogItemLootSubsystem, Verbose, TEXT("Item Actor spawned: %s"), *(ItemInstance.ItemData->DisplayName.ToString()));
+	}
+	else
+	{
+		UE_LOG(LogItemLootSubsystem, Warning, TEXT("Failed to spawn Item Actor"));
+	}
+}
+
 void UItemLootSubsystem::ReadLootTable()
 {
 	UDataTable* LootTable;
-	if (USimpleRPGGameInstance* GameInstance = Cast< USimpleRPGGameInstance>(GetGameInstance()))
+	if (USimpleRPGGameInstance* GameInstance = Cast<USimpleRPGGameInstance>(GetGameInstance()))
 	{
 		LootTable = GameInstance->GetLootTable().Get();
 		UE_LOG(LogItemLootSubsystem, Log, TEXT("Got LootTable from GameInstance, size: %i"), LootTable->GetRowNames().Num());

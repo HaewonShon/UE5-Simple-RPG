@@ -26,6 +26,16 @@ FInventoryPage::FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountP
 	}
 }
 
+const FItemInstance& FInventoryPage::GetItemInstance(int32 SlotIndex)
+{
+	return Slots[SlotIndex].Item;
+}
+
+bool FInventoryPage::IsSlotEmpty(int32 SlotIndex) const
+{
+	return Slots[SlotIndex].IsEmpty();
+}
+
 bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 {
 	if (!ItemInstance.ItemData->bIsStackable && !HasEmptySlot())
@@ -53,7 +63,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 					return false;
 				}
 			}
-			else if(EmptySlot == nullptr)
+			else if(EmptySlot == nullptr && Slot.IsEmpty())
 			{
 				EmptySlot = &Slot;
 			}
@@ -81,6 +91,11 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 	}
 
 	return false;
+}
+
+void FInventoryPage::RemoveItem(int32 SlotIndex)
+{
+	
 }
 
 bool FInventoryPage::HasEmptySlot() const
