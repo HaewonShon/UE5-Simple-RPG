@@ -79,20 +79,20 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 		if(bIsInvenetoryOn)
 		{
-			InputSystem->RemoveMappingContext(GameInputMaapping);
+			//InputSystem->RemoveMappingContext(GameInputMaapping);
 
 			bShowMouseCursor = true;
 
-			FInputModeUIOnly InputMode;
-			//InputMode.SetHideCursorDuringCapture(false);
-			//InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			//InputMode.SetWidgetToFocus(HUDWidget->GetInventoryWidget()->TakeWidget());
+			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			InputMode.SetWidgetToFocus(HUDWidget->GetInventoryWidget()->TakeWidget());
 
 			SetInputMode(InputMode);
 		}
 		else
 		{
-			InputSystem->AddMappingContext(GameInputMaapping, 0);
+			//InputSystem->AddMappingContext(GameInputMaapping, 0);
 
 			bShowMouseCursor = false;
 			SetInputMode(FInputModeGameOnly());

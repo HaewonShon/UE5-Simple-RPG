@@ -6,7 +6,29 @@
 #include "Blueprint/UserWidget.h"
 #include "InventorySlotWidget.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnDragBegin, class UInventorySlotWidget*);
+DECLARE_DELEGATE_OneParam(FOnSlotDragBegin, FSlotInfo);
+DECLARE_DELEGATE_TwoParams(FOnSlotDrop, FSlotInfo, FSlotInfo);
+
+UENUM()
+enum class ESlotType
+{
+	Weapon,
+	Helmet,
+	Chest,
+	Pants,
+	Boots,
+	Storage,
+	Count UMETA(Hidden)
+};
+
+USTRUCT()
+struct FSlotInfo
+{
+	GENERATED_BODY()
+
+	ESlotType SlotType;
+	int32 SlotIndex; // for ESlotType::Storage only
+};
 
 /**
  *	 Widget for each item slot in inventory.
@@ -19,13 +41,25 @@ class SIMPLERPG_API UInventorySlotWidget : public UUserWidget
 public:
 	/* Setter for Item Image and stack count text */
 	void SetItem(const struct FItemInstance* Item);
-
 	void ClearItem();
 
-	FOnDragBegin OnDragBegin;
+	int32 GetIndex() const;
+	void SetIndex(int32 Index);
+
+	class UTexture2D* GetIconTexture() const;
+
+	FOnSlotDragBegin OnDragBegin;
+	FOnSlotDrop OnDrop;
+
+	UDragDropOperation* DragDropOperationRef;
+
+	UPROPERTY(EditDefaultsOnly)
+	ESlotType SlotType;
 
 protected:
+	/* drag-drop related events implementation */
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
@@ -36,7 +70,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> StackText;
 
+	// Slot Information
+	int32 SlotIndex;
+
 	bool bIsSlotFilled;
-	UDragDropOperation* DragDropOperationRef;
+
 	FVector2f DragOffset;
 };

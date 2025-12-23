@@ -106,8 +106,7 @@ void AItemActor::SetItem(FItemInstance Item)
 
 		switch (Item.ItemData->Category)
 		{
-		case EItemCategory::Weapon:
-		case EItemCategory::Armor:
+		case EItemCategory::Equipment:
 			VFXColor = EquipmentColor;
 			break;
 		case EItemCategory::Consumable:

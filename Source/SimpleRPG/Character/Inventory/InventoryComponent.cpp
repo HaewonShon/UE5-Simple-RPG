@@ -23,6 +23,12 @@ void UInventoryComponent::BeginPlay()
 	{
 		InventoryPages.Add({ Category, FInventoryPage(Category, SlotCountPerPage) });
 	}
+
+	for (EEquipmentCategory Category : TEnumRange<EEquipmentCategory>())
+	{
+		EquiupmentSlotMap.Add({Category, FInventorySlot()});
+	}
+
 	UE_LOG(LogInventory, Verbose, TEXT("Initialized inventory pages size: %i"), InventoryPages.Num());
 }
 
@@ -38,8 +44,7 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 	EInventoryCategory PageCategory = EInventoryCategory::Count;
 	switch (ItemCategory)
 	{
-	case EItemCategory::Weapon:
-	case EItemCategory::Armor:
+	case EItemCategory::Equipment:
 		PageCategory = EInventoryCategory::Equipment;
 		break;
 	case EItemCategory::Consumable:
@@ -81,6 +86,14 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 	}
 
 	TargetPage.RemoveItem(SlotIndex);
+}
+
+void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2)
+{
+	FInventoryPage& CurrentPage = InventoryPages[PageCategory];
+	CurrentPage.SwapItems(Index1, Index2);
+
+	OnInventoryContentChanged.Execute(PageCategory);
 }
 
 const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const

@@ -17,8 +17,12 @@ class SIMPLERPG_API UInventorySlotDragWidget : public UUserWidget
 public:
     void OnDragBegin(UTexture2D* Texture);
     void OnDragEnd();
+    void SetDesiredSize(FVector2D Size);
 
 protected:
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<class USizeBox> SizeBox;
+
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<class UImage> ItemIcon;
 };

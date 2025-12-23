@@ -3,6 +3,7 @@
 
 #include "InventorySlotDragWidget.h"
 #include "Components/Image.h"
+#include "Components/SizeBox.h"
 
 void UInventorySlotDragWidget::OnDragBegin(UTexture2D* Texture)
 {
@@ -13,4 +14,10 @@ void UInventorySlotDragWidget::OnDragBegin(UTexture2D* Texture)
 void UInventorySlotDragWidget::OnDragEnd()
 {
 	SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UInventorySlotDragWidget::SetDesiredSize(FVector2D Size)
+{
+	SizeBox->SetWidthOverride(Size.X);
+	SizeBox->SetHeightOverride(Size.Y);
 }

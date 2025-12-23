@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "Inventory.h"
 #include "../../Item/ItemData.h"
+#include "../../Item/EquipmentItemData.h"
 #include "InventoryComponent.generated.h"
 
 // Define Log Inventory for Inventory-specific logs
@@ -30,15 +31,22 @@ public:
 	/* Remove Item From slot. ex) throw out, quest.. */
 	void RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem);
 
-	//bool EquipItem(UItemData* Item);
+	//void RequestEquipItem(FInventoryPage Page, int32 SlotIndex, )
 	//bool UnequipItem(UItemData* Item);
 	//bool UseItem(UItemData* Item);
+
+	void SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2);
 
 	const FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
 
 protected:
+	bool TryEquipItem(const FItemInstance& Item, EEquipmentCategory TargetCategory);
+
 	UPROPERTY()
 	TMap<EInventoryCategory, FInventoryPage> InventoryPages;
+
+	UPROPERTY()
+	TMap<EEquipmentCategory, FInventorySlot> EquiupmentSlotMap;
 };

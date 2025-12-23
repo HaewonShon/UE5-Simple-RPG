@@ -14,8 +14,7 @@
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
 {
-	Weapon,
-	Armor,
+	Equipment,
 	Consumable,
 	Material,
 	Count UMETA(Hidden)

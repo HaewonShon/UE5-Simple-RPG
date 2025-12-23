@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "../../Character/Inventory/Inventory.h"
+#include "InventorySlotWidget.h"
 #include "InventoryWidget.generated.h"
 
 /**
@@ -26,20 +27,20 @@ protected:
 	UFUNCTION()
 	void OnInventoryToggled(ESlateVisibility ChangedVisibility);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void OnPageSelected(int32 PageIndex);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION()
 	void OnCurrentPageSort();
 
 	//UFUNCTION(BlueprintCallable)
 	//void OnItemSelected();
 
-	//UFUNCTION(BlueprintCallable)
-	//void OnItemDragAndDropped();
+	UFUNCTION()
+	void OnSlotDragBegin(FSlotInfo SlotWidget);
 
 	UFUNCTION()
-	void OnSlotDragBegin(class UInventorySlotWidget* SlotWidget);
+	void OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2);
 
 protected:
 	/* Update Inventory manually when interface opened */
@@ -53,23 +54,43 @@ protected:
 	/*
 	*   Widget Properties 
 	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 PageWidth;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 PageHeight;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<class UInventorySlotWidget> SlotWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<class UInventorySlotDragWidget> SlotVisualWidgetClass;
 
 	/*
 	*   Bind Widgets
 	*/
-	UPROPERTY(meta = (BindWidget), EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInvalidationBox> InvalidationBox;
+
+	// Equipment Slots
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UInventorySlotWidget> HelmetSlot;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UInventorySlotWidget> ChestSlot;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UInventorySlotWidget> PantsSlot;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UInventorySlotWidget> BootsSlot;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UInventorySlotWidget> WeaponSlot;
+	
 
 	/*
 	*   Other members for inventory widget
@@ -82,4 +103,10 @@ protected:
 
 	UPROPERTY()
 	TMap<EInventoryCategory, bool> bIsPageContentChanged;
+
+	UPROPERTY()
+	TObjectPtr<class UInventorySlotDragWidget> SlotVisualWidget;
+
+	UPROPERTY()
+	TMap<ESlotType, class UInventorySlotWidget*> EquipmentSlotMap;
 };

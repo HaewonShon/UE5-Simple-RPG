@@ -89,13 +89,23 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 			}
 		}
 	}
-
 	return false;
 }
 
 void FInventoryPage::RemoveItem(int32 SlotIndex)
 {
 	
+}
+
+void FInventoryPage::SwapItems(int32 Index1, int32 Index2)
+{
+	if (Index1 < 0 || Index1 >= CountMaxSlot || Index2 < 0 || Index2 >= CountMaxSlot)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Inventory Index not valid"));
+		return;
+	}
+
+	Swap(Slots[Index1], Slots[Index2]);
 }
 
 bool FInventoryPage::HasEmptySlot() const

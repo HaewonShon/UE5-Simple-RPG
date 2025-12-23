@@ -45,10 +45,10 @@ struct FInventoryPage
 
 	bool AddItem(FItemInstance& Item);
 	void RemoveItem(int32 SlotIndex);
+	void SwapItems(int32 Index1, int32 Index2);
 	bool HasEmptySlot() const;
 
 	EInventoryCategory Category;
-
 	TArray<FInventorySlot> Slots;
 
 	int32 CountMaxSlot;
