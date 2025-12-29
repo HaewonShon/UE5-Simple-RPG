@@ -7,27 +7,28 @@
 #include "EquipmentItemData.generated.h"
 
 UENUM()
-enum class EEquipmentCategory : uint8
+enum class EEquipmentType : uint8
 {
 	Weapon,
-	Helemt,
+	Helmet,
 	Chest,
 	Pants,
 	Boots,
 	Count UMETA(Hidden)
 };
-ENUM_RANGE_BY_COUNT(EEquipmentCategory, EEquipmentCategory::Count);
+ENUM_RANGE_BY_COUNT(EEquipmentType, EEquipmentType::Count);
 
 /**
  *	Data Asset for equipment
  */
-UCLASS(BlueprintType, meta = (DisplayName = "Item Data Asset"))
+UCLASS(BlueprintType, meta = (DisplayName = "Equipment Item Data Asset"))
 class SIMPLERPG_API UEquipmentItemData : public UItemData
 {
 	GENERATED_BODY()
 
 public:
-	EEquipmentCategory EquipmentCategory;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
+	EEquipmentType EquipmentCategory;
 
 protected:
 };

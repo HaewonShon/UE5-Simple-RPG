@@ -48,7 +48,6 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 	if (ItemInstance.ItemData->bIsStackable)
 	{
 		FInventorySlot* EmptySlot = nullptr;
-
 		for (FInventorySlot& Slot : Slots)
 		{
 			if (!Slot.IsEmpty() && ItemInstance.ItemID == Slot.Item.ItemID)
@@ -57,10 +56,6 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 				if (ItemInstance.StackCount == 0)
 				{
 					return true;
-				}
-				else
-				{
-					return false;
 				}
 			}
 			else if(EmptySlot == nullptr && Slot.IsEmpty())

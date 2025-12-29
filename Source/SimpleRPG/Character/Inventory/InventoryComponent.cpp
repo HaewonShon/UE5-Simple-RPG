@@ -19,14 +19,15 @@ void UInventoryComponent::BeginPlay()
 
 	const int32 SlotCountPerPage = 24;
 
+	// Page & Equipment slots init
 	for (EInventoryCategory Category : TEnumRange<EInventoryCategory>())
 	{
 		InventoryPages.Add({ Category, FInventoryPage(Category, SlotCountPerPage) });
 	}
 
-	for (EEquipmentCategory Category : TEnumRange<EEquipmentCategory>())
+	for (EEquipmentType Category : TEnumRange<EEquipmentType>())
 	{
-		EquiupmentSlotMap.Add({Category, FInventorySlot()});
+		EquipmentSlots.Add({Category, FInventorySlot()});
 	}
 
 	UE_LOG(LogInventory, Verbose, TEXT("Initialized inventory pages size: %i"), InventoryPages.Num());
@@ -58,7 +59,6 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 	check(PageCategory != EInventoryCategory::Count);
 
 	FInventoryPage& TargetPage = InventoryPages[PageCategory];
-	UE_LOG(LogInventory, Verbose, TEXT("Selected page: %i"), TargetPage.Category);
 	if (TargetPage.AddItem(ItemInstance) && OnInventoryContentChanged.IsBound())
 	{
 		OnInventoryContentChanged.Execute(PageCategory);
@@ -96,7 +96,52 @@ void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index
 	OnInventoryContentChanged.Execute(PageCategory);
 }
 
+void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType TargetCategory)
+{
+	FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
+	const FItemInstance& EquipmentItem = EquipmentPage.GetItemInstance(SlotIndex);
+	if (CanEquipItem(EquipmentItem, TargetCategory))
+	{
+		Swap(EquipmentSlots[TargetCategory], EquipmentPage.Slots[SlotIndex]);
+	}
+
+	OnInventoryContentChanged.Execute(EInventoryCategory::Equipment);
+}
+
 const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const
 {
 	return InventoryPages[PageCategory];
+}
+
+const FInventorySlot& UInventoryComponent::GetEquipmentSlot(EEquipmentType EquipmentType) const
+{
+	return EquipmentSlots[EquipmentType];
+}
+
+bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType TargetCategory)
+{
+	if (Item.ItemData == nullptr)
+	{
+		return true;
+	}
+
+	if (const UEquipmentItemData* Equipment = Cast<UEquipmentItemData>(Item.ItemData))
+	{
+		if (Equipment->EquipmentCategory == TargetCategory)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void UInventoryComponent::EquipItem(const UEquipmentItemData* EquipmentData)
+{
+	// Apply Item Effect
+}
+
+void UInventoryComponent::UnequipItem(EEquipmentType EquipmentType)
+{
+	// Remove Item Effect
 }

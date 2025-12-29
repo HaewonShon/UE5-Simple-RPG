@@ -131,7 +131,10 @@ void ASimpleRPGPlayerController::CheatFunction3()
 
 void ASimpleRPGPlayerController::CheatFunction4()
 {
-	UE_LOG(LogTemp, Log, TEXT("Cheat4 Called from controller"));
-
+	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
+	{
+		UE_LOG(LogTemp, Log, TEXT("Cheat4 Called from controller"));
+		ItemCheatManager->GiveItem(3);
+	}
 }
 #endif
