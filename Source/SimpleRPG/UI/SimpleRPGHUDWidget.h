@@ -25,6 +25,9 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UCanvasPanel> MainCanvas;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UBackdropWidget> BackdropWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
 	TSubclassOf<class UInventoryWidget> InventoryWidgetClass;
 

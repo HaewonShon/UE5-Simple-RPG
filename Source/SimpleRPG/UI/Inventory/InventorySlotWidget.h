@@ -20,6 +20,7 @@ enum class ESlotType
 	Storage,
 	Count UMETA(Hidden)
 };
+ENUM_RANGE_BY_COUNT(ESlotType, ESlotType::Count); // Register Enum Range using Count
 
 USTRUCT()
 struct FSlotInfo
@@ -40,7 +41,7 @@ class SIMPLERPG_API UInventorySlotWidget : public UUserWidget
 
 public:
 	/* Setter for Item Image and stack count text */
-	void SetItem(const struct FItemInstance* Item);
+	void SetItem(const struct FItemInstance& Item);
 	void ClearItem();
 
 	int32 GetIndex() const;
@@ -59,9 +60,7 @@ public:
 protected:
 	/* drag-drop related events implementation */
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
-
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))

@@ -21,7 +21,7 @@ void UItemTestCheatManager::GiveItem(int32 Index)
 	if (InventoryComponent.IsValid())
 	{
 		FItemInstance NewItem;
-		NewItem.SetItem(ItemList[Index].GetDefaultObject());
+		NewItem.SetItem(ItemList[Index]);
 		NewItem.StackCount = 1;
 
 		bool Result = InventoryComponent->AddItem(NewItem);

@@ -10,8 +10,18 @@
 #include "../../Character/SimpleRPGPlayerState.h"
 #include "../../Character/Inventory/InventoryComponent.h"
 #include "InventorySlotDragWidget.h"
-
+#include "../BackdropWidget.h"
 #include "Misc/OutputDeviceDebug.h"
+
+EEquipmentType ConvertSlotTypeToEquipmentType(ESlotType SlotType)
+{
+	if (SlotType == ESlotType::Helmet) return EEquipmentType::Helmet;
+	if (SlotType == ESlotType::Chest) return EEquipmentType::Chest;
+	if (SlotType == ESlotType::Pants) return EEquipmentType::Pants;
+	if (SlotType == ESlotType::Boots) return EEquipmentType::Boots;
+	if (SlotType == ESlotType::Weapon) return EEquipmentType::Weapon;
+	return EEquipmentType::Count;
+}
 
 UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
 	: UUserWidget(ObjectInitializer)
@@ -35,6 +45,7 @@ void UInventoryWidget::NativeConstruct()
 				if (SlotWidget)
 				{
 					SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
+					SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSwapSlots);
 					SlotWidget->SetIndex(h * PageWidth + w);
 					SlotWidget->SlotType = ESlotType::Storage;
 				}
@@ -51,11 +62,23 @@ void UInventoryWidget::NativeConstruct()
 	}
 
 	// Equipment Slot Setup
-	EquipmentSlotMap.Add({ ESlotType::Helmet, HelmetSlot.Get() });
-	EquipmentSlotMap.Add({ ESlotType::Chest, ChestSlot.Get() });
-	EquipmentSlotMap.Add({ ESlotType::Pants, PantsSlot.Get() });
-	EquipmentSlotMap.Add({ ESlotType::Boots, BootsSlot.Get() });
-	EquipmentSlotMap.Add({ ESlotType::Weapon, WeaponSlot.Get() });
+	{
+		EquipmentSlotMap.Add({ ESlotType::Helmet, HelmetSlot.Get() });
+		EquipmentSlotMap.Add({ ESlotType::Chest, ChestSlot.Get() });
+		EquipmentSlotMap.Add({ ESlotType::Pants, PantsSlot.Get() });
+		EquipmentSlotMap.Add({ ESlotType::Boots, BootsSlot.Get() });
+		EquipmentSlotMap.Add({ ESlotType::Weapon, WeaponSlot.Get() });
+
+		for(ESlotType SlotType : TEnumRange<ESlotType>())
+		{
+			if (SlotType == ESlotType::Storage) continue;
+
+			UInventorySlotWidget* SlotWidget = EquipmentSlotMap[SlotType];
+			SlotWidget->SlotType = SlotType;
+			SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
+			SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSwapSlots);
+		}
+	}
 
 	// Register Inventory component
 	if (ASimpleRPGPlayerState* PlayerState = GetOwningPlayerState <ASimpleRPGPlayerState>())
@@ -89,6 +112,19 @@ void UInventoryWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to create SlotVisualWidget"));
 	}
+
+}
+
+void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
+{
+	if (!Widget)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Backdrop widget is not valid"));
+		return;
+	}
+
+	Widget->OnItemDiscard.BindUObject(this, &UInventoryWidget::OnItemDiscard);
+	UE_LOG(LogInventory, Log, TEXT("OnItemDiscard Registtered"));
 }
 
 void UInventoryWidget::OnPageSelected(int32 PageIndex)
@@ -114,7 +150,16 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 {
 	UE_LOG(LogInventory, Log, TEXT("Slot Drag detected"));
 
-	UInventorySlotWidget* SlotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(SlotInfo.SlotIndex));
+	UInventorySlotWidget* SlotWidget;
+	if (SlotInfo.SlotType == ESlotType::Storage)
+	{
+		SlotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(SlotInfo.SlotIndex));
+	}
+	else
+	{
+		SlotWidget = EquipmentSlotMap[SlotInfo.SlotType];
+	}
+
 	if (!SlotWidget)
 	{
 		UE_LOG(LogInventory, Log, TEXT("Failed to cast InventorySlotWidget"));
@@ -122,9 +167,16 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 	}
 
 	UDragDropOperation*& DragOperation = SlotWidget->DragDropOperationRef;
-	DragOperation->DefaultDragVisual = SlotVisualWidget;
-	SlotVisualWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	SlotVisualWidget->OnDragBegin(SlotWidget->GetIconTexture());
+	if (DragOperation)
+	{
+		DragOperation->DefaultDragVisual = SlotVisualWidget;
+		SlotVisualWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		SlotVisualWidget->OnDragBegin(SlotWidget->GetIconTexture());
+	}
+	else
+	{
+		UE_LOG(LogInventory, Warning, TEXT("DragOperation not valid"));
+	}
 }
 
 void UInventoryWidget::OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2)
@@ -139,22 +191,24 @@ void UInventoryWidget::OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2)
 	{
 		InventoryComponent->SwapItems(SelectedPage, Slot1.SlotIndex, Slot2.SlotIndex);
 	}
-	else if (Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
+	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
 	{
-		
+		InventoryComponent->TryEquipItem(Slot1.SlotIndex, ConvertSlotTypeToEquipmentType(Slot2.SlotType));
+		UpdateEquipmentContents();
 	}
-	else if (Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
+	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
 	{
-
+		InventoryComponent->TryEquipItem(Slot2.SlotIndex, ConvertSlotTypeToEquipmentType(Slot1.SlotType));
+		UpdateEquipmentContents();
 	}
-	
-	// find target slot
-	
-
-	// is empty -> ±×³É ÀåÂø
-	// else swap
 
 	UpdateCurrentPageContents();
+}
+
+void UInventoryWidget::OnItemDiscard(FSlotInfo SlotWidget)
+{
+	UE_LOG(LogInventory, Log, TEXT("Widget OnItemDiscard"));
+	InventoryComponent->RemoveItem(SelectedPage, SlotWidget.SlotIndex, true);
 }
 
 void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
@@ -168,20 +222,38 @@ void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
 	}
 }
 
+void UInventoryWidget::UpdateEquipmentContents()
+{
+	EEquipmentType Types[5] = 
+		{ EEquipmentType::Helmet, EEquipmentType::Chest, EEquipmentType::Pants, EEquipmentType::Boots, EEquipmentType::Weapon };
+	ESlotType SlotTypes[5] =
+		{ ESlotType::Helmet, ESlotType::Chest, ESlotType::Pants, ESlotType::Boots, ESlotType::Weapon };
+
+	for (int32 i = 0; i < 5; ++i)
+	{
+		const FInventorySlot& ItemSlot = InventoryComponent->GetEquipmentSlot(Types[i]);
+		UInventorySlotWidget* SlotWidget = EquipmentSlotMap[SlotTypes[i]];
+
+		if (!ItemSlot.IsEmpty())
+		{
+			SlotWidget->SetItem(ItemSlot.Item);
+		}
+		else
+		{
+			SlotWidget->ClearItem();
+		}
+	}
+}
+
 void UInventoryWidget::UpdateCurrentPageContents()
 {
-	if (!InventoryComponent.IsValid())
-	{
-		return;
-	}
-
 	const FInventoryPage& Page = InventoryComponent->GetPage(SelectedPage);
 	for (int32 Index = 0; Index < PageWidth * PageHeight; ++Index)
 	{
 		UInventorySlotWidget* SlotWidget = Cast<UInventorySlotWidget>(SlotGridPanel->GetChildAt(Index));
 		if (!Page.Slots[Index].IsEmpty())
 		{
-			SlotWidget->SetItem(&Page.Slots[Index].Item);
+			SlotWidget->SetItem(Page.Slots[Index].Item);
 		}
 		else
 		{
@@ -190,5 +262,4 @@ void UInventoryWidget::UpdateCurrentPageContents()
 	}
 	UE_LOG(LogInventory, Log, TEXT("Inventory Widget Updated page %i"), SelectedPage);
 	bIsPageContentChanged[SelectedPage] = false;
-
 }

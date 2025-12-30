@@ -3,6 +3,7 @@
 
 #include "InventoryComponent.h"
 #include "Misc/EnumRange.h"
+#include "GameFramework/PlayerState.h"
 #include "../../Item/ItemLootSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
@@ -81,10 +82,17 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 		const FItemInstance& ItemInstance = TargetPage.GetItemInstance(SlotIndex);
 
 		// spawn actor
-		
-
+		if (UItemLootSubsystem* ItemLootSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemLootSubsystem>())
+		{
+			if (APlayerState* PlayerState = Cast<APlayerState>(GetOwner()))
+			{
+				UE_LOG(LogInventory, Log, TEXT("Item spawn %i requested"), SlotIndex);
+				ItemLootSubsystem->SpawnItem(ItemInstance, PlayerState->GetPawn()->GetActorLocation());
+			}
+		}
 	}
 
+	UE_LOG(LogInventory, Log, TEXT("Item %i Removed"), SlotIndex);
 	TargetPage.RemoveItem(SlotIndex);
 }
 

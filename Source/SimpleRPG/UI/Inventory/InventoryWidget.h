@@ -20,6 +20,8 @@ public:
 	UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 	virtual void NativeConstruct() override;
 
+	void BindItemDiscardDelegate(class UBackdropWidget* BackdropWidget);
+
 protected:
 	/**************************
 	 * Inventory Functions 
@@ -27,7 +29,7 @@ protected:
 	UFUNCTION()
 	void OnInventoryToggled(ESlateVisibility ChangedVisibility);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnPageSelected(int32 PageIndex);
 
 	UFUNCTION()
@@ -42,10 +44,16 @@ protected:
 	UFUNCTION()
 	void OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2);
 
+	UFUNCTION()
+	void OnItemDiscard(FSlotInfo SlotWidget);
+
 protected:
 	/* Update Inventory manually when interface opened */
 	UFUNCTION()
 	void OnContentChanged(EInventoryCategory ChangedPageCategory);
+
+	UFUNCTION()
+	void UpdateEquipmentContents();
 
 	UFUNCTION()
 	void UpdateCurrentPageContents();

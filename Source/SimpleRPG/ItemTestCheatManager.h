@@ -25,5 +25,5 @@ protected:
 	TWeakObjectPtr<class UInventoryComponent> GetPlayerInventoryComponent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UItemData>> ItemList;
+	TArray<UItemData*> ItemList;
 };

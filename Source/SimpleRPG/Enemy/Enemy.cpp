@@ -91,7 +91,7 @@ void AEnemy::OnDeath()
 	// Item Drop Request
 	if (UItemLootSubsystem* ItemLootSubsystem = GetGameInstance()->GetSubsystem<UItemLootSubsystem>())
 	{
-		UE_LOG(LogEnemy, Log, TEXT("Item spawn requested"));
+		UE_LOG(LogEnemy, Verbose, TEXT("Item spawn requested"));
 		ItemLootSubsystem->SpawnItem(EnemyTag, GetActorLocation());
 	}
 }

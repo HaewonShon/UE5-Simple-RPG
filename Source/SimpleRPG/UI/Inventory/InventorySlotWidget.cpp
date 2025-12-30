@@ -8,19 +8,23 @@
 #include "InventoryDragDropOp.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
-void UInventorySlotWidget::SetItem(const FItemInstance* Item)
+void UInventorySlotWidget::SetItem(const FItemInstance& Item)
 {
-	if (!Item)
+	if (!Item.ItemData)
 	{
 		return;
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Set Item image"));
 
-	ItemImage->SetBrushFromTexture(Item->ItemData->Icon);
-	if (Item->StackCount > 1)
+	ItemImage->SetBrushFromTexture(Item.ItemData->Icon);
+	if (Item.StackCount > 1)
 	{
-		StackText->SetText(FText::AsNumber(Item->StackCount));
+		StackText->SetText(FText::AsNumber(Item.StackCount));
+	}
+	else
+	{
+		StackText->SetText(FText::GetEmpty());
 	}
 
 	this->InvalidateLayoutAndVolatility(); // Refresh InvalidationBox cache

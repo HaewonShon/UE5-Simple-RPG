@@ -89,7 +89,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 
 void FInventoryPage::RemoveItem(int32 SlotIndex)
 {
-	
+	Slots[SlotIndex].Item = FItemInstance();
 }
 
 void FInventoryPage::SwapItems(int32 Index1, int32 Index2)
