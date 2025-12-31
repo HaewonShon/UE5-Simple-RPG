@@ -71,6 +71,7 @@ void UItemLootSubsystem::SpawnItem(const FItemInstance& ItemInstance, FVector Lo
 	if (ItemActorInWorld)
 	{
 		ItemActorInWorld->SetItem(ItemInstance);
+		ItemActorInWorld->SetPickupDelay(ItemPickupDelay);
 		UE_LOG(LogItemLootSubsystem, Verbose, TEXT("Item Actor spawned: %s"), *(ItemInstance.ItemData->DisplayName.ToString()));
 	}
 	else

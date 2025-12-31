@@ -21,15 +21,14 @@ public:
 	virtual void BeginPlay() override;
 
 	void SetItem(FItemInstance Item);
+	void SetPickupDelay(float Delay);
 
 protected:
 	UFUNCTION()
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 	UFUNCTION()
-	void OnFloorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
-		const FHitResult& Hit);
+	void OnFloorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	void LaunchRandomDirection();
 	void StartFloating();
@@ -67,4 +66,7 @@ protected:
 
 	float ElapsedTime;
 	bool bIsFloating;
+
+	static constexpr float DefaultPickupDelay = 0.5f;
+	float PickupDelay;
 };

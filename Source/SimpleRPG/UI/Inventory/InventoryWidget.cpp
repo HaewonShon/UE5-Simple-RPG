@@ -207,14 +207,13 @@ void UInventoryWidget::OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2)
 
 void UInventoryWidget::OnItemDiscard(FSlotInfo SlotWidget)
 {
-	UE_LOG(LogInventory, Log, TEXT("Widget OnItemDiscard"));
+	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemDiscard %i"), SlotWidget.SlotIndex);
 	InventoryComponent->RemoveItem(SelectedPage, SlotWidget.SlotIndex, true);
 }
 
 void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
 {
-	UE_LOG(LogInventory, Log, TEXT("Inventory Widget OnChanged Called"));
-
+	UE_LOG(LogInventory, Verbose, TEXT("Inventory Widget OnChanged Called"));
 	bIsPageContentChanged[ChangedPageCategory] = true;
 	if (GetVisibility() != ESlateVisibility::Collapsed && ChangedPageCategory == SelectedPage)
 	{
@@ -260,6 +259,6 @@ void UInventoryWidget::UpdateCurrentPageContents()
 			SlotWidget->ClearItem();
 		}
 	}
-	UE_LOG(LogInventory, Log, TEXT("Inventory Widget Updated page %i"), SelectedPage);
+	UE_LOG(LogInventory, Verbose, TEXT("Inventory Widget Updated page %i"), SelectedPage);
 	bIsPageContentChanged[SelectedPage] = false;
 }

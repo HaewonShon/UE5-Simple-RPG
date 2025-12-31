@@ -73,4 +73,6 @@ private:
 
 	UPROPERTY()
 	TMap<FGameplayTag, FLootInfo> Cache;
+
+	static constexpr float ItemPickupDelay = 5.f;
 };

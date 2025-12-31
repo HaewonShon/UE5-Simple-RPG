@@ -94,6 +94,7 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 
 	UE_LOG(LogInventory, Log, TEXT("Item %i Removed"), SlotIndex);
 	TargetPage.RemoveItem(SlotIndex);
+	OnInventoryContentChanged.Execute(PageCategory);
 }
 
 void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2)

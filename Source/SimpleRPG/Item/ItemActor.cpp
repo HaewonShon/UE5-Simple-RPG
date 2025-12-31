@@ -32,6 +32,7 @@ AItemActor::AItemActor()
 
 	ElapsedTime = 0.0f;
 	bIsFloating = false;
+	PickupDelay = DefaultPickupDelay;
 
 	ItemInstance = FItemInstance();
 }
@@ -60,6 +61,11 @@ void AItemActor::Tick(float DeltaTime)
 
 void AItemActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	if (ElapsedTime < PickupDelay)
+	{
+		return;
+	}
+
 	if (APlayerCharacter* Character = Cast<APlayerCharacter>(OtherActor))
 	{
 		bool bResult = Character->AddItem(ItemInstance);
@@ -118,6 +124,11 @@ void AItemActor::SetItem(FItemInstance Item)
 		}
 		NiagaraComponent->SetVariableLinearColor(TEXT("VFXColor"), VFXColor);
 	}
+}
+
+void AItemActor::SetPickupDelay(float Delay)
+{
+	PickupDelay = Delay;
 }
 
 void AItemActor::LaunchRandomDirection()

@@ -6,12 +6,12 @@
 
 bool UBackdropWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-    UE_LOG(LogTemp, Log, TEXT("Backdrop detected"));
+    UE_LOG(LogTemp, Verbose, TEXT("Backdrop detected"));
     bool Result = Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
     if (UInventoryDragDropOp* DragDropOp = Cast< UInventoryDragDropOp>(InOperation))
     {
         OnItemDiscard.ExecuteIfBound(DragDropOp->DraggingSlot);
-        UE_LOG(LogTemp, Log, TEXT("Backdrop detected1"));
+        UE_LOG(LogTemp, Verbose, TEXT("Item discard broadasted"));
     }
     return true;
 }

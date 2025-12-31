@@ -15,8 +15,6 @@ void UInventorySlotWidget::SetItem(const FItemInstance& Item)
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Set Item image"));
-
 	ItemImage->SetBrushFromTexture(Item.ItemData->Icon);
 	if (Item.StackCount > 1)
 	{
@@ -76,6 +74,7 @@ FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
 void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDragDetected Detected"));
 
 	if (!bIsSlotFilled)
 	{
@@ -94,6 +93,8 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 
 bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDrop Detected"));
+
 	DragDropOperationRef = nullptr;
 
 	FSlotInfo SlotToSwap = Cast<UInventoryDragDropOp>(InOperation)->DraggingSlot;
@@ -102,6 +103,5 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	Self.SlotIndex = GetIndex();
 	OnDrop.ExecuteIfBound(SlotToSwap, Self);
 
-	UE_LOG(LogTemp, Log, TEXT("Slot NativeOnDrop Detected"));
 	return true;
 }
