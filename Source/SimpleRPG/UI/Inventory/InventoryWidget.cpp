@@ -45,7 +45,8 @@ void UInventoryWidget::NativeConstruct()
 				if (SlotWidget)
 				{
 					SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
-					SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSwapSlots);
+					SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSlotsSwapped);
+					SlotWidget->OnDoubleClick.BindUObject(this, &UInventoryWidget::OnItemUsed);
 					SlotWidget->SetIndex(h * PageWidth + w);
 					SlotWidget->SlotType = ESlotType::Storage;
 				}
@@ -76,21 +77,21 @@ void UInventoryWidget::NativeConstruct()
 			UInventorySlotWidget* SlotWidget = EquipmentSlotMap[SlotType];
 			SlotWidget->SlotType = SlotType;
 			SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
-			SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSwapSlots);
+			SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSlotsSwapped);
+			SlotWidget->OnDoubleClick.BindUObject(this, &UInventoryWidget::OnItemUsed);
 		}
 	}
 
-	// Register Inventory component
-	if (ASimpleRPGPlayerState* PlayerState = GetOwningPlayerState <ASimpleRPGPlayerState>())
+	if (ASimpleRPGPlayerState* PlayerState = GetOwningPlayerState<ASimpleRPGPlayerState>())
 	{
+		// Register components from PS
 		InventoryComponent = PlayerState->GetInventoryComponent();
-		check(InventoryComponent != nullptr);
+		check(InventoryComponent.IsValid());
 
-		if (InventoryComponent.IsValid())
-		{
-			InventoryComponent->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::OnContentChanged);
-			UE_LOG(LogInventory, Log, TEXT("Inventory Component bound to ui"));
-		}
+		InventoryComponent->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::OnContentChanged);
+		InventoryComponent->OnEquipmentContentChanged.BindUObject(this, &UInventoryWidget::OnEquipmentChanged);
+		UE_LOG(LogInventory, Log, TEXT("Inventory Component bound to ui"));
+		
 		OnNativeVisibilityChanged.AddUObject(this, &UInventoryWidget::OnInventoryToggled);
 	}
 
@@ -123,7 +124,7 @@ void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
 		return;
 	}
 
-	Widget->OnItemDiscard.BindUObject(this, &UInventoryWidget::OnItemDiscard);
+	Widget->OnItemDiscard.BindUObject(this, &UInventoryWidget::OnItemDiscarded);
 	UE_LOG(LogInventory, Log, TEXT("OnItemDiscard Registtered"));
 }
 
@@ -179,7 +180,7 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 	}
 }
 
-void UInventoryWidget::OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2)
+void UInventoryWidget::OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2)
 {
 	// no support for swap between different equipment slots
 	if (Slot1.SlotType != ESlotType::Storage && Slot2.SlotType != ESlotType::Storage)
@@ -194,21 +195,39 @@ void UInventoryWidget::OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2)
 	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
 	{
 		InventoryComponent->TryEquipItem(Slot1.SlotIndex, ConvertSlotTypeToEquipmentType(Slot2.SlotType));
-		UpdateEquipmentContents();
+		OnEquipmentChanged();
 	}
 	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
 	{
 		InventoryComponent->TryEquipItem(Slot2.SlotIndex, ConvertSlotTypeToEquipmentType(Slot1.SlotType));
-		UpdateEquipmentContents();
+		OnEquipmentChanged();
 	}
 
 	UpdateCurrentPageContents();
 }
 
-void UInventoryWidget::OnItemDiscard(FSlotInfo SlotWidget)
+void UInventoryWidget::OnItemDiscarded(FSlotInfo SlotWidget)
 {
 	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemDiscard %i"), SlotWidget.SlotIndex);
 	InventoryComponent->RemoveItem(SelectedPage, SlotWidget.SlotIndex, true);
+}
+
+void UInventoryWidget::OnItemUsed(FSlotInfo SlotWidget)
+{
+	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemUsed %i"), SlotWidget.SlotIndex);
+
+	if (SlotWidget.SlotType != ESlotType::Storage)
+	{
+		InventoryComponent->TryRemoveEquipment(ConvertSlotTypeToEquipmentType(SlotWidget.SlotType));
+	}
+	else if (SelectedPage == EInventoryCategory::Equipment)
+	{
+		InventoryComponent->TryEquipItem(SlotWidget.SlotIndex);
+	}
+	else
+	{
+		InventoryComponent->UseItem(SelectedPage, SlotWidget.SlotIndex);
+	}
 }
 
 void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
@@ -221,7 +240,7 @@ void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
 	}
 }
 
-void UInventoryWidget::UpdateEquipmentContents()
+void UInventoryWidget::OnEquipmentChanged()
 {
 	EEquipmentType Types[5] = 
 		{ EEquipmentType::Helmet, EEquipmentType::Chest, EEquipmentType::Pants, EEquipmentType::Boots, EEquipmentType::Weapon };
@@ -242,6 +261,7 @@ void UInventoryWidget::UpdateEquipmentContents()
 			SlotWidget->ClearItem();
 		}
 	}
+	InvalidationBox->InvalidateCache();
 }
 
 void UInventoryWidget::UpdateCurrentPageContents()

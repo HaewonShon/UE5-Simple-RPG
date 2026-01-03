@@ -61,12 +61,11 @@ FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
 	FEventReply Reply;
 	Reply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
-	if (InMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+	if (Reply.NativeReply.IsEventHandled() || InMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
 	{
 		return Reply.NativeReply;
 	}
 
-	DragOffset = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 	Reply.NativeReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
 	return Reply.NativeReply;
 }
@@ -104,4 +103,23 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	OnDrop.ExecuteIfBound(SlotToSwap, Self);
 
 	return true;
+}
+
+FReply UInventorySlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	FEventReply Reply;
+	Reply.NativeReply = Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
+	if (Reply.NativeReply.IsEventHandled())
+	{
+		return Reply.NativeReply;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Slot NativeOnMouseButtonDoubleClick Detected"));
+	FSlotInfo Self;
+	Self.SlotType = this->SlotType;
+	Self.SlotIndex = GetIndex();
+
+	OnDoubleClick.ExecuteIfBound(Self);
+
+	return FReply::Handled();
 }

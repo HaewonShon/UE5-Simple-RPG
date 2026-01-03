@@ -4,6 +4,7 @@
 #include "InventoryComponent.h"
 #include "Misc/EnumRange.h"
 #include "GameFramework/PlayerState.h"
+#include "AbilitySystemComponent.h"
 #include "../../Item/ItemLootSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
@@ -28,10 +29,15 @@ void UInventoryComponent::BeginPlay()
 
 	for (EEquipmentType Category : TEnumRange<EEquipmentType>())
 	{
-		EquipmentSlots.Add({Category, FInventorySlot()});
+		EquipmentSlots.Add({ Category, FEquipmentInfo() });
 	}
 
 	UE_LOG(LogInventory, Verbose, TEXT("Initialized inventory pages size: %i"), InventoryPages.Num());
+}
+
+void UInventoryComponent::SetAbilitySystemComponent(UAbilitySystemComponent* ASC)
+{
+	AbilitySystemComponent = ASC;
 }
 
 bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
@@ -105,16 +111,47 @@ void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index
 	OnInventoryContentChanged.Execute(PageCategory);
 }
 
+bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotIndex)
+{
+	UE_LOG(LogInventory, Log, TEXT("UseItem SlotIndex %i"), SlotIndex);
+	return false;
+}
+
 void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType TargetCategory)
 {
 	FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
 	const FItemInstance& EquipmentItem = EquipmentPage.GetItemInstance(SlotIndex);
 	if (CanEquipItem(EquipmentItem, TargetCategory))
 	{
-		Swap(EquipmentSlots[TargetCategory], EquipmentPage.Slots[SlotIndex]);
-	}
+		Swap(EquipmentSlots[TargetCategory].Slot, EquipmentPage.Slots[SlotIndex]);
+		UnequipCurrentItem(TargetCategory);
+		EquipCurrentItem(TargetCategory);
 
-	OnInventoryContentChanged.Execute(EInventoryCategory::Equipment);
+		OnInventoryContentChanged.ExecuteIfBound(EInventoryCategory::Equipment);
+		OnEquipmentContentChanged.ExecuteIfBound();
+	}
+}
+
+void UInventoryComponent::TryEquipItem(int32 SlotIndex)
+{
+	FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
+	const FItemInstance& EquipmentItem = EquipmentPage.GetItemInstance(SlotIndex);
+	EEquipmentType Type = Cast<UEquipmentItemData>(EquipmentItem.ItemData)->EquipmentType;
+	TryEquipItem(SlotIndex, Type);
+}
+
+void UInventoryComponent::TryRemoveEquipment(EEquipmentType TargetCategory)
+{
+	if (CanRemoveEquipment(TargetCategory))
+	{
+		UnequipCurrentItem(TargetCategory);
+
+		FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
+		Swap(EquipmentSlots[TargetCategory].Slot, EquipmentPage.Slots[EquipmentPage.GetFirstEmptySlotIndex()]);
+
+		OnInventoryContentChanged.ExecuteIfBound(EInventoryCategory::Equipment);
+		OnEquipmentContentChanged.ExecuteIfBound();
+	}
 }
 
 const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const
@@ -124,19 +161,20 @@ const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCatego
 
 const FInventorySlot& UInventoryComponent::GetEquipmentSlot(EEquipmentType EquipmentType) const
 {
-	return EquipmentSlots[EquipmentType];
+	return EquipmentSlots[EquipmentType].Slot;
 }
 
-bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType TargetCategory)
+bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType)
 {
 	if (Item.ItemData == nullptr)
 	{
 		return true;
 	}
 
+	// Test equipment type
 	if (const UEquipmentItemData* Equipment = Cast<UEquipmentItemData>(Item.ItemData))
 	{
-		if (Equipment->EquipmentCategory == TargetCategory)
+		if (Equipment->EquipmentType == EquipmentType)
 		{
 			return true;
 		}
@@ -145,12 +183,77 @@ bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType
 	return false;
 }
 
-void UInventoryComponent::EquipItem(const UEquipmentItemData* EquipmentData)
+bool UInventoryComponent::CanRemoveEquipment(EEquipmentType EquipmentType)
 {
-	// Apply Item Effect
+	if (InventoryPages[EInventoryCategory::Equipment].HasEmptySlot())
+	{
+		return true;
+	}
+	return false;
 }
 
-void UInventoryComponent::UnequipItem(EEquipmentType EquipmentType)
+void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 {
-	// Remove Item Effect
+	if (!AbilitySystemComponent.IsValid())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("AbilitySystemComponent is not set properly in InventoryComponent"));
+		return;
+	}
+
+	if (!EquipmentGE)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Equipment GE not registered"));
+		return;
+	}
+
+	// Apply Item stat to ASC
+	UAbilitySystemComponent* SourceASC = AbilitySystemComponent.Get();
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(SourceASC->GetAvatarActor());
+
+
+	FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(EquipmentGE, 1.0f, EffectContext);
+	const FItemInstance& ItemInstance = EquipmentSlots[EquipmentType].Slot.Item;
+	const UEquipmentItemData* EquipmentData = Cast<UEquipmentItemData>(ItemInstance.ItemData);
+	if (!SpecHandle.IsValid() || !EquipmentData)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Equipment SpecHandle is not valid"));
+		return;
+	}
+
+	// Write Equipment Stats into GameplayEffectSpec
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.AttackPower"), EquipmentData->Stat.AttackPower);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.Defense"), EquipmentData->Stat.Defense);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.CritChance"), EquipmentData->Stat.CritChance);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.MaxHealth"), EquipmentData->Stat.MaxHealth);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.HealthRegen"), EquipmentData->Stat.HealthRegen);
+	
+
+	FActiveGameplayEffectHandle Handle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	if (!Handle.IsValid())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Failed to apply equipment stats to the player"));
+	}
+	else
+	{
+		UE_LOG(LogInventory, Log, TEXT("Succeed to apply equipment stats to the player"));
+		EquipmentSlots[EquipmentType].ActiveSpecHandle = Handle;
+	}
+}
+
+void UInventoryComponent::UnequipCurrentItem(EEquipmentType EquipmentType)
+{
+	// Remove Item Effect using equipment slot's Active GE Handle
+	FActiveGameplayEffectHandle& Handle = EquipmentSlots[EquipmentType].ActiveSpecHandle;
+	if (Handle.IsValid())
+	{
+		if (AbilitySystemComponent->RemoveActiveGameplayEffect(Handle))
+		{
+			Handle.Invalidate();
+		}
+		else
+		{
+			UE_LOG(LogInventory, Warning, TEXT("Failed to remove equipment GE from character"));
+		}
+	}
 }

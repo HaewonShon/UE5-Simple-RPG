@@ -35,17 +35,17 @@ protected:
 	UFUNCTION()
 	void OnCurrentPageSort();
 
-	//UFUNCTION(BlueprintCallable)
-	//void OnItemSelected();
-
 	UFUNCTION()
 	void OnSlotDragBegin(FSlotInfo SlotWidget);
 
 	UFUNCTION()
-	void OnSwapSlots(FSlotInfo Slot1, FSlotInfo Slot2);
+	void OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2);
 
 	UFUNCTION()
-	void OnItemDiscard(FSlotInfo SlotWidget);
+	void OnItemDiscarded(FSlotInfo SlotWidget);
+
+	UFUNCTION()
+	void OnItemUsed(FSlotInfo SlotWidget);
 
 protected:
 	/* Update Inventory manually when interface opened */
@@ -53,7 +53,7 @@ protected:
 	void OnContentChanged(EInventoryCategory ChangedPageCategory);
 
 	UFUNCTION()
-	void UpdateEquipmentContents();
+	void OnEquipmentChanged();
 
 	UFUNCTION()
 	void UpdateCurrentPageContents();

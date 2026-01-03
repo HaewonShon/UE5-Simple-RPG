@@ -14,6 +14,12 @@ ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
+void ASimpleRPGPlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+	InventoryComponent->SetAbilitySystemComponent(AbilitySystemComponent);
+}
+
 UAbilitySystemComponent* ASimpleRPGPlayerState::GetAbilitySystemComponent()
 {
 	return AbilitySystemComponent;

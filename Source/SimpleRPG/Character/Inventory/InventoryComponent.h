@@ -7,12 +7,23 @@
 #include "Inventory.h"
 #include "../../Item/ItemData.h"
 #include "../../Item/EquipmentItemData.h"
+#include "GameplayEffectTypes.h"
 #include "InventoryComponent.generated.h"
 
 // Define Log Inventory for Inventory-specific logs
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All)
 
 DECLARE_DELEGATE_OneParam(FInventoryContentChangedDelegate, EInventoryCategory)
+DECLARE_DELEGATE(FEquipmentChangedDelegate)
+
+USTRUCT()
+struct FEquipmentInfo
+{
+	GENERATED_BODY()
+
+	FInventorySlot Slot;
+	FActiveGameplayEffectHandle ActiveSpecHandle;
+};
 
 UCLASS(ClassGroup = (SimpleRPG), meta = (BlueprintSpawnableComponent))
 class SIMPLERPG_API UInventoryComponent : public UActorComponent
@@ -24,6 +35,7 @@ public:
 	UInventoryComponent();
 
 	virtual void BeginPlay() override;
+	void SetAbilitySystemComponent(UAbilitySystemComponent* ASC);
 
 	/*
 	*	Inventory Management functions 
@@ -36,28 +48,38 @@ public:
 
 	void SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2);
 
-	//bool UseItem(UItemData* Item);
+	bool UseItem(EInventoryCategory PageCategory, int32 SlotIndex);
 
 	/*
 	*	Equipment Management functions
 	*/
 	void TryEquipItem(int32 SlotIndex, EEquipmentType TargetCategory);
+	void TryEquipItem(int32 SlotIndex);
+	void TryRemoveEquipment(EEquipmentType TargetCategory);
 
 	const FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
 
 	const FInventorySlot& GetEquipmentSlot(EEquipmentType EquipmentType) const;
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
+	FEquipmentChangedDelegate OnEquipmentContentChanged;
 
 protected:
 	/* Checker for equipment - category */
-	bool CanEquipItem(const FItemInstance& Item, EEquipmentType TargetCategory);
-	void EquipItem(const UEquipmentItemData* EquipmentData);
-	void UnequipItem(EEquipmentType EquipmentType);
+	bool CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType);
+	bool CanRemoveEquipment(EEquipmentType EquipmentType);
+	void EquipCurrentItem(EEquipmentType EquipmentType);
+	void UnequipCurrentItem(EEquipmentType EquipmentType);
 
 	UPROPERTY()
 	TMap<EInventoryCategory, FInventoryPage> InventoryPages;
 
 	UPROPERTY()
-	TMap<EEquipmentType, FInventorySlot> EquipmentSlots;
+	TMap<EEquipmentType, FEquipmentInfo> EquipmentSlots;
+
+	UPROPERTY()
+	TWeakObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Equipment")
+	TSubclassOf<class UGameplayEffect> EquipmentGE;
 };

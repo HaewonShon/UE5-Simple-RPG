@@ -108,3 +108,15 @@ bool FInventoryPage::HasEmptySlot() const
 {
 	return CountFilledSlot < CountMaxSlot;
 }
+
+int32 FInventoryPage::GetFirstEmptySlotIndex() const
+{
+	for (int32 Index = 0; Index < CountMaxSlot; ++Index)
+	{
+		if (Slots[Index].IsEmpty())
+		{
+			return Index;
+		}
+	}
+	return -1;
+}

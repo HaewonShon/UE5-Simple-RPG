@@ -47,6 +47,7 @@ struct FInventoryPage
 	void RemoveItem(int32 SlotIndex);
 	void SwapItems(int32 Index1, int32 Index2);
 	bool HasEmptySlot() const;
+	int32 GetFirstEmptySlotIndex() const;
 
 	EInventoryCategory Category;
 	TArray<FInventorySlot> Slots;

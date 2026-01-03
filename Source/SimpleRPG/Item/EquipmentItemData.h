@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ItemData.h"
+#include "GameplayTagContainer.h"
 #include "EquipmentItemData.generated.h"
 
 UENUM()
@@ -18,6 +19,27 @@ enum class EEquipmentType : uint8
 };
 ENUM_RANGE_BY_COUNT(EEquipmentType, EEquipmentType::Count);
 
+USTRUCT(BlueprintType)
+struct FItemStat
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	float AttackPower;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Defense;
+
+	UPROPERTY(EditDefaultsOnly)
+	float CritChance;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxHealth;
+
+	UPROPERTY(EditDefaultsOnly)
+	float HealthRegen;
+};
+
 /**
  *	Data Asset for equipment
  */
@@ -28,7 +50,8 @@ class SIMPLERPG_API UEquipmentItemData : public UItemData
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	EEquipmentType EquipmentCategory;
+	EEquipmentType EquipmentType;
 
-protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Equipment")
+	FItemStat Stat;
 };

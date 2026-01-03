@@ -17,10 +17,17 @@ class SIMPLERPG_API ASimpleRPGPlayerState : public APlayerState
 public:
 	ASimpleRPGPlayerState();
 
+	virtual void BeginPlay();
+
 	class UAbilitySystemComponent* GetAbilitySystemComponent();
 	TWeakObjectPtr<class UInventoryComponent> GetInventoryComponent();
 protected:
+	UPROPERTY()
 	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
+
+	UPROPERTY()
 	TObjectPtr<class UAttributeSet> AttributeSet;
+
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UInventoryComponent> InventoryComponent;
 };
