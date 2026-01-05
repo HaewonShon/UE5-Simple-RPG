@@ -228,6 +228,7 @@ void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.MaxHealth"), EquipmentData->Stat.MaxHealth);
 	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.HealthRegen"), EquipmentData->Stat.HealthRegen);
 	
+	SpecHandle.Data->DynamicGrantedTags.AddTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 
 	FActiveGameplayEffectHandle Handle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 	if (!Handle.IsValid())
@@ -238,6 +239,15 @@ void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 	{
 		UE_LOG(LogInventory, Log, TEXT("Succeed to apply equipment stats to the player"));
 		EquipmentSlots[EquipmentType].ActiveSpecHandle = Handle;
+
+		FGameplayTagContainer OwnedTags;
+		SourceASC->GetOwnedGameplayTags(OwnedTags);
+
+		for (const FGameplayTag& Tag : OwnedTags)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ASC Tag: %s"), *Tag.ToString());
+		}
+		UE_LOG(LogTemp, Warning, TEXT("ASC owner: %s"), *SourceASC->GetOwner()->GetName());
 	}
 }
 

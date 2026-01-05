@@ -3,6 +3,7 @@
 
 #include "SimpleRPGHUDWidget.h"
 #include "Inventory/InventoryWidget.h"
+#include "BackdropWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 
@@ -12,6 +13,7 @@ void USimpleRPGHUDWidget::NativeConstruct()
     if (InventoryWidget)
     {
         InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+        BackdropWidget->SetVisibility(ESlateVisibility::Collapsed);
 
         UCanvasPanelSlot* InventoryWidgetSlot = MainCanvas->AddChildToCanvas(InventoryWidget);
         const FVector2D InventoryWidgetSize{ 640.f, 900.f };
@@ -30,17 +32,16 @@ void USimpleRPGHUDWidget::NativeConstruct()
 
 void USimpleRPGHUDWidget::ToggleInventory()
 {
-    if (InventoryWidget)
+    ESlateVisibility CurrentInventoryVisilbity = InventoryWidget->GetVisibility();
+    if (CurrentInventoryVisilbity == ESlateVisibility::Collapsed)
     {
-        ESlateVisibility CurrentInventoryVisilbity = InventoryWidget->GetVisibility();
-        if (CurrentInventoryVisilbity == ESlateVisibility::Collapsed)
-        {
-            InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-        }
-        else
-        {
-            InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
-        }
+        InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+        BackdropWidget->SetVisibility(ESlateVisibility::Visible);
+    }
+    else
+    {
+        InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
+        BackdropWidget->SetVisibility(ESlateVisibility::Collapsed);
     }
 }
 

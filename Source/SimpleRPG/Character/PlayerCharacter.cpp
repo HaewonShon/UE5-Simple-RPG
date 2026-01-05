@@ -57,6 +57,7 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	if (AbilitySystemComponent.IsValid())
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+		AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 
 		// ASC init
 		InitializeAttributes();
@@ -65,8 +66,6 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 		FGameplayAttribute HealthAttribute = UCharacterAttributeSet::GetHealthAttribute();
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &APlayerCharacter::OnHealthChanged);
 
-		//temp : add sword tag
-		//AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 		//AbilitySystemComponent->gameplaytag
 	}
 }
@@ -135,6 +134,7 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::Attack()
 {
+	UE_LOG(LogTemp, Log, TEXT("Attack called"));
 	// Currently in attack -> set next combo if possible
 	if (AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Combo")))
 	{
@@ -145,7 +145,7 @@ void APlayerCharacter::Attack()
 	}
 	else // Otherwise run 1st attack of the combo series
 	{
-		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Combo.1").GetSingleTagContainer());
+		bool bResult = AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Combo.1").GetSingleTagContainer());
 	}
 }
 
