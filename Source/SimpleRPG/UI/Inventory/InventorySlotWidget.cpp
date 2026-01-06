@@ -61,7 +61,7 @@ FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
 	FEventReply Reply;
 	Reply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
-	if (Reply.NativeReply.IsEventHandled() || InMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+	if (Reply.NativeReply.IsEventHandled() || InMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton || !bIsSlotFilled)
 	{
 		return Reply.NativeReply;
 	}
@@ -74,11 +74,6 @@ void UInventorySlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDragDetected Detected"));
-
-	if (!bIsSlotFilled)
-	{
-		return;
-	}
 
 	UInventoryDragDropOp* DragDropOp = Cast<UInventoryDragDropOp>(UWidgetBlueprintLibrary::CreateDragDropOperation(UInventoryDragDropOp::StaticClass()));
 	DragDropOp->DraggingSlot.SlotType = this->SlotType;
@@ -107,14 +102,15 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 
 FReply UInventorySlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDoubleClick Detected"));
+
 	FEventReply Reply;
 	Reply.NativeReply = Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
-	if (Reply.NativeReply.IsEventHandled())
+	if (Reply.NativeReply.IsEventHandled() || !bIsSlotFilled)
 	{
 		return Reply.NativeReply;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Slot NativeOnMouseButtonDoubleClick Detected"));
 	FSlotInfo Self;
 	Self.SlotType = this->SlotType;
 	Self.SlotIndex = GetIndex();
@@ -122,4 +118,31 @@ FReply UInventorySlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InG
 	OnDoubleClick.ExecuteIfBound(Self);
 
 	return FReply::Handled();
+}
+
+void UInventorySlotWidget::NativeOnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	Super::NativeOnMouseEnter(MyGeometry, MouseEvent);
+
+	if (!bIsSlotFilled)
+	{
+		return;
+	}
+
+	FSlotInfo Self;
+	Self.SlotType = this->SlotType;
+	Self.SlotIndex = GetIndex();
+	OnHovered.ExecuteIfBound(Self);
+}
+
+void UInventorySlotWidget::NativeOnMouseLeave(const FPointerEvent& MouseEvent)
+{
+	Super::NativeOnMouseLeave(MouseEvent);
+
+	if (!bIsSlotFilled)
+	{
+		return;
+	}
+
+	OnHoverEnded.ExecuteIfBound();
 }

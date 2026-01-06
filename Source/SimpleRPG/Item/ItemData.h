@@ -7,6 +7,35 @@
 #include "Misc/EnumRange.h"
 #include "ItemData.generated.h"
 
+struct FStatLine
+{
+	FText Name;
+	FText Value;
+};
+
+struct FItemDetail
+{
+	FText DetailText;
+};
+
+struct FEquipmentDetail
+{
+	FText TypeText;
+	TArray<TPair<FText, FText>> Stats;
+};
+
+using FItemDetailPayload = TVariant<FItemDetail, FEquipmentDetail>;
+
+/**
+ *	structure for delivery item description info
+ */
+struct FItemDescription
+{
+	FText Name;
+	UTexture2D* Icon;
+	FItemDetailPayload Payload;
+};
+
 /**
  *    Item Data
  */
@@ -32,6 +61,8 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 
+	virtual FItemDescription BuildDescriptionData() const;
+
 	UPROPERTY(VisibleAnywhere, Category = "Item", meta = (ReadOnly))
 	FPrimaryAssetId AssetId;
 
@@ -50,6 +81,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	int32 MaxStackSize;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
+	FText DescriptionText;
 	// TSubclassOf<class UGameplayEffect> StatEffect; - dynamicalliy generated
 
 };

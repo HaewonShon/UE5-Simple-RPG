@@ -6,10 +6,11 @@
 #include "BackdropWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Inventory/ItemDescriptionWidget.h"
 
 void USimpleRPGHUDWidget::NativeConstruct()
 { 
-    InventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(), InventoryWidgetClass.Get());
+    InventoryWidget = CreateWidget<UInventoryWidget>(GetOwningPlayer(), InventoryWidgetClass.Get());
     if (InventoryWidget)
     {
         InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -23,6 +24,14 @@ void USimpleRPGHUDWidget::NativeConstruct()
         InventoryWidgetSlot->SetOffsets(FMargin(-(20.f), 20.f, InventoryWidgetSize.X, InventoryWidgetSize.Y));
 
         InventoryWidget->BindItemDiscardDelegate(BackdropWidget.Get());
+
+        ItemDescriptionWidget = CreateWidget<UItemDescriptionWidget>(GetOwningPlayer(), ItemDescriptionWidgetClass.Get());
+        if (ItemDescriptionWidget)
+        {
+            ItemDescriptionWidget->AddToViewport(10); // magic number for z-order
+            ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
+            InventoryWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
+        }
     }
     else
     {

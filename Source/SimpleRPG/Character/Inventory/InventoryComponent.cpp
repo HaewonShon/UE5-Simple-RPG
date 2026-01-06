@@ -117,15 +117,15 @@ bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotInd
 	return false;
 }
 
-void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType TargetCategory)
+void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType EquipmentType)
 {
 	FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
 	const FItemInstance& EquipmentItem = EquipmentPage.GetItemInstance(SlotIndex);
-	if (CanEquipItem(EquipmentItem, TargetCategory))
+	if (CanEquipItem(EquipmentItem, EquipmentType))
 	{
-		Swap(EquipmentSlots[TargetCategory].Slot, EquipmentPage.Slots[SlotIndex]);
-		UnequipCurrentItem(TargetCategory);
-		EquipCurrentItem(TargetCategory);
+		Swap(EquipmentSlots[EquipmentType].Slot, EquipmentPage.Slots[SlotIndex]);
+		UnequipCurrentItem(EquipmentType);
+		EquipCurrentItem(EquipmentType);
 
 		OnInventoryContentChanged.ExecuteIfBound(EInventoryCategory::Equipment);
 		OnEquipmentContentChanged.ExecuteIfBound();
@@ -140,14 +140,14 @@ void UInventoryComponent::TryEquipItem(int32 SlotIndex)
 	TryEquipItem(SlotIndex, Type);
 }
 
-void UInventoryComponent::TryRemoveEquipment(EEquipmentType TargetCategory)
+void UInventoryComponent::TryRemoveEquipment(EEquipmentType EquipmentType)
 {
-	if (CanRemoveEquipment(TargetCategory))
+	if (CanRemoveEquipment(EquipmentType))
 	{
-		UnequipCurrentItem(TargetCategory);
+		UnequipCurrentItem(EquipmentType);
 
 		FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
-		Swap(EquipmentSlots[TargetCategory].Slot, EquipmentPage.Slots[EquipmentPage.GetFirstEmptySlotIndex()]);
+		Swap(EquipmentSlots[EquipmentType].Slot, EquipmentPage.Slots[EquipmentPage.GetFirstEmptySlotIndex()]);
 
 		OnInventoryContentChanged.ExecuteIfBound(EInventoryCategory::Equipment);
 		OnEquipmentContentChanged.ExecuteIfBound();
@@ -162,6 +162,26 @@ const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCatego
 const FInventorySlot& UInventoryComponent::GetEquipmentSlot(EEquipmentType EquipmentType) const
 {
 	return EquipmentSlots[EquipmentType].Slot;
+}
+
+FItemDescription UInventoryComponent::GetItemDescription(EInventoryCategory PageCategory, int32 SlotIndex)
+{
+	const FInventorySlot& Slot = GetPage(PageCategory).Slots[SlotIndex];
+	if (!Slot.IsEmpty())
+	{
+		return Slot.Item.ItemData->BuildDescriptionData();
+	}
+	return FItemDescription();
+}
+
+FItemDescription UInventoryComponent::GetItemDescription(EEquipmentType EquipmentType)
+{
+	const FInventorySlot& Slot = GetEquipmentSlot(EquipmentType);
+	if (!Slot.IsEmpty())
+	{
+		return Slot.Item.ItemData->BuildDescriptionData();
+	}
+	return FItemDescription();
 }
 
 bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType)

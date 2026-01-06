@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "InventorySlotWidget.generated.h"
 
+DECLARE_DELEGATE(FOnSlotLeave);
 DECLARE_DELEGATE_OneParam(FOnSlotEvent, FSlotInfo);
 DECLARE_DELEGATE_TwoParams(FOnSlotDrop, FSlotInfo, FSlotInfo);
 
@@ -51,7 +52,9 @@ public:
 
 	FOnSlotEvent OnDragBegin;
 	FOnSlotEvent OnDoubleClick;
+	FOnSlotEvent OnHovered;
 	FOnSlotDrop OnDrop;
+	FOnSlotLeave OnHoverEnded;
 
 	UDragDropOperation* DragDropOperationRef;
 
@@ -64,6 +67,8 @@ protected:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& MouseEvent) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UImage> ItemImage;

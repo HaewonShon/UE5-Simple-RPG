@@ -32,4 +32,9 @@ protected:
 	TSubclassOf<class UInventoryWidget> InventoryWidgetClass;
 
 	TObjectPtr<class UInventoryWidget> InventoryWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
+	TSubclassOf<class UItemDescriptionWidget> ItemDescriptionWidgetClass;
+
+	TObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidget;
 };

@@ -66,3 +66,16 @@ FPrimaryAssetId UItemData::GetPrimaryAssetId() const
 {
 	return FPrimaryAssetId(FPrimaryAssetType("ItemData"), GetFName());
 }
+
+FItemDescription UItemData::BuildDescriptionData() const
+{
+	FItemDescription Description;
+	Description.Name = DisplayName;
+	Description.Icon = Icon;
+
+	FItemDetail Detail;
+	Detail.DetailText = DescriptionText;
+	Description.Payload.Set<FItemDetail>(Detail);
+
+	return Description;
+}

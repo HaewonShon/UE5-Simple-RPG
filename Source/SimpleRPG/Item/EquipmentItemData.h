@@ -49,6 +49,8 @@ class SIMPLERPG_API UEquipmentItemData : public UItemData
 	GENERATED_BODY()
 
 public:
+	virtual FItemDescription BuildDescriptionData() const override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	EEquipmentType EquipmentType;
 

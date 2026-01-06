@@ -40,7 +40,6 @@ public:
 	/*
 	*	Inventory Management functions 
 	*/
-	/* Add Item to inventory */
 	bool AddItem(FItemInstance& ItemInstance);
 
 	/* Remove Item From slot. ex) throw out, quest.. */
@@ -53,13 +52,21 @@ public:
 	/*
 	*	Equipment Management functions
 	*/
-	void TryEquipItem(int32 SlotIndex, EEquipmentType TargetCategory);
+	void TryEquipItem(int32 SlotIndex, EEquipmentType EquipmentType);
+
 	void TryEquipItem(int32 SlotIndex);
-	void TryRemoveEquipment(EEquipmentType TargetCategory);
+
+	void TryRemoveEquipment(EEquipmentType EquipmentType);
 
 	const FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
 
 	const FInventorySlot& GetEquipmentSlot(EEquipmentType EquipmentType) const;
+
+	/*
+	*	Request functions for UI
+	*/
+	FItemDescription GetItemDescription(EInventoryCategory PageCategory, int32 SlotIndex);
+	FItemDescription GetItemDescription(EEquipmentType EquipmentType);
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
 	FEquipmentChangedDelegate OnEquipmentContentChanged;

@@ -21,6 +21,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	void BindItemDiscardDelegate(class UBackdropWidget* BackdropWidget);
+	void SetDescriptionWidgetRef(class UItemDescriptionWidget* DescriptionWidgetRef);
 
 protected:
 	/**************************
@@ -46,6 +47,12 @@ protected:
 
 	UFUNCTION()
 	void OnItemUsed(FSlotInfo SlotWidget);
+
+	UFUNCTION()
+	void OnSlotHovered(FSlotInfo SlotWidget);
+
+	UFUNCTION()
+	void OnSlotHoverEnded();
 
 protected:
 	/* Update Inventory manually when interface opened */
@@ -74,6 +81,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<class UInventorySlotDragWidget> SlotVisualWidgetClass;
 
+	UPROPERTY()
+	TMap<ESlotType, class UInventorySlotWidget*> EquipmentSlotMap;
+
 	/*
 	*   Bind Widgets
 	*/
@@ -98,13 +108,13 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInventorySlotWidget> WeaponSlot;
-	
+
 
 	/*
 	*   Other members for inventory widget
 	*/
 	UPROPERTY()
-	TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
+	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 
 	UPROPERTY()
 	EInventoryCategory SelectedPage;
@@ -116,5 +126,5 @@ protected:
 	TObjectPtr<class UInventorySlotDragWidget> SlotVisualWidget;
 
 	UPROPERTY()
-	TMap<ESlotType, class UInventorySlotWidget*> EquipmentSlotMap;
+	TWeakObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidgetRef;
 };
