@@ -6,6 +6,7 @@
 #include "../UI/EnemyHPDisplayWidgetComponent.h"
 #include "../Gameplay/DamageTextActor.h"
 #include "../Item/ItemLootSubsystem.h"
+#include "../Quest/QuestManagerSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEnemy);
 // Sets default values
@@ -69,6 +70,21 @@ void AEnemy::OnHealthChanged(const FOnAttributeChangeData& Data)
 	}
 }
 
+FGameplayTag AEnemy::GetGameplayTag() const
+{
+	return EnemyTag;
+}
+
+void AEnemy::AddDamageRecord(const FDamageRecord& Record)
+{
+	DamageHistory.Push(Record);
+}
+
+const TArray<FDamageRecord>& AEnemy::GetDamageHistory() const
+{
+	return DamageHistory;
+}
+
 void AEnemy::OnDeath()
 {
 	if (DeathAnimMontage)
@@ -93,6 +109,13 @@ void AEnemy::OnDeath()
 	{
 		UE_LOG(LogEnemy, Verbose, TEXT("Item spawn requested"));
 		ItemLootSubsystem->SpawnItem(EnemyTag, GetActorLocation());
+	}
+
+	// Death Notify for quest system
+	if (UQuestManagerSubsystem* QuestManagerSubsystem = GetGameInstance()->GetSubsystem<UQuestManagerSubsystem>())
+	{
+		UE_LOG(LogEnemy, Verbose, TEXT("Enemy %s death notified"), *EnemyTag.ToString());
+		QuestManagerSubsystem->OnEnenyKilled(EnemyTag, DamageHistory);
 	}
 }
 

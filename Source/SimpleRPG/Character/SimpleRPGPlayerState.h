@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "GameplayTagContainer.h"
 #include "SimpleRPGPlayerState.generated.h"
 
 /**
@@ -21,6 +22,8 @@ public:
 
 	class UAbilitySystemComponent* GetAbilitySystemComponent();
 	TWeakObjectPtr<class UInventoryComponent> GetInventoryComponent();
+
+	void NotifyEnemyKilled(FGameplayTag EnemyTag);
 protected:
 	UPROPERTY()
 	TObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
@@ -30,4 +33,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UInventoryComponent> InventoryComponent;
+
+	UPROPERTY()
+	TObjectPtr<class UQuestManagerComponent> QuestManagerComponent;
 };

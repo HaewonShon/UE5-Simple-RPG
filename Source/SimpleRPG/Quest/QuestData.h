@@ -4,31 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "GameplayTagContainer.h"
 #include "QuestData.generated.h"
 
-/**
- *
- */
+DECLARE_LOG_CATEGORY_EXTERN(LogQuest, Log, All);
 
-UENUM(BlueprintType)
+UENUM(Blueprintable)
 enum class EQuestObjectiveType : uint8
 {
 	Kill,
 	Collect,
 	Explore,
 	Interact,
-	QUEST_OBJECTIVE_TYPE_MAX
+	Count UMETA(Hidden)
 };
 
-UENUM(BlueprintType)
+UENUM(Blueprintable)
 enum class EQuestRewardType : uint8
 {
 	Exp,
 	Item,
-	QUEST_REWARD_TYPE_MAX
+	Count UMETA(Hidden)
 };
 
-USTRUCT(BlueprintType)
+UENUM(Blueprintable)
+enum class EQuestStatus : uint8
+{
+	NotStarted,
+	InProgress,
+	Completed,
+	Count UMETA(Hidden)
+};
+
+USTRUCT(Blueprintable)
 struct FQuestObjective
 {
 	GENERATED_BODY()
@@ -36,14 +44,20 @@ struct FQuestObjective
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	EQuestObjectiveType Type;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Collect", EditConditionHides))
+	FPrimaryAssetId TargetId;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Item", EditConditionHides))
+	FGameplayTag TargetTag;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	FName TargetID;
+	FText TargetDescription;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	int32 RequiredCount;
 };
 
-USTRUCT(BlueprintType)
+USTRUCT(Blueprintable)
 struct FQuestReward
 {
 	GENERATED_BODY()
@@ -51,21 +65,28 @@ struct FQuestReward
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	EQuestRewardType Type;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	FName RewardID;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestRewardType::Kill", EditConditionHides))
+	FPrimaryAssetId RewardID;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	int32 RewardAmount;
 };
 
+/**
+ *	Quest Data Asset
+ */
 UCLASS()
 class SIMPLERPG_API UQuestData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	virtual void PostInitProperties() override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	FName QuestID;
+	FPrimaryAssetId AssetId;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	FText Title;
@@ -78,4 +99,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	TArray<FQuestReward> Rewards;
+};
+
+USTRUCT()
+struct FQuestInstance
+{
+	GENERATED_BODY()
+
+	FPrimaryAssetId AssetId;
+
+	const UQuestData* QuestData;
+
+	//UObject* ObjectiveStatus;
+	TArray<int32> ObjectiveStatus; // UObject for flexibility
 };

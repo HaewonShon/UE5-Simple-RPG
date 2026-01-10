@@ -12,6 +12,15 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogEnemy, Log, All)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyDeath);
 
+USTRUCT()
+struct FDamageRecord
+{
+	GENERATED_BODY()
+
+	TWeakObjectPtr<class ASimpleRPGPlayerState> Instigator;
+	float DamageAmount;
+};
+
 UCLASS()
 class SIMPLERPG_API AEnemy : public ACharacter, public IAbilitySystemInterface
 {
@@ -23,6 +32,10 @@ public:
 	virtual void PossessedBy(AController* NewController);
 
 	void OnHealthChanged(const FOnAttributeChangeData& Data);
+	FGameplayTag GetGameplayTag() const;
+
+	void AddDamageRecord(const FDamageRecord& Record);
+	const TArray<FDamageRecord>& GetDamageHistory() const;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDeath OnEnemyDeath;
@@ -43,6 +56,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Enemy")
 	FGameplayTag EnemyTag;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Enemy")
+	TObjectPtr<class UAnimMontage> DeathAnimMontage;
+
+	UPROPERTY()
+	TArray<FDamageRecord> DamageHistory;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TObjectPtr<class UAttributeSet> AttributeSet;
 
@@ -51,9 +70,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Abilities")
 	TSubclassOf<class UGameplayEffect> DefaultAttributeSet;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
-	TObjectPtr<class UAnimMontage> DeathAnimMontage;
 
 	/*******************************************
 	*	UI

@@ -4,6 +4,7 @@
 #include "SimpleRPGPlayerState.h"
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "Inventory/InventoryComponent.h"
+#include "../Quest/QuestManagerComponent.h"
 
 ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 {
@@ -12,6 +13,7 @@ ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 	AbilitySystemComponent->AddAttributeSetSubobject(AttributeSet.Get());
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	QuestManagerComponent = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManagerComponent"));
 }
 
 void ASimpleRPGPlayerState::BeginPlay()
@@ -28,4 +30,9 @@ UAbilitySystemComponent* ASimpleRPGPlayerState::GetAbilitySystemComponent()
 TWeakObjectPtr<class UInventoryComponent> ASimpleRPGPlayerState::GetInventoryComponent()
 {
 	return InventoryComponent;
+}
+
+void ASimpleRPGPlayerState::NotifyEnemyKilled(FGameplayTag EnemyTag)
+{
+	QuestManagerComponent->OnEnemyKilled(EnemyTag);
 }

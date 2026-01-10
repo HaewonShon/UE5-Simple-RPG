@@ -2,6 +2,8 @@
 
 
 #include "GEExecCalculation.h"
+#include "../Enemy/Enemy.h"
+#include "../Character/SimpleRPGPlayerState.h"
 #include "CharacterAttributeSet.h"
 
 struct FDamageStatics
@@ -69,7 +71,15 @@ void UGEExecCalculation::Execute_Implementation(const FGameplayEffectCustomExecu
     }
 
     Damage = FMath::Max(Damage - Defense, 0.f);
-    UE_LOG(LogTemp, Log, TEXT("Damage Dealt: %f"), AttackPower);
     OutExecutionOutput.AddOutputModifier(
         FGameplayModifierEvaluatedData(UCharacterAttributeSet::GetHealthAttribute(), EGameplayModOp::Additive, -Damage));
+
+    if (Damage > 0)
+    {
+        if (AEnemy* Enemy = Cast<AEnemy>(TargetASC->GetOwnerActor()))
+        {
+            Enemy->AddDamageRecord(FDamageRecord{ Cast<ASimpleRPGPlayerState>(SourceASC->GetOwnerActor()), Damage });
+            UE_LOG(LogTemp, Log, TEXT("History recorded"));
+        }
+    }
 }
