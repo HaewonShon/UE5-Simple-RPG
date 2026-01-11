@@ -52,22 +52,22 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	{
 		UE_LOG(LogCharacter, Log, TEXT("PlayerState initialized"));
 		AbilitySystemComponent = PS->GetAbilitySystemComponent();
-	}
 
-	if (AbilitySystemComponent.IsValid())
-	{
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-		AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
+		if (AbilitySystemComponent.IsValid())
+		{
+			AbilitySystemComponent->InitAbilityActorInfo(PS, this);
+			AbilitySystemComponent->AddLooseGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 
-		// ASC init
-		InitializeAttributes();
-		AddCharacterAbilities();
+			// ASC init
+			InitializeAttributes();
+			AddCharacterAbilities();
 
-		FGameplayAttribute HealthAttribute = UCharacterAttributeSet::GetHealthAttribute();
-		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &APlayerCharacter::OnHealthChanged);
+			FGameplayAttribute HealthAttribute = UCharacterAttributeSet::GetHealthAttribute();
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttribute).AddUObject(this, &APlayerCharacter::OnHealthChanged);
 
-		//AbilitySystemComponent->gameplaytag
-	}
+			//AbilitySystemComponent->gameplaytag
+		}
+	}	
 }
 
 bool APlayerCharacter::AddItem(FItemInstance& Item)
@@ -134,7 +134,6 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::Attack()
 {
-	UE_LOG(LogTemp, Log, TEXT("Attack called"));
 	// Currently in attack -> set next combo if possible
 	if (AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Ability.Attack.Combo")))
 	{

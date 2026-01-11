@@ -85,7 +85,7 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
+	UPROPERTY(VisibleAnywhere, Category = "Item", meta = (ReadOnly))
 	FPrimaryAssetId AssetId;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")

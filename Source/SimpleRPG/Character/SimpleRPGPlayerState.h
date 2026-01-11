@@ -22,6 +22,7 @@ public:
 
 	class UAbilitySystemComponent* GetAbilitySystemComponent();
 	TWeakObjectPtr<class UInventoryComponent> GetInventoryComponent();
+	TWeakObjectPtr<class UQuestManagerComponent> GetQuestManagerComponent();
 
 	void NotifyEnemyKilled(FGameplayTag EnemyTag);
 protected:

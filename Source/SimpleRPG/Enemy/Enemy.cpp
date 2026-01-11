@@ -117,6 +117,10 @@ void AEnemy::OnDeath()
 		UE_LOG(LogEnemy, Verbose, TEXT("Enemy %s death notified"), *EnemyTag.ToString());
 		QuestManagerSubsystem->OnEnenyKilled(EnemyTag, DamageHistory);
 	}
+	else
+	{
+		UE_LOG(LogEnemy, Warning, TEXT("Failed to get QuestManagerSubsystem"));
+	}
 }
 
 void AEnemy::InitializeAttributes()

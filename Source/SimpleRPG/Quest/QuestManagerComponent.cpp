@@ -15,6 +15,16 @@ UQuestManagerComponent::UQuestManagerComponent()
 
 bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
 {
+	if (QuestInProgress.Num() >= MAX_QUEST_COUNT)
+	{
+		return false;
+	}
+
+	if (QuestInProgress.Find(Quest->AssetId))
+	{
+		return false;
+	}
+
 	FQuestInstance QuestInstance;
 	QuestInstance.QuestData = Quest;
 	QuestInstance.AssetId = Quest->GetPrimaryAssetId();
@@ -22,6 +32,8 @@ bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
 
 	QuestInProgress.Add({ QuestInstance.AssetId, QuestInstance });
 	UE_LOG(LogQuest, Log, TEXT("Quest added: %s"), *QuestInstance.AssetId.ToString());
+
+	OnQuestAccepted.ExecuteIfBound(Quest);
 
 	return true;
 }
@@ -43,6 +55,7 @@ void UQuestManagerComponent::OnEnemyKilled(const FGameplayTag& EnemyTag)
 			if (Objective.Type == EQuestObjectiveType::Kill && Objective.TargetTag == EnemyTag)
 			{
 				OnQuestProgressChanged.ExecuteIfBound(Instance.AssetId, i, ++Instance.ObjectiveStatus[i]);
+				UE_LOG(LogQuest, Log, TEXT("Quest progress : %i // %i"), Instance.ObjectiveStatus[i], Objective.RequiredCount);
 			}
 		}
 	}

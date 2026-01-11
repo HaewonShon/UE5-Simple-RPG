@@ -17,7 +17,7 @@ struct FQuestObjectiveInfo
 };
 
 /**
- *  Widget for displaying current quests, including title and progress
+ *  Widget for displaying one specific quests, including title and progress
  */
 UCLASS()
 class SIMPLERPG_API UQuestStatusWidget : public UUserWidget

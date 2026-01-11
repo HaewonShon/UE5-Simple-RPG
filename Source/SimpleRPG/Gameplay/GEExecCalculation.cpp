@@ -79,7 +79,7 @@ void UGEExecCalculation::Execute_Implementation(const FGameplayEffectCustomExecu
         if (AEnemy* Enemy = Cast<AEnemy>(TargetASC->GetOwnerActor()))
         {
             Enemy->AddDamageRecord(FDamageRecord{ Cast<ASimpleRPGPlayerState>(SourceASC->GetOwnerActor()), Damage });
-            UE_LOG(LogTemp, Log, TEXT("History recorded"));
+            UE_LOG(LogTemp, Log, TEXT("History recorded, instigator : %s"), *(AActor::GetDebugName(SourceASC->GetOwnerActor())));
         }
     }
 }

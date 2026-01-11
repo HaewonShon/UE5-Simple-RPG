@@ -7,14 +7,13 @@
 #include "QuestData.h"
 #include "QuestManagerComponent.generated.h"
 
+DECLARE_DELEGATE_OneParam(FOnQuestAccepted, const class UQuestData*);
 DECLARE_DELEGATE_ThreeParams(FOnQuestProgressChanged, FPrimaryAssetId, int32, int32); // QuestId, Objective Index, Progress
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIMPLERPG_API UQuestManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-	friend class QuestManagerSubsystem;
 
 public:	
 	UQuestManagerComponent();
@@ -26,6 +25,7 @@ public:
 
 	void OnEnemyKilled(const FGameplayTag& EnemyTag);
 
+	FOnQuestAccepted OnQuestAccepted;
 	FOnQuestProgressChanged OnQuestProgressChanged;
 
 protected:
@@ -39,4 +39,6 @@ protected:
 
 	UFUNCTION()
 	void OnItemEarned();*/
+
+	static const int32 MAX_QUEST_COUNT = 5;
 };

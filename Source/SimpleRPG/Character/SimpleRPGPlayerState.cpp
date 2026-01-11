@@ -32,6 +32,11 @@ TWeakObjectPtr<class UInventoryComponent> ASimpleRPGPlayerState::GetInventoryCom
 	return InventoryComponent;
 }
 
+TWeakObjectPtr<class UQuestManagerComponent> ASimpleRPGPlayerState::GetQuestManagerComponent()
+{
+	return QuestManagerComponent;
+}
+
 void ASimpleRPGPlayerState::NotifyEnemyKilled(FGameplayTag EnemyTag)
 {
 	QuestManagerComponent->OnEnemyKilled(EnemyTag);

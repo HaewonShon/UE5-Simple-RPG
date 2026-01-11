@@ -86,7 +86,7 @@ void UPlayerAttackAbilityBase::OnExecution()
 		return;
 	}
 
-	TArray<AActor*> HitActors = AttackHitModule->GetHitTargets(CurrentActorInfo->OwnerActor.Get());
+	TArray<AActor*> HitActors = AttackHitModule->GetHitTargets(CurrentActorInfo->AvatarActor.Get());
 	if (HitActors.IsEmpty())
 	{
 		return;

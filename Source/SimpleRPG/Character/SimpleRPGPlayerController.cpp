@@ -102,12 +102,16 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 #if !UE_BUILD_SHIPPING
 #include "../ItemTestCheatManager.h"
+#include "../Quest/QuestTestCheatManager.h"
 void ASimpleRPGPlayerController::CheatFunction1()
 {
 	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Cheat1 Called from controller"));
 		ItemCheatManager->GiveItem(0);
+	}
+	else if (UQuestTestCheatManager* QuestCheatManager = Cast<UQuestTestCheatManager>(CheatManager))
+	{
+		QuestCheatManager->GiveQuest(0);
 	}
 }
 
@@ -115,8 +119,11 @@ void ASimpleRPGPlayerController::CheatFunction2()
 {
 	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Cheat2 Called from controller"));
 		ItemCheatManager->GiveItem(1);
+	}
+	else if (UQuestTestCheatManager* QuestCheatManager = Cast<UQuestTestCheatManager>(CheatManager))
+	{
+		QuestCheatManager->GiveQuest(1);
 	}
 }
 
@@ -124,8 +131,11 @@ void ASimpleRPGPlayerController::CheatFunction3()
 {
 	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Cheat3 Called from controller"));
 		ItemCheatManager->GiveItem(2);
+	}
+	else if (UQuestTestCheatManager* QuestCheatManager = Cast<UQuestTestCheatManager>(CheatManager))
+	{
+		QuestCheatManager->GiveQuest(2);
 	}
 }
 
@@ -133,8 +143,11 @@ void ASimpleRPGPlayerController::CheatFunction4()
 {
 	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))
 	{
-		UE_LOG(LogTemp, Log, TEXT("Cheat4 Called from controller"));
 		ItemCheatManager->GiveItem(3);
+	}
+	else if (UQuestTestCheatManager* QuestCheatManager = Cast<UQuestTestCheatManager>(CheatManager))
+	{
+		QuestCheatManager->GiveQuest(3);
 	}
 }
 #endif
