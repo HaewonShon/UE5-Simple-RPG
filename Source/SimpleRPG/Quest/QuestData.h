@@ -47,7 +47,7 @@ struct FQuestObjective
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Collect", EditConditionHides))
 	FPrimaryAssetId TargetId;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Item", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Item || Type==EQuestObjectiveType::Kill", EditConditionHides))
 	FGameplayTag TargetTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
@@ -65,7 +65,7 @@ struct FQuestReward
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	EQuestRewardType Type;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestRewardType::Kill", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	FPrimaryAssetId RewardID;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")

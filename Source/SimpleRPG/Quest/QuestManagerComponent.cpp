@@ -45,17 +45,21 @@ void UQuestManagerComponent::OnCompleteQuest(FPrimaryAssetId CompletedQuestId)
 
 void UQuestManagerComponent::OnEnemyKilled(const FGameplayTag& EnemyTag)
 {
-	for (auto Pair : QuestInProgress)
+	for (auto& Pair : QuestInProgress)
 	{
 		FQuestInstance& Instance = Pair.Value;
 		const UQuestData* Quest = Instance.QuestData;
 		for(int32 i = 0; i < Quest->Objectives.Num(); ++i)
 		{
 			const FQuestObjective& Objective = Quest->Objectives[i];
+			if (Instance.ObjectiveStatus[i] >= Objective.RequiredCount)
+			{
+				continue;
+			}
+
 			if (Objective.Type == EQuestObjectiveType::Kill && Objective.TargetTag == EnemyTag)
 			{
-				OnQuestProgressChanged.ExecuteIfBound(Instance.AssetId, i, ++Instance.ObjectiveStatus[i]);
-				UE_LOG(LogQuest, Log, TEXT("Quest progress : %i // %i"), Instance.ObjectiveStatus[i], Objective.RequiredCount);
+				OnQuestProgressChanged.Broadcast(Instance.AssetId, i, ++Instance.ObjectiveStatus[i]);
 			}
 		}
 	}

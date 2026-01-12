@@ -16,11 +16,32 @@ void UQuestDisplayWidget::NativeConstruct()
 		check(QuestManagerComponent);
 
 		QuestManagerComponent->OnQuestAccepted.BindUObject(this, &UQuestDisplayWidget::RegisterQuest);
+		QuestManagerComponentRef = QuestManagerComponent;
 	}
 }
 
 void UQuestDisplayWidget::RegisterQuest(const class UQuestData* Quest)
 {
 	UQuestStatusWidget* StatusWidget = CreateWidget<UQuestStatusWidget>(GetOwningPlayer(), StatusWidgetClass.Get());
-	StatusWidgetSlot->AddChildToVerticalBox(StatusWidget);
+	if (StatusWidget)
+	{
+		StatusWidget->RegisterQuest(Quest);
+		StatusWidgetSlot->AddChildToVerticalBox(StatusWidget);
+
+		QuestManagerComponentRef->OnQuestProgressChanged.AddUObject(this, &UQuestDisplayWidget::UpdateQuestProgress);
+
+		StatusWidgetMap.Add({Quest->AssetId, StatusWidget});
+	}
+}
+
+void UQuestDisplayWidget::UpdateQuestProgress(FPrimaryAssetId QuestId, int32 ObjectiveIndex, int32 Progress)
+{
+	if (UQuestStatusWidget* StatusWidget = StatusWidgetMap[QuestId])
+	{
+		StatusWidget->UpdateQuestProgress(ObjectiveIndex, Progress);
+	}
+	else
+	{
+		UE_LOG(LogQuest, Warning, TEXT("Display Widget could not find quest with id: %s"), *QuestId.ToString());
+	}
 }

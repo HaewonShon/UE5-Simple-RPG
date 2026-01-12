@@ -19,10 +19,17 @@ public:
 
 	void RegisterQuest(const class UQuestData* Quest);
 
+	void UpdateQuestProgress(FPrimaryAssetId QuestId, int32 ObjectiveIndex, int32 Progress);
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UQuestStatusWidget> StatusWidgetClass;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UVerticalBox> StatusWidgetSlot;
+
+	TWeakObjectPtr<class UQuestManagerComponent> QuestManagerComponentRef;
+
+	// map for sub-widgets, to deliver 
+	TMap<FPrimaryAssetId, TObjectPtr<UQuestStatusWidget>> StatusWidgetMap;
 };

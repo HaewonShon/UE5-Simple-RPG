@@ -8,7 +8,7 @@
 #include "QuestManagerComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FOnQuestAccepted, const class UQuestData*);
-DECLARE_DELEGATE_ThreeParams(FOnQuestProgressChanged, FPrimaryAssetId, int32, int32); // QuestId, Objective Index, Progress
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnQuestProgressChanged, FPrimaryAssetId, int32, int32); // QuestId, Objective Index, Progress
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIMPLERPG_API UQuestManagerComponent : public UActorComponent
