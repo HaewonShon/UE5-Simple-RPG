@@ -42,7 +42,7 @@ void UQuestManagerSubsystem::GrantQuest(FPrimaryAssetId QuestId, ASimpleRPGPlaye
     }
 }
 
-void UQuestManagerSubsystem::OnEnenyKilled(const FGameplayTag& Enemy, const TArray<FDamageRecord>& DamageHistory)
+void UQuestManagerSubsystem::OnEnenyKilled(const FGameplayTag& EnemyTag, const TArray<FDamageRecord>& DamageHistory)
 {
     TSet<ASimpleRPGPlayerState*> PlayersGotEvent;
     for (const FDamageRecord& Record : DamageHistory)
@@ -50,9 +50,17 @@ void UQuestManagerSubsystem::OnEnenyKilled(const FGameplayTag& Enemy, const TArr
         ASimpleRPGPlayerState* PlayerState = Record.Instigator.Get();
         if (PlayerState && !PlayersGotEvent.Contains(Record.Instigator.Get()))
         {
-            PlayerState->NotifyEnemyKilled(Enemy);
+            PlayerState->NotifyEnemyKilled(EnemyTag);
             PlayersGotEvent.Add(PlayerState);
         }
+    }
+}
+
+void UQuestManagerSubsystem::OnPlaceVisited(const FGameplayTag& PlaceTag, class ASimpleRPGPlayerState* PlayerState)
+{
+    if (UQuestManagerComponent* QuestComponent = PlayerState->GetComponentByClass<UQuestManagerComponent>())
+    {
+        QuestComponent->OnPlaceVisited(PlaceTag);
     }
 }
 

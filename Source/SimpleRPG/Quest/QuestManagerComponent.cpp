@@ -3,6 +3,7 @@
 
 #include "QuestManagerComponent.h"
 #include "QuestData.h"
+#include "../Character/Inventory/InventoryComponent.h"
 
 // Sets default values for this component's properties
 UQuestManagerComponent::UQuestManagerComponent()
@@ -11,6 +12,19 @@ UQuestManagerComponent::UQuestManagerComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
+}
+
+void UQuestManagerComponent::SetInventoryComponentRef(UInventoryComponent* InventoryComponent)
+{
+	InventoryComponentRef = InventoryComponent;
+	if (InventoryComponentRef.IsValid())
+	{
+		InventoryComponentRef->OnItemCountChanged.BindUObject(this, &UQuestManagerComponent::OnItemCountChanged);
+	}
+	else
+	{
+		UE_LOG(LogQuest, Warning, TEXT("Failed to set inventory component ref"));
+	}
 }
 
 bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
@@ -38,7 +52,7 @@ bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
 	return true;
 }
 
-void UQuestManagerComponent::OnCompleteQuest(FPrimaryAssetId CompletedQuestId)
+void UQuestManagerComponent::OnCompleteQuest(const FPrimaryAssetId& CompletedQuestId)
 {
 
 }
@@ -60,6 +74,47 @@ void UQuestManagerComponent::OnEnemyKilled(const FGameplayTag& EnemyTag)
 			if (Objective.Type == EQuestObjectiveType::Kill && Objective.TargetTag == EnemyTag)
 			{
 				OnQuestProgressChanged.Broadcast(Instance.AssetId, i, ++Instance.ObjectiveStatus[i]);
+			}
+		}
+	}
+}
+
+void UQuestManagerComponent::OnPlaceVisited(const FGameplayTag& PlaceTag)
+{
+	for (auto& Pair : QuestInProgress)
+	{
+		FQuestInstance& Instance = Pair.Value;
+		const UQuestData* Quest = Instance.QuestData;
+		for (int32 i = 0; i < Quest->Objectives.Num(); ++i)
+		{
+			const FQuestObjective& Objective = Quest->Objectives[i];
+			if (Instance.ObjectiveStatus[i] >= Objective.RequiredCount)
+			{
+				continue;
+			}
+
+			if (Objective.Type == EQuestObjectiveType::Explore && Objective.TargetTag == PlaceTag)
+			{
+				OnQuestProgressChanged.Broadcast(Instance.AssetId, i, ++Instance.ObjectiveStatus[i]);
+			}
+		}
+	}
+}
+
+void UQuestManagerComponent::OnItemCountChanged(const FPrimaryAssetId& ItemId)
+{
+	for (auto& Pair : QuestInProgress)
+	{
+		FQuestInstance& Instance = Pair.Value;
+		const UQuestData* Quest = Instance.QuestData;
+		for (int32 i = 0; i < Quest->Objectives.Num(); ++i)
+		{
+			const FQuestObjective& Objective = Quest->Objectives[i];
+			if (Objective.Type == EQuestObjectiveType::Collect && Objective.TargetId == ItemId)
+			{
+				int32 ItemCount = InventoryComponentRef->RequestItemCount(ItemId);
+				Instance.ObjectiveStatus[i] = ItemCount;
+				OnQuestProgressChanged.Broadcast(Instance.AssetId, i, Instance.ObjectiveStatus[i]);
 			}
 		}
 	}

@@ -6,8 +6,23 @@
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemComponent.h"
 #include "../../Item/ItemLootSubsystem.h"
+#include "../../Item/ItemDatabaseSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
+
+EInventoryCategory ConvertItemToInventoryCategory(EItemCategory ItemCategory)
+{
+	switch (ItemCategory)
+	{
+	case EItemCategory::Equipment:
+		return EInventoryCategory::Equipment;
+	case EItemCategory::Consumable:
+		return EInventoryCategory::Consumable;
+	case EItemCategory::Material:
+		return EInventoryCategory::Material;
+	}
+	return EInventoryCategory::Count;
+}
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
@@ -35,9 +50,9 @@ void UInventoryComponent::BeginPlay()
 	UE_LOG(LogInventory, Verbose, TEXT("Initialized inventory pages size: %i"), InventoryPages.Num());
 }
 
-void UInventoryComponent::SetAbilitySystemComponent(UAbilitySystemComponent* ASC)
+void UInventoryComponent::SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC)
 {
-	AbilitySystemComponent = ASC;
+	AbilitySystemComponentRef = ASC;
 }
 
 bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
@@ -49,26 +64,14 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 	}
 
 	EItemCategory ItemCategory = ItemInstance.ItemData->Category;
-	EInventoryCategory PageCategory = EInventoryCategory::Count;
-	switch (ItemCategory)
-	{
-	case EItemCategory::Equipment:
-		PageCategory = EInventoryCategory::Equipment;
-		break;
-	case EItemCategory::Consumable:
-		PageCategory = EInventoryCategory::Consumable;
-		break;
-	case EItemCategory::Material:
-		PageCategory = EInventoryCategory::Material;
-		break;
-	}
-	
+	EInventoryCategory PageCategory = ConvertItemToInventoryCategory(ItemCategory);
 	check(PageCategory != EInventoryCategory::Count);
 
 	FInventoryPage& TargetPage = InventoryPages[PageCategory];
-	if (TargetPage.AddItem(ItemInstance) && OnInventoryContentChanged.IsBound())
+	if (TargetPage.AddItem(ItemInstance))
 	{
-		OnInventoryContentChanged.Execute(PageCategory);
+		OnInventoryContentChanged.ExecuteIfBound(PageCategory);
+		OnItemCountChanged.ExecuteIfBound(ItemInstance.ItemID);
 		return true;
 	}
 	
@@ -98,9 +101,12 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 		}
 	}
 
-	UE_LOG(LogInventory, Log, TEXT("Item %i Removed"), SlotIndex);
+	FPrimaryAssetId RemovedItemId = TargetPage.Slots[SlotIndex].Item.ItemID;
 	TargetPage.RemoveItem(SlotIndex);
-	OnInventoryContentChanged.Execute(PageCategory);
+
+	UE_LOG(LogInventory, Verbose, TEXT("Item %s Removed"), *RemovedItemId.ToString());
+	OnInventoryContentChanged.ExecuteIfBound(PageCategory);
+	OnItemCountChanged.ExecuteIfBound(RemovedItemId);	
 }
 
 void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2)
@@ -184,6 +190,27 @@ FItemDescription UInventoryComponent::GetItemDescription(EEquipmentType Equipmen
 	return FItemDescription();
 }
 
+int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
+{
+	int32 Count = 0;
+
+	if (UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>())
+	{
+		const UItemData* Item = ItemDB->Get(ItemId);
+		EInventoryCategory PageCategory = ConvertItemToInventoryCategory(Item->Category);
+
+		for (const FInventorySlot& Slot : InventoryPages[PageCategory].Slots)
+		{
+			if (!Slot.IsEmpty() && Slot.Item.ItemID == ItemId)
+			{
+				Count += Slot.Item.StackCount;
+			}
+		}
+	}
+
+	return Count;
+}
+
 bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType)
 {
 	if (Item.ItemData == nullptr)
@@ -214,7 +241,7 @@ bool UInventoryComponent::CanRemoveEquipment(EEquipmentType EquipmentType)
 
 void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 {
-	if (!AbilitySystemComponent.IsValid())
+	if (!AbilitySystemComponentRef.IsValid())
 	{
 		UE_LOG(LogInventory, Warning, TEXT("AbilitySystemComponent is not set properly in InventoryComponent"));
 		return;
@@ -227,8 +254,8 @@ void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 	}
 
 	// Apply Item stat to ASC
-	UAbilitySystemComponent* SourceASC = AbilitySystemComponent.Get();
-	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	UAbilitySystemComponent* SourceASC = AbilitySystemComponentRef.Get();
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponentRef->MakeEffectContext();
 	EffectContext.AddSourceObject(SourceASC->GetAvatarActor());
 
 
@@ -250,7 +277,7 @@ void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 	
 	SpecHandle.Data->DynamicGrantedTags.AddTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 
-	FActiveGameplayEffectHandle Handle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	FActiveGameplayEffectHandle Handle = AbilitySystemComponentRef->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 	if (!Handle.IsValid())
 	{
 		UE_LOG(LogInventory, Warning, TEXT("Failed to apply equipment stats to the player"));
@@ -277,7 +304,7 @@ void UInventoryComponent::UnequipCurrentItem(EEquipmentType EquipmentType)
 	FActiveGameplayEffectHandle& Handle = EquipmentSlots[EquipmentType].ActiveSpecHandle;
 	if (Handle.IsValid())
 	{
-		if (AbilitySystemComponent->RemoveActiveGameplayEffect(Handle))
+		if (AbilitySystemComponentRef->RemoveActiveGameplayEffect(Handle))
 		{
 			Handle.Invalidate();
 		}

@@ -15,6 +15,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All)
 
 DECLARE_DELEGATE_OneParam(FInventoryContentChangedDelegate, EInventoryCategory)
 DECLARE_DELEGATE(FEquipmentChangedDelegate)
+DECLARE_DELEGATE_OneParam(FItemCountChangedDelegate, const FPrimaryAssetId&)
 
 USTRUCT()
 struct FEquipmentInfo
@@ -35,7 +36,7 @@ public:
 	UInventoryComponent();
 
 	virtual void BeginPlay() override;
-	void SetAbilitySystemComponent(UAbilitySystemComponent* ASC);
+	void SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC);
 
 	/*
 	*	Inventory Management functions 
@@ -67,9 +68,11 @@ public:
 	*/
 	FItemDescription GetItemDescription(EInventoryCategory PageCategory, int32 SlotIndex);
 	FItemDescription GetItemDescription(EEquipmentType EquipmentType);
+	int32 RequestItemCount(const FPrimaryAssetId& ItemId);
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
 	FEquipmentChangedDelegate OnEquipmentContentChanged;
+	FItemCountChangedDelegate OnItemCountChanged;
 
 protected:
 	/* Checker for equipment - category */
@@ -85,7 +88,7 @@ protected:
 	TMap<EEquipmentType, FEquipmentInfo> EquipmentSlots;
 
 	UPROPERTY()
-	TWeakObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
+	TWeakObjectPtr<class UAbilitySystemComponent> AbilitySystemComponentRef;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Equipment")
 	TSubclassOf<class UGameplayEffect> EquipmentGE;

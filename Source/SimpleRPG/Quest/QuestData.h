@@ -47,7 +47,7 @@ struct FQuestObjective
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Collect", EditConditionHides))
 	FPrimaryAssetId TargetId;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Item || Type==EQuestObjectiveType::Kill", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest", meta = (EditCondition = "Type==EQuestObjectiveType::Explore || Type==EQuestObjectiveType::Kill", EditConditionHides))
 	FGameplayTag TargetTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
@@ -75,7 +75,7 @@ struct FQuestReward
 /**
  *	Quest Data Asset
  */
-UCLASS()
+UCLASS(BlueprintType, meta = (DisplayName = "Item Data Asset"))
 class SIMPLERPG_API UQuestData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()

@@ -21,8 +21,7 @@ public:
 	void GrantQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 
 	void OnEnenyKilled(const FGameplayTag& Enemy, const TArray<struct FDamageRecord>& DamageHistory);
-	// void OnInventoryUpdated();
-	// void OnVisitPlace();
+	void OnPlaceVisited(const FGameplayTag& Place, class ASimpleRPGPlayerState* PlayerState);
 	// void OnInteract();
 
 protected:

@@ -10,6 +10,9 @@
 DECLARE_DELEGATE_OneParam(FOnQuestAccepted, const class UQuestData*);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnQuestProgressChanged, FPrimaryAssetId, int32, int32); // QuestId, Objective Index, Progress
 
+/*
+*	Quest Component for player state, manage quest status
+*/
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SIMPLERPG_API UQuestManagerComponent : public UActorComponent
 {
@@ -17,28 +20,23 @@ class SIMPLERPG_API UQuestManagerComponent : public UActorComponent
 
 public:	
 	UQuestManagerComponent();
+	void SetInventoryComponentRef(class UInventoryComponent* InventoryComponent);
 	
 	// Called by Quest Subsystem, adds a quest to the component
 	bool RecevieQuest(const class UQuestData* Quest);
-
-	void OnCompleteQuest(FPrimaryAssetId CompletedQuestId);
+	void OnCompleteQuest(const FPrimaryAssetId& CompletedQuestId);
 
 	void OnEnemyKilled(const FGameplayTag& EnemyTag);
+	void OnPlaceVisited(const FGameplayTag& PlaceTag);
 
 	FOnQuestAccepted OnQuestAccepted;
 	FOnQuestProgressChanged OnQuestProgressChanged;
 
 protected:
+	void OnItemCountChanged(const FPrimaryAssetId& ItemId);
+
 	TMap<FPrimaryAssetId, FQuestInstance> QuestInProgress;
-
-	/*UFUNCTION()
-	void OnMonsterKilled();
-
-	UFUNCTION()
-	void OnSpaceVisited();
-
-	UFUNCTION()
-	void OnItemEarned();*/
-
 	static const int32 MAX_QUEST_COUNT = 5;
+
+	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 };
