@@ -16,6 +16,8 @@ void UQuestDisplayWidget::NativeConstruct()
 		check(QuestManagerComponent);
 
 		QuestManagerComponent->OnQuestAccepted.BindUObject(this, &UQuestDisplayWidget::RegisterQuest);
+		QuestManagerComponent->OnQuestProgressChanged.AddUObject(this, &UQuestDisplayWidget::UpdateQuestProgress);
+		QuestManagerComponent->OnQuestCompleted.BindUObject(this, &UQuestDisplayWidget::RemovedCompletedQuest);
 		QuestManagerComponentRef = QuestManagerComponent;
 	}
 }
@@ -28,7 +30,6 @@ void UQuestDisplayWidget::RegisterQuest(const class UQuestData* Quest)
 		StatusWidget->RegisterQuest(Quest);
 		StatusWidgetSlot->AddChildToVerticalBox(StatusWidget);
 
-		QuestManagerComponentRef->OnQuestProgressChanged.AddUObject(this, &UQuestDisplayWidget::UpdateQuestProgress);
 
 		StatusWidgetMap.Add({Quest->AssetId, StatusWidget});
 	}
@@ -43,5 +44,16 @@ void UQuestDisplayWidget::UpdateQuestProgress(FPrimaryAssetId QuestId, int32 Obj
 	else
 	{
 		UE_LOG(LogQuest, Warning, TEXT("Display Widget could not find quest with id: %s"), *QuestId.ToString());
+	}
+}
+
+void UQuestDisplayWidget::RemovedCompletedQuest(FPrimaryAssetId QuestId)
+{
+	if (UQuestStatusWidget* StatusWidget = StatusWidgetMap[QuestId])
+	{
+		StatusWidgetSlot->RemoveChild(StatusWidget);
+		StatusWidget->Destruct();
+
+		UE_LOG(LogQuest, Log, TEXT("Remove Quest from widget: %s"), *QuestId.ToString());
 	}
 }

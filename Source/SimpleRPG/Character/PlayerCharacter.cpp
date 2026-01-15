@@ -83,6 +83,19 @@ bool APlayerCharacter::AddItem(FItemInstance& Item)
 	return false;
 }
 
+void APlayerCharacter::SetInteractableNPC(ANPCCharacter* NPC)
+{
+	InteractableNPC = NPC;
+}
+
+void APlayerCharacter::ClearInteractableNPC(ANPCCharacter* NPC)
+{
+	if (InteractableNPC.IsValid() && InteractableNPC.Get() == NPC)
+	{
+		InteractableNPC = nullptr;
+	}
+}
+
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -96,6 +109,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EIC->BindAction(DashAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Dash);
 		//EIC->BindAction(ConsumeAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EIC->BindAction(SkillAction, ETriggerEvent::Triggered, this, &APlayerCharacter::SkillAttack);
+		EIC->BindAction(Interaction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
 
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
@@ -200,6 +214,17 @@ void APlayerCharacter::AddWeaponAbilities()
 			}
 		}
 	}
+}
+
+#include "NPCCharacter.h"
+void APlayerCharacter::Interact()
+{
+	if (!InteractableNPC.IsValid())
+	{
+		return;
+	}
+
+	InteractableNPC->Interact(Cast<ASimpleRPGPlayerState>(GetPlayerState()));
 }
 
 UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const

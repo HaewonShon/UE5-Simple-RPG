@@ -21,6 +21,8 @@ public:
 
 	void UpdateQuestProgress(FPrimaryAssetId QuestId, int32 ObjectiveIndex, int32 Progress);
 
+	void RemovedCompletedQuest(FPrimaryAssetId QuestId);
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UQuestStatusWidget> StatusWidgetClass;

@@ -41,6 +41,9 @@ public:
 
 	bool AddItem(FItemInstance& Item);
 
+	void SetInteractableNPC(class ANPCCharacter* NPC);
+	void ClearInteractableNPC(class ANPCCharacter* NPC);
+
 	/*******************************************
 	*	Input
 	*******************************************/
@@ -68,6 +71,8 @@ public:
 	class UInputAction* SkillAction;
 
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputAction* Interaction;
 
 	/*******************************************
 	*	GAMEPLAY ABILITIY SYSTEM
@@ -128,4 +133,10 @@ protected:
 
 	// used to manage weapon-specific ability managment
 	TArray<FGameplayAbilitySpecHandle> WeaponAbilitySpecHandles;
+
+	/**********************
+	 *	Others
+	************************/
+	TWeakObjectPtr<class ANPCCharacter> InteractableNPC;
+	void Interact();
 };

@@ -19,6 +19,52 @@ const UQuestData* UQuestManagerSubsystem::Get(const FPrimaryAssetId& ID) const
     return QuestCache.FindRef(ID);
 }
 
+void UQuestManagerSubsystem::RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId)
+{
+    UE_LOG(LogQuest, Log, TEXT("Quest Regiestered"));
+    NPCQuestMap.Add({ NPCId, QuestId });
+}
+
+void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRPGPlayerState* PS)
+{
+    FPrimaryAssetId QuestId = NPCQuestMap[NPCId];
+    if (!QuestId.IsValid())
+    {
+        return;
+    }
+
+    UQuestManagerComponent* QuestManagerComponent = PS->GetQuestManagerComponent().Get();
+    EQuestStatus QuestStatus = QuestManagerComponent->GetQuestStatus(QuestId);
+    if (QuestStatus == EQuestStatus::Completed)
+    {
+        UE_LOG(LogQuest, Log, TEXT("QuestStatus Completed"));
+        return;
+    }
+    else if (QuestStatus == EQuestStatus::InProgress)
+    {
+        UE_LOG(LogQuest, Log, TEXT("QuestStatus InProgress"));
+        bool bCanComplete = QuestManagerComponent->CanCompleteQuest(QuestId);
+        if (bCanComplete)
+        {
+            QuestManagerComponent->OnCompleteQuest(QuestId);
+        }
+        else
+        {
+            // cannot complete quest yet
+        }
+    }
+    else if (QuestStatus == EQuestStatus::NotStarted)
+    {
+        UE_LOG(LogQuest, Log, TEXT("QuestStatus NotStarted"));
+        bool bResult = QuestManagerComponent->RecevieQuest(QuestCache[QuestId]);
+    }
+    // completed? -> return
+    // in progress -> try complete
+    // not started -> try start
+
+
+}
+
 void UQuestManagerSubsystem::GrantQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
 {
     if (!PlayerState)

@@ -112,7 +112,7 @@ void AEnemy::OnDeath()
 	}
 
 	// Death Notify for quest system
-	if (UQuestManagerSubsystem* QuestManagerSubsystem = GetGameInstance()->GetSubsystem<UQuestManagerSubsystem>())
+	if (UQuestManagerSubsystem* QuestManagerSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{
 		UE_LOG(LogEnemy, Verbose, TEXT("Enemy %s death notified"), *EnemyTag.ToString());
 		QuestManagerSubsystem->OnEnenyKilled(EnemyTag, DamageHistory);

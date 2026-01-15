@@ -43,7 +43,7 @@ void AExploreCheckActor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedCo
 	}
 	UE_LOG(LogTemp, Log, TEXT("OnTriggerBeginOverlap called for %s"), *PlaceTag.ToString());
 
-	if (UQuestManagerSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UQuestManagerSubsystem>())
+	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{
 		Subsystem->OnPlaceVisited(PlaceTag, PlayerState);
 	}

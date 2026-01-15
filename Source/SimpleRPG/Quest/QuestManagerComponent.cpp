@@ -27,6 +27,39 @@ void UQuestManagerComponent::SetInventoryComponentRef(UInventoryComponent* Inven
 	}
 }
 
+EQuestStatus UQuestManagerComponent::GetQuestStatus(const FPrimaryAssetId& QuestId) const
+{
+	if (CompletedQuestSet.Contains(QuestId))
+	{
+		return EQuestStatus::Completed;
+	}
+	if (QuestInProgress.Contains(QuestId))
+	{
+		return EQuestStatus::InProgress;
+	}
+
+	return EQuestStatus::NotStarted;
+}
+
+bool UQuestManagerComponent::CanCompleteQuest(const FPrimaryAssetId& QuestId) const
+{
+	FQuestInstance Instance = QuestInProgress[QuestId];
+	if (!Instance.QuestData)
+	{
+		return false;
+	}
+
+	const TArray<FQuestObjective>& Objectives = Instance.QuestData->Objectives;
+	for (int32 i = 0; i < Objectives.Num(); ++i)
+	{
+		if (Instance.ObjectiveStatus[i] < Objectives[i].RequiredCount)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
 {
 	if (QuestInProgress.Num() >= MAX_QUEST_COUNT)
@@ -54,7 +87,18 @@ bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
 
 void UQuestManagerComponent::OnCompleteQuest(const FPrimaryAssetId& CompletedQuestId)
 {
+	FQuestInstance Instance = QuestInProgress[CompletedQuestId];
+	if (!Instance.QuestData)
+	{
 
+	}
+
+	UE_LOG(LogQuest, Log, TEXT("Quest completed: %s"), *CompletedQuestId.ToString());
+
+	QuestInProgress.Remove(CompletedQuestId);
+	CompletedQuestSet.Add(CompletedQuestId);
+
+	OnQuestCompleted.ExecuteIfBound(CompletedQuestId);
 }
 
 void UQuestManagerComponent::OnEnemyKilled(const FGameplayTag& EnemyTag)

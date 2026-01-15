@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/GameInstanceSubsystem.h"
+#include "Subsystems/WorldSubsystem.h"
 #include "QuestData.h"
 #include "QuestManagerSubsystem.generated.h"
 
@@ -11,12 +11,15 @@
  *		Subsystem for Quest in game
  */
 UCLASS()
-class SIMPLERPG_API UQuestManagerSubsystem : public UGameInstanceSubsystem
+class SIMPLERPG_API UQuestManagerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	const UQuestData* Get(const FPrimaryAssetId& ID) const;
+
+	void RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId);
+	void ProcessInteraction(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PS);
 
 	void GrantQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 
@@ -26,6 +29,9 @@ public:
 
 protected:
 	void BuildCache();
+
+	UPROPERTY()
+	TMap<FPrimaryAssetId, FPrimaryAssetId> NPCQuestMap;
 
 	UPROPERTY()
 	TMap<FPrimaryAssetId, class UQuestData*> QuestCache;

@@ -8,6 +8,7 @@
 #include "QuestManagerComponent.generated.h"
 
 DECLARE_DELEGATE_OneParam(FOnQuestAccepted, const class UQuestData*);
+DECLARE_DELEGATE_OneParam(FOnQuestCompleted, FPrimaryAssetId);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnQuestProgressChanged, FPrimaryAssetId, int32, int32); // QuestId, Objective Index, Progress
 
 /*
@@ -21,6 +22,9 @@ class SIMPLERPG_API UQuestManagerComponent : public UActorComponent
 public:	
 	UQuestManagerComponent();
 	void SetInventoryComponentRef(class UInventoryComponent* InventoryComponent);
+
+	EQuestStatus GetQuestStatus(const FPrimaryAssetId& QuestId) const;
+	bool CanCompleteQuest(const FPrimaryAssetId& QuestId) const;
 	
 	// Called by Quest Subsystem, adds a quest to the component
 	bool RecevieQuest(const class UQuestData* Quest);
@@ -31,12 +35,15 @@ public:
 
 	FOnQuestAccepted OnQuestAccepted;
 	FOnQuestProgressChanged OnQuestProgressChanged;
+	FOnQuestCompleted OnQuestCompleted;
 
 protected:
 	void OnItemCountChanged(const FPrimaryAssetId& ItemId);
 
 	TMap<FPrimaryAssetId, FQuestInstance> QuestInProgress;
 	static const int32 MAX_QUEST_COUNT = 5;
+
+	TSet<FPrimaryAssetId> CompletedQuestSet;
 
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 };
