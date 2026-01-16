@@ -59,6 +59,7 @@ void ASimpleRPGPlayerController::BeginPlay()
     }
 
 	bIsInvenetoryOn = false;
+	OnDialogueRequested.AddUObject(this, &ASimpleRPGPlayerController::BeginDialogue);
 }
 
 void ASimpleRPGPlayerController::AddPitchInput(float Val)
@@ -98,6 +99,26 @@ void ASimpleRPGPlayerController::ToggleInventory()
 			SetInputMode(FInputModeGameOnly());
 		}
 	}
+}
+
+void ASimpleRPGPlayerController::BeginDialogue(const class UDialogueData* Dialogue)
+{
+	HUDWidget->OpenDialogueWidget();
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetHideCursorDuringCapture(false);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
+
+	SetInputMode(InputMode);
+}
+
+void ASimpleRPGPlayerController::FinishDialogue()
+{
+	HUDWidget->CloseDialogueWidget();
+
+	bShowMouseCursor = false;
+	SetInputMode(FInputModeGameOnly());
 }
 
 #if !UE_BUILD_SHIPPING

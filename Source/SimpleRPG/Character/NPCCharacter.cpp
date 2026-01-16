@@ -5,6 +5,7 @@
 #include "../Quest/QuestGiverComponent.h"
 #include "PlayerCharacter.h"
 #include "Components/SphereComponent.h"
+#include "../Dialogue/DialogueComponent.h"
 
 DEFINE_LOG_CATEGORY(LogNPC);
 
@@ -20,12 +21,18 @@ ANPCCharacter::ANPCCharacter()
 	InteractRangeSphere->SetSphereRadius(150.f);
 }
 
-void ANPCCharacter::Interact(ASimpleRPGPlayerState* PS)
+void ANPCCharacter::Interact(ASimpleRPGPlayerController* PS)
 {
-	if (UQuestGiverComponent* Comp = GetComponentByClass<UQuestGiverComponent>())
+	/*if (UQuestGiverComponent* Comp = GetComponentByClass<UQuestGiverComponent>())
 	{
 		UE_LOG(LogNPC, Log, TEXT("Quest requested"));
 		Comp->Oninteraction(GetPrimaryAssetId(), PS);
+	}*/
+
+	if (UDialogueComponent* Comp = GetComponentByClass<UDialogueComponent>())
+	{
+		UE_LOG(LogNPC, Log, TEXT("Quest requested"));
+		Comp->Interact(PS);
 	}
 }
 

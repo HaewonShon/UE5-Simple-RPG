@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "SimpleRPGPlayerController.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDialogueRequested, const class UDialogueData*)
+
 /**
  *	Player Controller Class for registering HUD
  */
@@ -20,7 +22,14 @@ public:
 
 	void ToggleInventory();
 
+	FOnDialogueRequested OnDialogueRequested;
+	void BeginDialogue(const class UDialogueData* Dialogue);
+	void FinishDialogue();
+
 protected:
+	/*
+	*	UI & Input
+	*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
 	TSubclassOf<class USimpleRPGHUDWidget> HUDWidgetClass;
 

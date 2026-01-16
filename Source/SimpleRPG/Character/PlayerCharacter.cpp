@@ -12,6 +12,7 @@
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "Abilities/PlayerAttackAbilityBase.h"
 #include "SimpleRPGPlayerState.h"
+#include "SimpleRPGPlayerController.h"
 #include "Inventory/InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -223,8 +224,7 @@ void APlayerCharacter::Interact()
 	{
 		return;
 	}
-
-	InteractableNPC->Interact(Cast<ASimpleRPGPlayerState>(GetPlayerState()));
+	InteractableNPC->Interact(Cast<ASimpleRPGPlayerController>(GetController()));
 }
 
 UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const
