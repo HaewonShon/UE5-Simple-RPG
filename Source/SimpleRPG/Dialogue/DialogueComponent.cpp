@@ -14,6 +14,6 @@ void UDialogueComponent::Interact(ASimpleRPGPlayerController* Controller)
 	if (Controller)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Dialogue requested"));
-		Controller->OnDialogueRequested.Broadcast(DefaultDialogue);
+		Controller->OnDialogueRequested.Broadcast(GetOwner(), DefaultDialogue);
 	}
 }

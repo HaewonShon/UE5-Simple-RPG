@@ -17,7 +17,7 @@ class SIMPLERPG_API UDialogueWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void IntializeDialogue(const class UDialogueData* Dialogue);
+	void IntializeDialogue(AActor* NPC, const class UDialogueData* Dialogue);
 
 protected:
 	virtual void NativeConstruct() override;

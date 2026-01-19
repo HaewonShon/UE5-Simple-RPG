@@ -18,8 +18,6 @@ public:
 	virtual void NativeConstruct() override;
 	
 	void ToggleInventory();
-	void OpenDialogueWidget();
-	void CloseDialogueWidget();
 
 	TWeakObjectPtr<UUserWidget> GetInventoryWidget() const;
 
@@ -37,11 +35,5 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
 	TSubclassOf<class UItemDescriptionWidget> ItemDescriptionWidgetClass;
-
 	TObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<class UDialogueWidget> DialogueDisplayWidgetClass;
-
-	TObjectPtr<class UDialogueWidget> DialogueDisplayWidget;
 };

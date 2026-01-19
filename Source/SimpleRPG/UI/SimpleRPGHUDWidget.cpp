@@ -7,7 +7,6 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Inventory/ItemDescriptionWidget.h"
-#include "DialogueWidget.h"
 
 void USimpleRPGHUDWidget::NativeConstruct()
 { 
@@ -38,21 +37,6 @@ void USimpleRPGHUDWidget::NativeConstruct()
     {
         UE_LOG(LogTemp, Warning, TEXT("Failed to create Inventory Widget"));
     }
-
-    DialogueDisplayWidget = CreateWidget<UDialogueWidget>(GetOwningPlayer(), DialogueDisplayWidgetClass.Get());
-    if (DialogueDisplayWidget)
-    {
-        DialogueDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
-        UCanvasPanelSlot* DialogueDisplayWidgetSlot = MainCanvas->AddChildToCanvas(DialogueDisplayWidget);
-        if (DialogueDisplayWidgetSlot)
-        {
-            constexpr float DIALOGUE_WIDGET_HEIGHT = 480.f;
-            constexpr float DIALOGUE_WIDGET_MARGIN = 100.f;
-            DialogueDisplayWidgetSlot->SetAlignment(FVector2D(0.5f, 1.f));
-            DialogueDisplayWidgetSlot->SetAnchors(FAnchors(0.f, 1.f, 1.f, 1.f)); // X stretch
-            DialogueDisplayWidgetSlot->SetOffsets(FMargin(DIALOGUE_WIDGET_MARGIN, -DIALOGUE_WIDGET_HEIGHT, DIALOGUE_WIDGET_MARGIN, 20.f));
-        }
-    }
 }
 
 void USimpleRPGHUDWidget::ToggleInventory()
@@ -68,16 +52,6 @@ void USimpleRPGHUDWidget::ToggleInventory()
         InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
         BackdropWidget->SetVisibility(ESlateVisibility::Collapsed);
     }
-}
-
-void USimpleRPGHUDWidget::OpenDialogueWidget()
-{
-    DialogueDisplayWidget->SetVisibility(ESlateVisibility::Visible);
-}
-
-void USimpleRPGHUDWidget::CloseDialogueWidget()
-{
-    DialogueDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 TWeakObjectPtr<UUserWidget> USimpleRPGHUDWidget::GetInventoryWidget() const

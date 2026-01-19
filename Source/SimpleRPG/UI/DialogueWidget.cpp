@@ -6,7 +6,7 @@
 #include "../Dialogue/DialogueData.h"
 #include "Components/TextBlock.h"
 
-void UDialogueWidget::IntializeDialogue(const UDialogueData* Dialogue)
+void UDialogueWidget::IntializeDialogue(AActor* NPC, const UDialogueData* Dialogue)
 {
 	if (!Dialogue || Dialogue->Dialogue.Num() == 0)
 	{

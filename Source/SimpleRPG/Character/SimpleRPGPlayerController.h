@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "SimpleRPGPlayerController.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnDialogueRequested, const class UDialogueData*)
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDialogueRequested, class AActor*, const class UDialogueData*); // target NPC, dialogue
 
 /**
  *	Player Controller Class for registering HUD
@@ -23,10 +23,11 @@ public:
 	void ToggleInventory();
 
 	FOnDialogueRequested OnDialogueRequested;
-	void BeginDialogue(const class UDialogueData* Dialogue);
+	void BeginDialogue(class AActor* NPC, const class UDialogueData* Dialogue);
 	void FinishDialogue();
 
 protected:
+
 	/*
 	*	UI & Input
 	*/
@@ -51,6 +52,17 @@ protected:
 	TArray<class UInputAction*> CheatAction;
 
 	bool bIsInvenetoryOn;
+
+	// Dialogue System
+	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
+	TSubclassOf<class ADialogueCameraActor> DialogueCameraActorClass;
+
+	TObjectPtr<class ADialogueCameraActor> DialogueCameraActor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Dialogue")
+	TSubclassOf<class UDialogueWidget> DialogueDisplayWidgetClass;
+
+	TObjectPtr<class UDialogueWidget> DialogueDisplayWidget;
 
 #if !UE_BUILD_SHIPPING
 	void CheatFunction1();

@@ -2,11 +2,13 @@
 
 
 #include "SimpleRPGPlayerController.h"
+#include "GameFramework/Character.h"
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "../UI/SimpleRPGHUDWidget.h"
-
+#include "../Dialogue/DialogueCameraActor.h"
+#include "../UI/DialogueWidget.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
 {
@@ -101,26 +103,77 @@ void ASimpleRPGPlayerController::ToggleInventory()
 	}
 }
 
-void ASimpleRPGPlayerController::BeginDialogue(const class UDialogueData* Dialogue)
+void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC, const class UDialogueData* Dialogue)
 {
-	HUDWidget->OpenDialogueWidget();
+	if (DialogueCameraActor) return;
 
+	// Input setting
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
 
 	SetInputMode(InputMode);
+
+	// Controller setting
+	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
+
+	DialogueCameraActor = GetWorld()->SpawnActor<ADialogueCameraActor>(DialogueCameraActorClass);
+	DialogueCameraActor->SetupCameraTransform(GetCharacter()->GetActorLocation(), NPC->GetActorLocation());
+	SetViewTargetWithBlend(DialogueCameraActor.Get(), DIALOGUE_CAM_BLEND_TIME);
+
+	// Create Dialogue Widget
+	DialogueDisplayWidget = CreateWidget<UDialogueWidget>(this, DialogueDisplayWidgetClass.Get());
+	if (DialogueDisplayWidget)
+	{
+		constexpr int32 DIALOGUE_ZORDER = 1000;
+		DialogueDisplayWidget->AddToViewport(DIALOGUE_ZORDER);
+		//UCanvasPanelSlot* DialogueDisplayWidgetSlot = MainCanvas->AddChildToCanvas(DialogueDisplayWidget);
+		//if (DialogueDisplayWidgetSlot)
+		//{
+		//	constexpr float DIALOGUE_WIDGET_HEIGHT = 480.f;
+		//	constexpr float DIALOGUE_WIDGET_MARGIN = 100.f;
+		//	DialogueDisplayWidgetSlot->SetAlignment(FVector2D(0.5f, 1.f));
+		//	DialogueDisplayWidgetSlot->SetAnchors(FAnchors(0.f, 1.f, 1.f, 1.f)); // X stretch
+		//	DialogueDisplayWidgetSlot->SetOffsets(FMargin(DIALOGUE_WIDGET_MARGIN, -DIALOGUE_WIDGET_HEIGHT, DIALOGUE_WIDGET_MARGIN, 20.f));
+		//}
+	}
+
+	// prevent input from player
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
 {
-	HUDWidget->CloseDialogueWidget();
-
+	// Input setting
 	bShowMouseCursor = false;
 	SetInputMode(FInputModeGameOnly());
+
+	// Controller setting
+	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
+	SetViewTargetWithBlend(GetCharacter(), DIALOGUE_CAM_BLEND_TIME);
+
+	SetIgnoreMoveInput(false);
+	SetIgnoreLookInput(false);
+
+	if (DialogueCameraActor)
+	{
+		DialogueCameraActor->SetLifeSpan(DIALOGUE_CAM_BLEND_TIME);
+		DialogueCameraActor = nullptr;
+	}
+
+	if (DialogueDisplayWidget)
+	{
+		DialogueDisplayWidget->RemoveFromViewport();
+		DialogueDisplayWidget->Destruct();
+		DialogueDisplayWidget = nullptr;
+	}
 }
 
+/*
+*	Cheat input
+*/
 #if !UE_BUILD_SHIPPING
 #include "../ItemTestCheatManager.h"
 #include "../Quest/QuestTestCheatManager.h"
