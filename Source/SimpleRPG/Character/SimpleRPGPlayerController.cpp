@@ -19,14 +19,14 @@ void ASimpleRPGPlayerController::BeginPlay()
 
 	ULocalPlayer* LocalPlayer = GetLocalPlayer();
 	check(LocalPlayer);
-	UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-	check(InputSystem)
+	InputSystemRef = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	check(InputSystemRef.IsValid())
 
 	// Input setup for UI
 	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
 		EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
-		InputSystem->AddMappingContext(UIMapping, 1);
+		InputSystemRef->AddMappingContext(UIMapping, 1);
 		
 #if !UE_BUILD_SHIPPING
 		ensure(CheatAction.Num() >= 4);
@@ -34,7 +34,7 @@ void ASimpleRPGPlayerController::BeginPlay()
 		EIC->BindAction(CheatAction[1], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction2);
 		EIC->BindAction(CheatAction[2], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction3);
 		EIC->BindAction(CheatAction[3], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction4);
-		InputSystem->AddMappingContext(CheatMapping, 0);
+		InputSystemRef->AddMappingContext(CheatMapping, 0);
 #endif
 
 	}
@@ -67,14 +67,10 @@ void ASimpleRPGPlayerController::BeginPlay()
 void ASimpleRPGPlayerController::AddPitchInput(float Val)
 {
     Super::AddPitchInput(Val);
-    
 }
 
 void ASimpleRPGPlayerController::ToggleInventory()
 {
-	ULocalPlayer* LocalPlayer = GetLocalPlayer();
-	UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-
 	if (HUDWidget)
 	{
 		HUDWidget->ToggleInventory();
@@ -82,8 +78,6 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 		if(bIsInvenetoryOn)
 		{
-			//InputSystem->RemoveMappingContext(GameInputMaapping);
-
 			bShowMouseCursor = true;
 
 			FInputModeGameAndUI InputMode;
@@ -95,8 +89,6 @@ void ASimpleRPGPlayerController::ToggleInventory()
 		}
 		else
 		{
-			//InputSystem->AddMappingContext(GameInputMaapping, 0);
-
 			bShowMouseCursor = false;
 			SetInputMode(FInputModeGameOnly());
 		}
@@ -105,43 +97,22 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC, const class UDialogueData* Dialogue)
 {
-	if (DialogueCameraActor) return;
-
 	// Input setting
+	bShowMouseCursor = true;
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
 
-	SetInputMode(InputMode);
-
-	// Controller setting
-	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
-
-	DialogueCameraActor = GetWorld()->SpawnActor<ADialogueCameraActor>(DialogueCameraActorClass);
-	DialogueCameraActor->SetupCameraTransform(GetCharacter()->GetActorLocation(), NPC->GetActorLocation());
-	SetViewTargetWithBlend(DialogueCameraActor.Get(), DIALOGUE_CAM_BLEND_TIME);
-
-	// Create Dialogue Widget
-	DialogueDisplayWidget = CreateWidget<UDialogueWidget>(this, DialogueDisplayWidgetClass.Get());
-	if (DialogueDisplayWidget)
-	{
-		constexpr int32 DIALOGUE_ZORDER = 1000;
-		DialogueDisplayWidget->AddToViewport(DIALOGUE_ZORDER);
-		//UCanvasPanelSlot* DialogueDisplayWidgetSlot = MainCanvas->AddChildToCanvas(DialogueDisplayWidget);
-		//if (DialogueDisplayWidgetSlot)
-		//{
-		//	constexpr float DIALOGUE_WIDGET_HEIGHT = 480.f;
-		//	constexpr float DIALOGUE_WIDGET_MARGIN = 100.f;
-		//	DialogueDisplayWidgetSlot->SetAlignment(FVector2D(0.5f, 1.f));
-		//	DialogueDisplayWidgetSlot->SetAnchors(FAnchors(0.f, 1.f, 1.f, 1.f)); // X stretch
-		//	DialogueDisplayWidgetSlot->SetOffsets(FMargin(DIALOGUE_WIDGET_MARGIN, -DIALOGUE_WIDGET_HEIGHT, DIALOGUE_WIDGET_MARGIN, 20.f));
-		//}
-	}
+	SetInputMode(FInputModeUIOnly());
 
 	// prevent input from player
 	SetIgnoreMoveInput(true);
 	SetIgnoreLookInput(true);
+
+	InputSystemRef->AddMappingContext(DialogueInputMapping, 10);
+
+	BuildDialogueWidgetAndCamera(NPC, Dialogue);
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
@@ -157,8 +128,33 @@ void ASimpleRPGPlayerController::FinishDialogue()
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
 
+	InputSystemRef->RemoveMappingContext(DialogueInputMapping);
+	ClearDialogueWidgetAndCamera();
+}
+
+void ASimpleRPGPlayerController::BuildDialogueWidgetAndCamera(AActor* NPC, const class UDialogueData* Dialogue)
+{// Controller setting
+	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
+
+	DialogueCameraActor = GetWorld()->SpawnActor<ADialogueCameraActor>(DialogueCameraActorClass);
+	DialogueCameraActor->SetupCameraTransform(GetCharacter()->GetActorLocation(), NPC->GetActorLocation());
+	SetViewTargetWithBlend(DialogueCameraActor.Get(), DIALOGUE_CAM_BLEND_TIME);
+
+	// Create Dialogue Widget
+	DialogueDisplayWidget = CreateWidget<UDialogueWidget>(this, DialogueDisplayWidgetClass.Get());
+	if (DialogueDisplayWidget)
+	{
+		constexpr int32 DIALOGUE_ZORDER = 1000;
+		DialogueDisplayWidget->AddToViewport(DIALOGUE_ZORDER);
+		DialogueDisplayWidget->IntializeDialogue(NPC, Dialogue);
+	}
+
+}
+void ASimpleRPGPlayerController::ClearDialogueWidgetAndCamera()
+{
 	if (DialogueCameraActor)
 	{
+		constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
 		DialogueCameraActor->SetLifeSpan(DIALOGUE_CAM_BLEND_TIME);
 		DialogueCameraActor = nullptr;
 	}
@@ -166,7 +162,6 @@ void ASimpleRPGPlayerController::FinishDialogue()
 	if (DialogueDisplayWidget)
 	{
 		DialogueDisplayWidget->RemoveFromViewport();
-		DialogueDisplayWidget->Destruct();
 		DialogueDisplayWidget = nullptr;
 	}
 }
@@ -177,6 +172,7 @@ void ASimpleRPGPlayerController::FinishDialogue()
 #if !UE_BUILD_SHIPPING
 #include "../ItemTestCheatManager.h"
 #include "../Quest/QuestTestCheatManager.h"
+
 void ASimpleRPGPlayerController::CheatFunction1()
 {
 	if (UItemTestCheatManager* ItemCheatManager = Cast<UItemTestCheatManager>(CheatManager))

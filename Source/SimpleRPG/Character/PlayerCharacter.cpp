@@ -15,6 +15,7 @@
 #include "SimpleRPGPlayerController.h"
 #include "Inventory/InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "InteractionRotationComponent.h"
 
 DEFINE_LOG_CATEGORY(LogCharacter);
 
@@ -224,7 +225,11 @@ void APlayerCharacter::Interact()
 	{
 		return;
 	}
-	InteractableNPC->Interact(Cast<ASimpleRPGPlayerController>(GetController()));
+	InteractableNPC->Interact(this, Cast<ASimpleRPGPlayerController>(GetController()));
+	if (UInteractionRotationComponent* Comp = GetComponentByClass<UInteractionRotationComponent>())
+	{
+		Comp->StartRoationToTarget(InteractableNPC.Get());
+	}
 }
 
 UAbilitySystemComponent* APlayerCharacter::GetAbilitySystemComponent() const

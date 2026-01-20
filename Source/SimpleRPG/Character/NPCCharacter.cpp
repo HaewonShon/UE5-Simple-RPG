@@ -6,6 +6,7 @@
 #include "PlayerCharacter.h"
 #include "Components/SphereComponent.h"
 #include "../Dialogue/DialogueComponent.h"
+#include "InteractionRotationComponent.h"
 
 DEFINE_LOG_CATEGORY(LogNPC);
 
@@ -21,7 +22,7 @@ ANPCCharacter::ANPCCharacter()
 	InteractRangeSphere->SetSphereRadius(150.f);
 }
 
-void ANPCCharacter::Interact(ASimpleRPGPlayerController* PS)
+void ANPCCharacter::Interact(ACharacter* Character, ASimpleRPGPlayerController* PS)
 {
 	/*if (UQuestGiverComponent* Comp = GetComponentByClass<UQuestGiverComponent>())
 	{
@@ -33,6 +34,10 @@ void ANPCCharacter::Interact(ASimpleRPGPlayerController* PS)
 	{
 		UE_LOG(LogNPC, Log, TEXT("Quest requested"));
 		Comp->Interact(PS);
+	}
+	if (UInteractionRotationComponent* Comp = GetComponentByClass<UInteractionRotationComponent>())
+	{
+		Comp->StartRoationToTarget(Character);
 	}
 }
 
@@ -47,7 +52,6 @@ void ANPCCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	InteractRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &ANPCCharacter::OnInteractRangeBeginOverlap);
-
 	InteractRangeSphere->OnComponentEndOverlap.AddDynamic(this, &ANPCCharacter::OnInteractRangeEndOverlap);
 }
 

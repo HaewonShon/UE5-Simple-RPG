@@ -17,7 +17,7 @@ public:
 	// Sets default values for this character's properties
 	ANPCCharacter();
 
-	void Interact(class ASimpleRPGPlayerController* PS);
+	void Interact(ACharacter* Character, class ASimpleRPGPlayerController* PS);
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 protected:

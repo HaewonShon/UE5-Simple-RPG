@@ -37,7 +37,7 @@ protected:
 	TObjectPtr<class USimpleRPGHUDWidget>  HUDWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	class UInputMappingContext* GameInputMaapping;
+	class UInputMappingContext* DialogueInputMapping;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* UIMapping;
@@ -53,7 +53,12 @@ protected:
 
 	bool bIsInvenetoryOn;
 
+	TWeakObjectPtr<class UEnhancedInputLocalPlayerSubsystem> InputSystemRef;
+
 	// Dialogue System
+	void BuildDialogueWidgetAndCamera(AActor* NPC, const class UDialogueData* Dialogue);
+	void ClearDialogueWidgetAndCamera();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	TSubclassOf<class ADialogueCameraActor> DialogueCameraActorClass;
 
