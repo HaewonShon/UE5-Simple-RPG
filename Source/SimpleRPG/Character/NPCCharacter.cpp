@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "../Dialogue/DialogueComponent.h"
 #include "InteractionRotationComponent.h"
+#include "SimpleRPGPlayerController.h"
 
 DEFINE_LOG_CATEGORY(LogNPC);
 
@@ -30,14 +31,16 @@ void ANPCCharacter::Interact(ACharacter* Character, ASimpleRPGPlayerController* 
 		Comp->Oninteraction(GetPrimaryAssetId(), PS);
 	}*/
 
-	if (UDialogueComponent* Comp = GetComponentByClass<UDialogueComponent>())
+	if (UDialogueComponent* DialogoueComponent = GetComponentByClass<UDialogueComponent>())
 	{
 		UE_LOG(LogNPC, Log, TEXT("Quest requested"));
-		Comp->Interact(PS);
+		DialogoueComponent->BeginDialogue(PS);
+		PS->OnDialogueRequested.Broadcast(this);
 	}
-	if (UInteractionRotationComponent* Comp = GetComponentByClass<UInteractionRotationComponent>())
+
+	if (UInteractionRotationComponent* RotationComponent = GetComponentByClass<UInteractionRotationComponent>())
 	{
-		Comp->StartRoationToTarget(Character);
+		RotationComponent->StartRoationToTarget(Character);
 	}
 }
 

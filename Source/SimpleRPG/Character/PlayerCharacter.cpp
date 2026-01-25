@@ -226,9 +226,9 @@ void APlayerCharacter::Interact()
 		return;
 	}
 	InteractableNPC->Interact(this, Cast<ASimpleRPGPlayerController>(GetController()));
-	if (UInteractionRotationComponent* Comp = GetComponentByClass<UInteractionRotationComponent>())
+	if (UInteractionRotationComponent* RotationComponent = GetComponentByClass<UInteractionRotationComponent>())
 	{
-		Comp->StartRoationToTarget(InteractableNPC.Get());
+		RotationComponent->StartRoationToTarget(InteractableNPC.Get());
 	}
 }
 

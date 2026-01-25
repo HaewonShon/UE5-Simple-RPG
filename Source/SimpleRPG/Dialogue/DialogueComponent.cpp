@@ -3,17 +3,33 @@
 
 #include "DialogueComponent.h"
 #include "../Character/SimpleRPGPlayerController.h"
+#include "DialogueSubsystem.h"
 
-void UDialogueComponent::Interact(ASimpleRPGPlayerController* Controller)
+
+void UDialogueComponent::BeginDialogue(ASimpleRPGPlayerController* Controller)
 {
 	if (!DefaultDialogue)
 	{
 		return;
 	}
 
-	if (Controller)
+	if (UDialogueSubsystem* Subsystem = GetWorld()->GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Dialogue requested"));
-		Controller->OnDialogueRequested.Broadcast(GetOwner(), DefaultDialogue);
+		Subsystem->BeginDefaultDialogue(GetOwner()->GetPrimaryAssetId(), DefaultDialogue);
 	}
 }
+
+UDialogueData* UDialogueComponent::GetDefaultDialogue() const
+{
+	return DefaultDialogue;
+}
+
+UDialogueData* UDialogueComponent::GetQuestDialogue(FPrimaryAssetId QuestId) const
+{
+	if (QuestDialogues.Find(QuestId))
+	{
+		return QuestDialogues[QuestId];
+	}
+	return nullptr;
+}
+

@@ -5,20 +5,27 @@
 #include "../Character/SimpleRPGPlayerController.h"
 #include "../Dialogue/DialogueData.h"
 #include "Components/TextBlock.h"
+#include "../Dialogue/DialogueSubsystem.h"
 
-void UDialogueWidget::IntializeDialogue(AActor* NPC, const UDialogueData* Dialogue)
+void UDialogueWidget::IntializeDialogue(const UDialogueData* Dialogue)
 {
-	if (!Dialogue || Dialogue->Dialogue.Num() == 0)
-	{
-		return;
-	}
+	//if (!Dialogue || Dialogue->Dialogue.Num() == 0)
+	//{
+	//	return;
+	//}
 
-	UE_LOG(LogTemp, Log, TEXT("Dialogue init"));
+	/*UE_LOG(LogTemp, Log, TEXT("Dialogue init"));
 	DialogueData = Dialogue;
 
 	NPCName->SetText(DialogueData->NPCName);
-	CurrentPageIndex = 0;
-	DialogueText->SetText(DialogueData->Dialogue[CurrentPageIndex]);
+	CurrentPageIndex = 0;*/
+	//DialogueText->SetText(DialogueData->Dialogue[CurrentPageIndex]);
+}
+
+void UDialogueWidget::UpdateDialogue(FDialogueInfo DialogueInfo)
+{
+	NPCName->SetText(DialogueInfo.NPCName);
+	DialogueText->SetText(DialogueInfo.DialogueText);
 }
 
 void UDialogueWidget::NativeConstruct()
@@ -26,8 +33,14 @@ void UDialogueWidget::NativeConstruct()
 	if (ASimpleRPGPlayerController* PC = Cast<ASimpleRPGPlayerController>(GetOwningPlayer()))
 	{
 		UE_LOG(LogTemp, Log, TEXT("Dialogue init2"));
-		PC->OnDialogueRequested.AddUObject(this, &UDialogueWidget::IntializeDialogue);
-		OnDialogueFinished.BindUObject(PC, &ASimpleRPGPlayerController::FinishDialogue);
+		//PC->OnDialogueRequested.AddUObject(this, &UDialogueWidget::IntializeDialogue);
+		//OnDialogueFinished.BindUObject(PC, &ASimpleRPGPlayerController::FinishDialogue);
+	}
+
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->OnDialogueUpdate.BindUObject(this, &UDialogueWidget::UpdateDialogue);
+		UpdateDialogue(Subsystem->RequestCurrentDialogueInfo());
 	}
 }
 
@@ -46,12 +59,20 @@ FReply UDialogueWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
 
 void UDialogueWidget::SetNextPage()
 {
-	if (CurrentPageIndex < DialogueData->Dialogue.Num() - 1)
+	FDialogueResponse Response;
+	Response.Type = EDialogueResponseType::Continue;
+
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->OnDialogueResponses(Response);
+	}
+
+	/*if (CurrentPageIndex < DialogueData->Dialogue.Num() - 1)
 	{
 		DialogueText->SetText(DialogueData->Dialogue[++CurrentPageIndex]);
 	}
 	else
 	{
 		OnDialogueFinished.ExecuteIfBound();
-	}
+	}*/
 }

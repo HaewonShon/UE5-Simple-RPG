@@ -6,6 +6,18 @@
 #include "Engine/DataAsset.h"
 #include "DialogueData.generated.h"
 
+USTRUCT(BlueprintType)
+struct FDialogueNode
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	FText DialogueText;
+
+	UPROPERTY(EditAnywhere)
+	int32 NextNode = -1;
+};
+
 /**
  *	Data asset for dialogue
  */
@@ -25,5 +37,5 @@ public:
 	FText NPCName;
 
 	UPROPERTY(EditDefaultsOnly)
-	TArray<FText> Dialogue;
+	TArray<FDialogueNode> DialogueNodes; // Nodes[0] for default
 };

@@ -13,9 +13,16 @@ class SIMPLERPG_API UDialogueComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	void Interact(class ASimpleRPGPlayerController* Controller);
+	void BeginDialogue(class ASimpleRPGPlayerController* Controller);
+
+	class UDialogueData* GetDefaultDialogue() const;
+
+	class UDialogueData* GetQuestDialogue(FPrimaryAssetId QuestId) const;
 
 protected:
 	UPROPERTY(EditAnywhere)
 	class UDialogueData* DefaultDialogue;
+
+	UPROPERTY(EditAnywhere)
+	TMap<FPrimaryAssetId, class UDialogueData*> QuestDialogues;
 };

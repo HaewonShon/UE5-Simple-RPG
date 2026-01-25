@@ -17,8 +17,8 @@ class SIMPLERPG_API UDialogueWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void IntializeDialogue(AActor* NPC, const class UDialogueData* Dialogue);
-
+	void IntializeDialogue(const class UDialogueData* Dialogue);
+	void UpdateDialogue(struct FDialogueInfo DialogueInfo);
 protected:
 	virtual void NativeConstruct() override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -31,9 +31,4 @@ protected:
 
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UTextBlock> DialogueText;
-
-	TWeakObjectPtr<const class UDialogueData> DialogueData;
-	int32 CurrentPageIndex;
-
-	FOnDialogueFinished OnDialogueFinished;
 };

@@ -9,10 +9,11 @@
 #include "../UI/SimpleRPGHUDWidget.h"
 #include "../Dialogue/DialogueCameraActor.h"
 #include "../UI/DialogueWidget.h"
+#include "../Dialogue/DialogueSubsystem.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
 {
-    Super::BeginPlay();
+	Super::BeginPlay();
 
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
@@ -22,43 +23,48 @@ void ASimpleRPGPlayerController::BeginPlay()
 	InputSystemRef = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(InputSystemRef.IsValid())
 
-	// Input setup for UI
-	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
-	{
-		EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
-		InputSystemRef->AddMappingContext(UIMapping, 1);
-		
+		// Input setup for UI
+		if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
+		{
+			EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
+			InputSystemRef->AddMappingContext(UIMapping, 1);
+
 #if !UE_BUILD_SHIPPING
-		ensure(CheatAction.Num() >= 4);
-		EIC->BindAction(CheatAction[0], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction1);
-		EIC->BindAction(CheatAction[1], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction2);
-		EIC->BindAction(CheatAction[2], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction3);
-		EIC->BindAction(CheatAction[3], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction4);
-		InputSystemRef->AddMappingContext(CheatMapping, 0);
+			ensure(CheatAction.Num() >= 4);
+			EIC->BindAction(CheatAction[0], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction1);
+			EIC->BindAction(CheatAction[1], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction2);
+			EIC->BindAction(CheatAction[2], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction3);
+			EIC->BindAction(CheatAction[3], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction4);
+			InputSystemRef->AddMappingContext(CheatMapping, 0);
 #endif
 
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController requires EnhancedInputComponent"));
-	}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("PlayerController requires EnhancedInputComponent"));
+		}
 
-    if (HUDWidgetClass)
-    {
-        HUDWidget = CreateWidget<USimpleRPGHUDWidget>(this, HUDWidgetClass);
-        if (HUDWidget)
-        {
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<USimpleRPGHUDWidget>(this, HUDWidgetClass);
+		if (HUDWidget)
+		{
 			HUDWidget->AddToViewport();
-        }
+		}
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("Failed to create HUD"));
 		}
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("HUDWidget in PlayerController not registered."));
-    }
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HUDWidget in PlayerController not registered."));
+	}
+
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->OnDialogueEnd.AddUObject(this, &ASimpleRPGPlayerController::FinishDialogue);
+	}
 
 	bIsInvenetoryOn = false;
 	OnDialogueRequested.AddUObject(this, &ASimpleRPGPlayerController::BeginDialogue);
@@ -95,7 +101,7 @@ void ASimpleRPGPlayerController::ToggleInventory()
 	}
 }
 
-void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC, const class UDialogueData* Dialogue)
+void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC)
 {
 	// Input setting
 	bShowMouseCursor = true;
@@ -103,7 +109,7 @@ void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC, const class UDialogu
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
-
+	 
 	SetInputMode(FInputModeUIOnly());
 
 	// prevent input from player
@@ -112,7 +118,7 @@ void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC, const class UDialogu
 
 	InputSystemRef->AddMappingContext(DialogueInputMapping, 10);
 
-	BuildDialogueWidgetAndCamera(NPC, Dialogue);
+	BuildDialogueCamera(NPC);
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
@@ -129,10 +135,10 @@ void ASimpleRPGPlayerController::FinishDialogue()
 	SetIgnoreLookInput(false);
 
 	InputSystemRef->RemoveMappingContext(DialogueInputMapping);
-	ClearDialogueWidgetAndCamera();
+	ClearDialogueCamera();
 }
 
-void ASimpleRPGPlayerController::BuildDialogueWidgetAndCamera(AActor* NPC, const class UDialogueData* Dialogue)
+void ASimpleRPGPlayerController::BuildDialogueCamera(AActor* NPC)
 {// Controller setting
 	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
 
@@ -146,11 +152,11 @@ void ASimpleRPGPlayerController::BuildDialogueWidgetAndCamera(AActor* NPC, const
 	{
 		constexpr int32 DIALOGUE_ZORDER = 1000;
 		DialogueDisplayWidget->AddToViewport(DIALOGUE_ZORDER);
-		DialogueDisplayWidget->IntializeDialogue(NPC, Dialogue);
+		//DialogueDisplayWidget->IntializeDialogue(NPC, Dialogue);
 	}
 
 }
-void ASimpleRPGPlayerController::ClearDialogueWidgetAndCamera()
+void ASimpleRPGPlayerController::ClearDialogueCamera()
 {
 	if (DialogueCameraActor)
 	{
@@ -161,7 +167,7 @@ void ASimpleRPGPlayerController::ClearDialogueWidgetAndCamera()
 
 	if (DialogueDisplayWidget)
 	{
-		DialogueDisplayWidget->RemoveFromViewport();
+		DialogueDisplayWidget->RemoveFromParent();
 		DialogueDisplayWidget = nullptr;
 	}
 }

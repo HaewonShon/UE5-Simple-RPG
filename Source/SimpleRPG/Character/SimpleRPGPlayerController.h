@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "SimpleRPGPlayerController.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDialogueRequested, class AActor*, const class UDialogueData*); // target NPC, dialogue
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDialogueRequested, class AActor*); // target NPC
 
 /**
  *	Player Controller Class for registering HUD
@@ -23,7 +23,11 @@ public:
 	void ToggleInventory();
 
 	FOnDialogueRequested OnDialogueRequested;
-	void BeginDialogue(class AActor* NPC, const class UDialogueData* Dialogue);
+
+	UFUNCTION()
+	void BeginDialogue(class AActor* NPC);
+
+	UFUNCTION()
 	void FinishDialogue();
 
 protected:
@@ -56,8 +60,8 @@ protected:
 	TWeakObjectPtr<class UEnhancedInputLocalPlayerSubsystem> InputSystemRef;
 
 	// Dialogue System
-	void BuildDialogueWidgetAndCamera(AActor* NPC, const class UDialogueData* Dialogue);
-	void ClearDialogueWidgetAndCamera();
+	void BuildDialogueCamera(AActor* NPC);
+	void ClearDialogueCamera();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	TSubclassOf<class ADialogueCameraActor> DialogueCameraActorClass;
