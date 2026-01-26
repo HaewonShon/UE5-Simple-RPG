@@ -23,13 +23,16 @@ enum EDialogueResponseType : int8
 	QuestReject,
 };
 
+
 USTRUCT()
 struct FDialogueResponse
 {
 	GENERATED_BODY()
 	
 	EDialogueResponseType Type;
-	int32 Payload;
+	FText QuestTitle;
+	FPrimaryAssetId Questid; // temporary paylaod for quest selection
+	class UTexture2D* QuestStatusTexture;
 };
 
 /*
@@ -55,8 +58,10 @@ class SIMPLERPG_API UDialogueSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection);
+
 	UFUNCTION()
-	void BeginDefaultDialogue(FPrimaryAssetId NPCId, class UDialogueData* DefaultDialogue);
+	void BeginDialogue(class ANPCCharacter* NPC, class ASimpleRPGPlayerState* PS);
 
 	UFUNCTION()
 	void OnDialogueResponses(FDialogueResponse Response);
@@ -73,4 +78,15 @@ protected:
 	
 	TWeakObjectPtr<class UDialogueData> CurrentDialogueData;
 	int32 CurrentNodeIndex;
+
+	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
+	TWeakObjectPtr<AActor> InteractingTargetRef;
+
+	// TEMP ICONS
+	UPROPERTY()
+	TObjectPtr<class UTexture2D> QuestAvailableIcon;
+
+	UPROPERTY()
+	TObjectPtr<class UTexture2D> QuestInProgressIcon; 
 };
+

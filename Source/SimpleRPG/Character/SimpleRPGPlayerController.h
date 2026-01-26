@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "SimpleRPGPlayerController.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnDialogueRequested, class AActor*); // target NPC
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDialogueRequested, class ANPCCharacter*); // target NPC
 
 /**
  *	Player Controller Class for registering HUD
@@ -25,7 +25,7 @@ public:
 	FOnDialogueRequested OnDialogueRequested;
 
 	UFUNCTION()
-	void BeginDialogue(class AActor* NPC);
+	void BeginDialogue(class ANPCCharacter* NPC);
 
 	UFUNCTION()
 	void FinishDialogue();
@@ -60,7 +60,7 @@ protected:
 	TWeakObjectPtr<class UEnhancedInputLocalPlayerSubsystem> InputSystemRef;
 
 	// Dialogue System
-	void BuildDialogueCamera(AActor* NPC);
+	void BuildDialogueCamera(class ANPCCharacter* NPC);
 	void ClearDialogueCamera();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")

@@ -23,6 +23,8 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
+	void OnRespond(int32 ResponseIndex);
+
 	UFUNCTION(BlueprintCallable)
 	void SetNextPage();
 
@@ -31,4 +33,13 @@ protected:
 
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UTextBlock> DialogueText;
+
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UVerticalBox> QuestOfferButtonSlot;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UQuestOfferButtonWidget> QuestOfferButtonClass;
+
+	UPROPERTY()
+	TArray<struct FDialogueResponse> CachedResponses;
 };

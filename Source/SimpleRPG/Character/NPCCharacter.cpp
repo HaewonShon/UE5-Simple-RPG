@@ -25,16 +25,9 @@ ANPCCharacter::ANPCCharacter()
 
 void ANPCCharacter::Interact(ACharacter* Character, ASimpleRPGPlayerController* PS)
 {
-	/*if (UQuestGiverComponent* Comp = GetComponentByClass<UQuestGiverComponent>())
-	{
-		UE_LOG(LogNPC, Log, TEXT("Quest requested"));
-		Comp->Oninteraction(GetPrimaryAssetId(), PS);
-	}*/
-
 	if (UDialogueComponent* DialogoueComponent = GetComponentByClass<UDialogueComponent>())
 	{
-		UE_LOG(LogNPC, Log, TEXT("Quest requested"));
-		DialogoueComponent->BeginDialogue(PS);
+		UE_LOG(LogNPC, Log, TEXT("Dialogue requested"));
 		PS->OnDialogueRequested.Broadcast(this);
 	}
 

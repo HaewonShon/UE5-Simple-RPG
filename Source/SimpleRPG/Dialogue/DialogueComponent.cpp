@@ -3,6 +3,7 @@
 
 #include "DialogueComponent.h"
 #include "../Character/SimpleRPGPlayerController.h"
+#include "../Character/SimpleRPGPlayerState.h"
 #include "DialogueSubsystem.h"
 
 
@@ -15,7 +16,8 @@ void UDialogueComponent::BeginDialogue(ASimpleRPGPlayerController* Controller)
 
 	if (UDialogueSubsystem* Subsystem = GetWorld()->GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		Subsystem->BeginDefaultDialogue(GetOwner()->GetPrimaryAssetId(), DefaultDialogue);
+		//ASimpleRPGPlayerState* PS = Controller->GetPlayerState<ASimpleRPGPlayerState>();
+		//Subsystem->BeginDialogue(GetOwner()->GetPrimaryAssetId(), PS, DefaultDialogue);
 	}
 }
 

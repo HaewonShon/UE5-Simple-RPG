@@ -10,6 +10,17 @@
 /**
  *		Subsystem for Quest in game
  */
+
+USTRUCT()
+struct FQuestStatusEntry
+{
+	GENERATED_BODY()
+
+	FPrimaryAssetId Id;
+	EQuestStatus Status;
+};
+
+
 UCLASS()
 class SIMPLERPG_API UQuestManagerSubsystem : public UWorldSubsystem
 {
@@ -19,20 +30,19 @@ public:
 	const UQuestData* Get(const FPrimaryAssetId& ID) const;
 
 	void RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId);
+	TArray<FQuestStatusEntry> RequestAvailableQuestListForNPC(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PlayerState);
+
 	void ProcessInteraction(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PS);
 
 	void GrantQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 
 	void OnEnenyKilled(const FGameplayTag& Enemy, const TArray<struct FDamageRecord>& DamageHistory);
 	void OnPlaceVisited(const FGameplayTag& Place, class ASimpleRPGPlayerState* PlayerState);
-	// void OnInteract();
 
 protected:
 	void BuildCache();
 
-	UPROPERTY()
-	TMap<FPrimaryAssetId, FPrimaryAssetId> NPCQuestMap;
+	TMap<FPrimaryAssetId, TArray<FPrimaryAssetId>> NPCQuestMap; // {npc id, quest ids}
 
-	UPROPERTY()
 	TMap<FPrimaryAssetId, class UQuestData*> QuestCache;
 };

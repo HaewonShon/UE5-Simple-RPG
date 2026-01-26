@@ -6,6 +6,9 @@
 #include "../Dialogue/DialogueData.h"
 #include "Components/TextBlock.h"
 #include "../Dialogue/DialogueSubsystem.h"
+#include "Components/VerticalBox.h"
+#include "QuestOfferButtonWidget.h"
+#include "Components/Button.h"
 
 void UDialogueWidget::IntializeDialogue(const UDialogueData* Dialogue)
 {
@@ -24,19 +27,33 @@ void UDialogueWidget::IntializeDialogue(const UDialogueData* Dialogue)
 
 void UDialogueWidget::UpdateDialogue(FDialogueInfo DialogueInfo)
 {
+	QuestOfferButtonSlot->ClearChildren();
+
 	NPCName->SetText(DialogueInfo.NPCName);
 	DialogueText->SetText(DialogueInfo.DialogueText);
+	CachedResponses = DialogueInfo.Responses;
+
+	int32 ResponseIndex = 0;
+	for (const FDialogueResponse& Response : DialogueInfo.Responses)
+	{
+		switch (Response.Type)
+		{
+		case EDialogueResponseType::QuestSelect: // create quest offer
+			UQuestOfferButtonWidget* QuestOfferButton = CreateWidget<UQuestOfferButtonWidget>(this, QuestOfferButtonClass);
+			if (QuestOfferButton)
+			{
+				QuestOfferButton->SetContent(Response.QuestStatusTexture, Response.QuestTitle, ResponseIndex++);
+				QuestOfferButton->OnResponseSelected.BindUObject(this, &UDialogueWidget::OnRespond);
+				QuestOfferButtonSlot->AddChildToVerticalBox(QuestOfferButton);
+				UE_LOG(LogTemp, Log, TEXT("Quest button added"));
+			}
+			break;
+		}
+	}
 }
 
 void UDialogueWidget::NativeConstruct()
 {
-	if (ASimpleRPGPlayerController* PC = Cast<ASimpleRPGPlayerController>(GetOwningPlayer()))
-	{
-		UE_LOG(LogTemp, Log, TEXT("Dialogue init2"));
-		//PC->OnDialogueRequested.AddUObject(this, &UDialogueWidget::IntializeDialogue);
-		//OnDialogueFinished.BindUObject(PC, &ASimpleRPGPlayerController::FinishDialogue);
-	}
-
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
 		Subsystem->OnDialogueUpdate.BindUObject(this, &UDialogueWidget::UpdateDialogue);
@@ -57,6 +74,19 @@ FReply UDialogueWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
 	return FReply::Handled();
 }
 
+void UDialogueWidget::OnRespond(int32 ResponseIndex)
+{
+	if (ResponseIndex < 0 || ResponseIndex >= CachedResponses.Num())
+	{
+		return;
+	}
+
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->OnDialogueResponses(CachedResponses[ResponseIndex]);
+	}
+}
+
 void UDialogueWidget::SetNextPage()
 {
 	FDialogueResponse Response;
@@ -66,13 +96,4 @@ void UDialogueWidget::SetNextPage()
 	{
 		Subsystem->OnDialogueResponses(Response);
 	}
-
-	/*if (CurrentPageIndex < DialogueData->Dialogue.Num() - 1)
-	{
-		DialogueText->SetText(DialogueData->Dialogue[++CurrentPageIndex]);
-	}
-	else
-	{
-		OnDialogueFinished.ExecuteIfBound();
-	}*/
 }

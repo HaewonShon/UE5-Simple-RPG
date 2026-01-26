@@ -10,6 +10,8 @@
 #include "../Dialogue/DialogueCameraActor.h"
 #include "../UI/DialogueWidget.h"
 #include "../Dialogue/DialogueSubsystem.h"
+#include "NPCCharacter.h"
+#include "SimpleRPGPlayerState.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
 {
@@ -101,7 +103,7 @@ void ASimpleRPGPlayerController::ToggleInventory()
 	}
 }
 
-void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC)
+void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 {
 	// Input setting
 	bShowMouseCursor = true;
@@ -119,6 +121,11 @@ void ASimpleRPGPlayerController::BeginDialogue(AActor* NPC)
 	InputSystemRef->AddMappingContext(DialogueInputMapping, 10);
 
 	BuildDialogueCamera(NPC);
+
+	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		DialogueSubsystem->BeginDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
+	}
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
@@ -138,7 +145,7 @@ void ASimpleRPGPlayerController::FinishDialogue()
 	ClearDialogueCamera();
 }
 
-void ASimpleRPGPlayerController::BuildDialogueCamera(AActor* NPC)
+void ASimpleRPGPlayerController::BuildDialogueCamera(ANPCCharacter* NPC)
 {// Controller setting
 	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
 

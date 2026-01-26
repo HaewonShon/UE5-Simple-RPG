@@ -21,19 +21,40 @@ const UQuestData* UQuestManagerSubsystem::Get(const FPrimaryAssetId& ID) const
 
 void UQuestManagerSubsystem::RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId)
 {
+    if (!NPCQuestMap.Find(NPCId))
+    {
+        NPCQuestMap.Add({ NPCId });
+    }
+
+    NPCQuestMap[NPCId].Add(QuestId);
     UE_LOG(LogQuest, Log, TEXT("Quest Regiestered"));
-    NPCQuestMap.Add({ NPCId, QuestId });
 }
 
-void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRPGPlayerState* PS)
+TArray<FQuestStatusEntry> UQuestManagerSubsystem::RequestAvailableQuestListForNPC(FPrimaryAssetId NPCId, ASimpleRPGPlayerState* PlayerState)
 {
-    FPrimaryAssetId QuestId = NPCQuestMap[NPCId];
+    TArray<FQuestStatusEntry> QuestList;
+
+    UQuestManagerComponent* QuestManagerComponent = PlayerState->GetQuestManagerComponent().Get();
+    for (FPrimaryAssetId QuestId : NPCQuestMap[NPCId])
+    {
+        EQuestStatus Status = QuestManagerComponent->GetQuestStatus(QuestId);
+        if (Status == EQuestStatus::NotStarted || Status == EQuestStatus::InProgress)
+        {
+            QuestList.Add({QuestId, Status});
+        }
+    }
+    return QuestList;
+}
+
+void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRPGPlayerState* PlayerState)
+{
+    FPrimaryAssetId QuestId = NPCQuestMap[NPCId][0];
     if (!QuestId.IsValid())
     {
         return;
     }
 
-    UQuestManagerComponent* QuestManagerComponent = PS->GetQuestManagerComponent().Get();
+    UQuestManagerComponent* QuestManagerComponent = PlayerState->GetQuestManagerComponent().Get();
     EQuestStatus QuestStatus = QuestManagerComponent->GetQuestStatus(QuestId);
     if (QuestStatus == EQuestStatus::Completed)
     {
