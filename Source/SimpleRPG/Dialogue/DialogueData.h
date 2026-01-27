@@ -39,3 +39,26 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FDialogueNode> DialogueNodes; // Nodes[0] for default
 };
+
+UENUM(Blueprintable)
+enum class EQuestDialogueContext : uint8
+{
+	Available,
+	Accepted,
+	Declined,
+	Completed,
+	CompletionFailed
+};
+
+/**
+ *	expansion asset for quest dialogue
+ */
+UCLASS(BlueprintType)
+class SIMPLERPG_API UQuestDialogueData : public UDialogueData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly);
+	TMap<EQuestDialogueContext, int32> ContextEntryNodes;
+};

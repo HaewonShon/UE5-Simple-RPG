@@ -30,7 +30,7 @@ void UQuestManagerSubsystem::RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimar
     UE_LOG(LogQuest, Log, TEXT("Quest Regiestered"));
 }
 
-TArray<FQuestStatusEntry> UQuestManagerSubsystem::RequestAvailableQuestListForNPC(FPrimaryAssetId NPCId, ASimpleRPGPlayerState* PlayerState)
+TArray<FQuestStatusEntry> UQuestManagerSubsystem::GetAvailableQuestListForNPC(FPrimaryAssetId NPCId, ASimpleRPGPlayerState* PlayerState)
 {
     TArray<FQuestStatusEntry> QuestList;
 
@@ -86,6 +86,15 @@ void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRP
 
 }
 
+EQuestStatus UQuestManagerSubsystem::GetQuestStatus(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
+{
+    if (UQuestManagerComponent* Component = PlayerState->GetQuestManagerComponent().Get())
+    {
+        return Component->GetQuestStatus(QuestId);
+    }
+    return EQuestStatus::Count;
+}
+
 void UQuestManagerSubsystem::GrantQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
 {
     if (!PlayerState)
@@ -107,6 +116,15 @@ void UQuestManagerSubsystem::GrantQuest(FPrimaryAssetId QuestId, ASimpleRPGPlaye
 
         // update available quest?
     }
+}
+
+bool UQuestManagerSubsystem::CanClearQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
+{
+    if (UQuestManagerComponent* QuestComponent = PlayerState->GetComponentByClass<UQuestManagerComponent>())
+    {
+        return QuestComponent->CanCompleteQuest(QuestId);
+    }
+    return false;
 }
 
 void UQuestManagerSubsystem::OnEnenyKilled(const FGameplayTag& EnemyTag, const TArray<FDamageRecord>& DamageHistory)

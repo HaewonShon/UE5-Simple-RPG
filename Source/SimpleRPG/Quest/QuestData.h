@@ -99,6 +99,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	TArray<FQuestReward> Rewards;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
+	class UQuestDialogueData* DialogueData;
 };
 
 USTRUCT()

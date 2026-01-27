@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "DialogueData.h"
 #include "DialogueSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnDialogueBegin)
@@ -20,7 +21,7 @@ enum EDialogueResponseType : int8
 	Exit,
 	QuestSelect,
 	QuestAccept,
-	QuestReject,
+	QuestDecline,
 };
 
 
@@ -31,7 +32,7 @@ struct FDialogueResponse
 	
 	EDialogueResponseType Type;
 	FText QuestTitle;
-	FPrimaryAssetId Questid; // temporary paylaod for quest selection
+	FPrimaryAssetId QuestId; // temporary paylaod for quest selection
 	class UTexture2D* QuestStatusTexture;
 };
 
@@ -75,6 +76,7 @@ public:
 protected:
 	void UpdateDialogueNode(int NextNodeIndex);
 	FDialogueInfo BuildDialogueWithCurrentNode();
+	EQuestDialogueContext ResolveQuestDialogueContext(FPrimaryAssetId QuestId);
 	
 	TWeakObjectPtr<class UDialogueData> CurrentDialogueData;
 	int32 CurrentNodeIndex;

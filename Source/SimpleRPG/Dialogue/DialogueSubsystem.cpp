@@ -44,7 +44,7 @@ void UDialogueSubsystem::BeginDialogue(ANPCCharacter* NPC, ASimpleRPGPlayerState
 	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
 	check(QuestSubsystem);
 
-	for (const FQuestStatusEntry& Quest : QuestSubsystem->RequestAvailableQuestListForNPC(InteractingTargetRef->GetPrimaryAssetId(), PlayerStateRef.Get()))
+	for (const FQuestStatusEntry& Quest : QuestSubsystem->GetAvailableQuestListForNPC(InteractingTargetRef->GetPrimaryAssetId(), PlayerStateRef.Get()))
 	{
 		if (const UQuestData* QuestData = QuestSubsystem->Get(Quest.Id))
 		{
@@ -84,30 +84,29 @@ void UDialogueSubsystem::OnDialogueResponses(FDialogueResponse Response)
 	}
 	else if (Response.Type == EDialogueResponseType::QuestSelect)
 	{
-		// load quest-related dialogue
 		UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-		QuestSubsystem->GrantQuest(Response.Questid, PlayerStateRef.Get());
-		OnDialogueEnd.Broadcast();
+		const UQuestData* QuestData = QuestSubsystem->Get(Response.QuestId);
+
+		CurrentDialogueData = QuestData->DialogueData;
+		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
+		int32 Node = QuestDialogue->ContextEntryNodes[ResolveQuestDialogueContext(Response.QuestId)];
+		UpdateDialogueNode(Node);
 	}
 	else if (Response.Type == EDialogueResponseType::QuestAccept)
 	{
-		
+		UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
+		QuestSubsystem->GrantQuest(Response.QuestId, PlayerStateRef.Get());
+
+		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
+		int32 Node = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Accepted];
+		UpdateDialogueNode(Node);
 	}
-	else if (Response.Type == EDialogueResponseType::QuestReject)
+	else if (Response.Type == EDialogueResponseType::QuestDecline)
 	{
-
+		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
+		int32 Node = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Declined];
+		UpdateDialogueNode(Node);
 	}
-
-	// default - quest? exit? 
-	// begin new dialogue
-	// 
-	// quest - accept? decline?
-	// accept - questsubsystem에 request
-	// decline - 실망이 크다 제군
-
-	// in-quest - cleared?
-	// requestclearquest questsubsystem
-	// 완료 시 npc는 가나ㅡdquest 목록 update하는게 좋을듯
 }
 
 FDialogueInfo UDialogueSubsystem::RequestCurrentDialogueInfo()
@@ -132,4 +131,29 @@ FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 		DialogueInfo.DialogueText = CurrentDialogueData->DialogueNodes[CurrentNodeIndex].DialogueText;
 	}
 	return DialogueInfo;
+}
+
+EQuestDialogueContext UDialogueSubsystem::ResolveQuestDialogueContext(FPrimaryAssetId QuestId)
+{
+	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
+	EQuestStatus QuestStatus = QuestSubsystem->GetQuestStatus(QuestId, PlayerStateRef.Get());
+
+	if (QuestStatus == EQuestStatus::NotStarted)
+	{
+		return EQuestDialogueContext::Available;
+	}
+	else if (QuestStatus == EQuestStatus::InProgress)
+	{
+		if (QuestSubsystem->CanClearQuest(QuestId, PlayerStateRef.Get()))
+		{
+			return EQuestDialogueContext::Completed;
+		}
+		else
+		{
+			return EQuestDialogueContext::CompletionFailed;
+		}
+	}
+	
+	// invalid case
+	return EQuestDialogueContext::Available;
 }
