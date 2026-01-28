@@ -6,6 +6,19 @@
 #include "Engine/DataAsset.h"
 #include "DialogueData.generated.h"
 
+/*
+*   Dialogue response from UI
+*/
+UENUM(Blueprintable)
+enum EDialogueResponseType : int8
+{
+	Continue,
+	Exit,
+	QuestSelect,
+	QuestAccept,
+	QuestDecline,
+};
+
 USTRUCT(BlueprintType)
 struct FDialogueNode
 {
@@ -16,6 +29,9 @@ struct FDialogueNode
 
 	UPROPERTY(EditAnywhere)
 	int32 NextNode = -1;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TEnumAsByte<EDialogueResponseType>> Responses;
 };
 
 /**
@@ -46,8 +62,8 @@ enum class EQuestDialogueContext : uint8
 	Available,
 	Accepted,
 	Declined,
-	Completed,
-	CompletionFailed
+	Cleared,
+	ClearFailed
 };
 
 /**

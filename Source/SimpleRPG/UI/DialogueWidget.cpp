@@ -27,7 +27,10 @@ void UDialogueWidget::IntializeDialogue(const UDialogueData* Dialogue)
 
 void UDialogueWidget::UpdateDialogue(FDialogueInfo DialogueInfo)
 {
+	// clear prev buttons
 	QuestOfferButtonSlot->ClearChildren();
+	QuestAcceptButton->SetVisibility(ESlateVisibility::Collapsed);
+	QuestDeclineButton->SetVisibility(ESlateVisibility::Collapsed);
 
 	NPCName->SetText(DialogueInfo.NPCName);
 	DialogueText->SetText(DialogueInfo.DialogueText);
@@ -39,6 +42,7 @@ void UDialogueWidget::UpdateDialogue(FDialogueInfo DialogueInfo)
 		switch (Response.Type)
 		{
 		case EDialogueResponseType::QuestSelect: // create quest offer
+		{
 			UQuestOfferButtonWidget* QuestOfferButton = CreateWidget<UQuestOfferButtonWidget>(this, QuestOfferButtonClass);
 			if (QuestOfferButton)
 			{
@@ -47,6 +51,15 @@ void UDialogueWidget::UpdateDialogue(FDialogueInfo DialogueInfo)
 				QuestOfferButtonSlot->AddChildToVerticalBox(QuestOfferButton);
 				UE_LOG(LogTemp, Log, TEXT("Quest button added"));
 			}
+		}
+			break;
+		case EDialogueResponseType::QuestAccept:
+			QuestAcceptButton->SetVisibility(ESlateVisibility::Visible);
+			AcceptResponseIndex = ResponseIndex++;
+			break;
+		case EDialogueResponseType::QuestDecline:
+			QuestDeclineButton->SetVisibility(ESlateVisibility::Visible);
+			DeclineResponseIndex = ResponseIndex++;
 			break;
 		}
 	}
@@ -59,6 +72,11 @@ void UDialogueWidget::NativeConstruct()
 		Subsystem->OnDialogueUpdate.BindUObject(this, &UDialogueWidget::UpdateDialogue);
 		UpdateDialogue(Subsystem->RequestCurrentDialogueInfo());
 	}
+
+	QuestAcceptButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnQuestAcceptButtonClicked);
+	QuestDeclineButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnQuestDeclineButtonClicked);
+	QuestAcceptButton->SetVisibility(ESlateVisibility::Collapsed);
+	QuestDeclineButton->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 FReply UDialogueWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -95,5 +113,21 @@ void UDialogueWidget::SetNextPage()
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
 		Subsystem->OnDialogueResponses(Response);
+	}
+}
+
+void UDialogueWidget::OnQuestAcceptButtonClicked()
+{
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->OnDialogueResponses(CachedResponses[AcceptResponseIndex]);
+	}
+}
+
+void UDialogueWidget::OnQuestDeclineButtonClicked()
+{
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->OnDialogueResponses(CachedResponses[DeclineResponseIndex]);
 	}
 }

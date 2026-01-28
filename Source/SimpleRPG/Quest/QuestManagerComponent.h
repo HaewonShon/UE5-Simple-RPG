@@ -24,11 +24,11 @@ public:
 	void SetInventoryComponentRef(class UInventoryComponent* InventoryComponent);
 
 	EQuestStatus GetQuestStatus(const FPrimaryAssetId& QuestId) const;
-	bool CanCompleteQuest(const FPrimaryAssetId& QuestId) const;
+	bool CanClearQuest(const FPrimaryAssetId& QuestId) const;
 	
 	// Called by Quest Subsystem, adds a quest to the component
 	bool RecevieQuest(const class UQuestData* Quest);
-	void OnCompleteQuest(const FPrimaryAssetId& CompletedQuestId);
+	void ClearQuest(const FPrimaryAssetId& CompletedQuestId);
 
 	void OnEnemyKilled(const FGameplayTag& EnemyTag);
 	void OnPlaceVisited(const FGameplayTag& PlaceTag);
@@ -43,7 +43,7 @@ protected:
 	TMap<FPrimaryAssetId, FQuestInstance> QuestInProgress;
 	static const int32 MAX_QUEST_COUNT = 5;
 
-	TSet<FPrimaryAssetId> CompletedQuestSet;
+	TSet<FPrimaryAssetId> ClearedQuestSet;
 
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 };

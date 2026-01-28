@@ -56,7 +56,7 @@ void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRP
 
     UQuestManagerComponent* QuestManagerComponent = PlayerState->GetQuestManagerComponent().Get();
     EQuestStatus QuestStatus = QuestManagerComponent->GetQuestStatus(QuestId);
-    if (QuestStatus == EQuestStatus::Completed)
+    if (QuestStatus == EQuestStatus::Cleared)
     {
         UE_LOG(LogQuest, Log, TEXT("QuestStatus Completed"));
         return;
@@ -64,10 +64,10 @@ void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRP
     else if (QuestStatus == EQuestStatus::InProgress)
     {
         UE_LOG(LogQuest, Log, TEXT("QuestStatus InProgress"));
-        bool bCanComplete = QuestManagerComponent->CanCompleteQuest(QuestId);
+        bool bCanComplete = QuestManagerComponent->CanClearQuest(QuestId);
         if (bCanComplete)
         {
-            QuestManagerComponent->OnCompleteQuest(QuestId);
+            QuestManagerComponent->ClearQuest(QuestId);
         }
         else
         {
@@ -122,8 +122,23 @@ bool UQuestManagerSubsystem::CanClearQuest(FPrimaryAssetId QuestId, ASimpleRPGPl
 {
     if (UQuestManagerComponent* QuestComponent = PlayerState->GetComponentByClass<UQuestManagerComponent>())
     {
-        return QuestComponent->CanCompleteQuest(QuestId);
+        return QuestComponent->CanClearQuest(QuestId);
     }
+    return false;
+}
+
+
+bool UQuestManagerSubsystem::TryClearQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
+{
+    if (UQuestManagerComponent* QuestComponent = PlayerState->GetComponentByClass<UQuestManagerComponent>())
+    {
+        if (QuestComponent->CanClearQuest(QuestId))
+        {
+            QuestComponent->ClearQuest(QuestId);
+            return true;
+        }
+    }
+
     return false;
 }
 

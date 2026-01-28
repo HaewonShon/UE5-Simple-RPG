@@ -49,8 +49,8 @@ void UDialogueSubsystem::BeginDialogue(ANPCCharacter* NPC, ASimpleRPGPlayerState
 		if (const UQuestData* QuestData = QuestSubsystem->Get(Quest.Id))
 		{
 			DialogueInfo.Responses.Add({ EDialogueResponseType::QuestSelect,
-				QuestData->Title,
 				QuestData->GetPrimaryAssetId(),
+				QuestData->Title,
 				(Quest.Status == EQuestStatus::NotStarted) ? QuestAvailableIcon : QuestInProgressIcon });
 		}
 	}
@@ -89,8 +89,27 @@ void UDialogueSubsystem::OnDialogueResponses(FDialogueResponse Response)
 
 		CurrentDialogueData = QuestData->DialogueData;
 		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
-		int32 Node = QuestDialogue->ContextEntryNodes[ResolveQuestDialogueContext(Response.QuestId)];
-		UpdateDialogueNode(Node);
+		int32 NextNode = -1;
+
+		EQuestStatus QuestStatus = QuestSubsystem->GetQuestStatus(Response.QuestId, PlayerStateRef.Get());
+		if (QuestStatus == EQuestStatus::NotStarted)
+		{
+			NextNode = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Available];
+		}
+		else if(QuestStatus == EQuestStatus::InProgress)
+		{
+			if (QuestSubsystem->TryClearQuest(Response.QuestId, PlayerStateRef.Get()))
+			{
+				NextNode = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Cleared];
+			}
+			else
+			{
+				NextNode = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::ClearFailed];
+			}
+		}
+		UpdateDialogueNode(NextNode);
+		CurrentQuestId = Response.QuestId;
+
 	}
 	else if (Response.Type == EDialogueResponseType::QuestAccept)
 	{
@@ -127,8 +146,14 @@ FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 	FDialogueInfo DialogueInfo;
 	if (CurrentDialogueData.IsValid() && (CurrentNodeIndex != -1 && CurrentNodeIndex < CurrentDialogueData->DialogueNodes.Num()))
 	{
+		const FDialogueNode& Node = CurrentDialogueData->DialogueNodes[CurrentNodeIndex];
 		DialogueInfo.NPCName = CurrentDialogueData->NPCName;
-		DialogueInfo.DialogueText = CurrentDialogueData->DialogueNodes[CurrentNodeIndex].DialogueText;
+		DialogueInfo.DialogueText = Node.DialogueText;
+
+		for (EDialogueResponseType ResponseType : Node.Responses)
+		{
+			DialogueInfo.Responses.Add({ ResponseType, CurrentQuestId });
+		}
 	}
 	return DialogueInfo;
 }
@@ -138,7 +163,7 @@ EQuestDialogueContext UDialogueSubsystem::ResolveQuestDialogueContext(FPrimaryAs
 	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
 	EQuestStatus QuestStatus = QuestSubsystem->GetQuestStatus(QuestId, PlayerStateRef.Get());
 
-	if (QuestStatus == EQuestStatus::NotStarted)
+	/*if (QuestStatus == EQuestStatus::NotStarted)
 	{
 		return EQuestDialogueContext::Available;
 	}
@@ -152,7 +177,7 @@ EQuestDialogueContext UDialogueSubsystem::ResolveQuestDialogueContext(FPrimaryAs
 		{
 			return EQuestDialogueContext::CompletionFailed;
 		}
-	}
+	}*/
 	
 	// invalid case
 	return EQuestDialogueContext::Available;

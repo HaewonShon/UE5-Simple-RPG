@@ -32,7 +32,7 @@ enum class EQuestStatus : uint8
 {
 	NotStarted,
 	InProgress,
-	Completed,
+	Cleared,
 	Count UMETA(Hidden)
 };
 

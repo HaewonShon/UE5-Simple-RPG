@@ -11,28 +11,14 @@ DECLARE_MULTICAST_DELEGATE(FOnDialogueBegin)
 DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd)
 DECLARE_DELEGATE_OneParam(FOnDialogueUpdate, FDialogueInfo)
 
-/*
-*   Dialogue response from UI 
-*/
-UENUM(Blueprintable)
-enum EDialogueResponseType : int8
-{
-	Continue,
-	Exit,
-	QuestSelect,
-	QuestAccept,
-	QuestDecline,
-};
-
-
 USTRUCT()
 struct FDialogueResponse
 {
 	GENERATED_BODY()
 	
 	EDialogueResponseType Type;
-	FText QuestTitle;
 	FPrimaryAssetId QuestId; // temporary paylaod for quest selection
+	FText QuestTitle;
 	class UTexture2D* QuestStatusTexture;
 };
 
@@ -83,6 +69,7 @@ protected:
 
 	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
 	TWeakObjectPtr<AActor> InteractingTargetRef;
+	FPrimaryAssetId CurrentQuestId;
 
 	// TEMP ICONS
 	UPROPERTY()

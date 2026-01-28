@@ -28,6 +28,14 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetNextPage();
 
+	// temp for accept/decline buttons
+	UFUNCTION()
+	void OnQuestAcceptButtonClicked();
+
+	UFUNCTION()
+	void OnQuestDeclineButtonClicked();
+
+	/* Bind Widgets */
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UTextBlock> NPCName;
 
@@ -37,9 +45,18 @@ protected:
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UVerticalBox> QuestOfferButtonSlot;
 
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UButton> QuestAcceptButton;
+
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UButton> QuestDeclineButton;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UQuestOfferButtonWidget> QuestOfferButtonClass;
 
 	UPROPERTY()
 	TArray<struct FDialogueResponse> CachedResponses;
+
+	int32 AcceptResponseIndex;
+	int32 DeclineResponseIndex;
 };
