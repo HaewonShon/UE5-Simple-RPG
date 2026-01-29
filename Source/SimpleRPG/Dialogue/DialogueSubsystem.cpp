@@ -58,7 +58,7 @@ void UDialogueSubsystem::BeginDialogue(ANPCCharacter* NPC, ASimpleRPGPlayerState
 	OnDialogueUpdate.ExecuteIfBound(DialogueInfo);
 }
 
-void UDialogueSubsystem::OnDialogueResponses(FDialogueResponse Response)
+void UDialogueSubsystem::OnDialogueResponse(FDialogueResponse Response)
 {
 	if (Response.Type == EDialogueResponseType::Continue)
 	{
@@ -84,37 +84,13 @@ void UDialogueSubsystem::OnDialogueResponses(FDialogueResponse Response)
 	}
 	else if (Response.Type == EDialogueResponseType::QuestSelect)
 	{
-		UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-		const UQuestData* QuestData = QuestSubsystem->Get(Response.QuestId);
-
-		CurrentDialogueData = QuestData->DialogueData;
-		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
-		int32 NextNode = -1;
-
-		EQuestStatus QuestStatus = QuestSubsystem->GetQuestStatus(Response.QuestId, PlayerStateRef.Get());
-		if (QuestStatus == EQuestStatus::NotStarted)
-		{
-			NextNode = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Available];
-		}
-		else if(QuestStatus == EQuestStatus::InProgress)
-		{
-			if (QuestSubsystem->TryClearQuest(Response.QuestId, PlayerStateRef.Get()))
-			{
-				NextNode = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Cleared];
-			}
-			else
-			{
-				NextNode = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::ClearFailed];
-			}
-		}
-		UpdateDialogueNode(NextNode);
 		CurrentQuestId = Response.QuestId;
-
+		HandleQuestSelectResponse(Response);
 	}
 	else if (Response.Type == EDialogueResponseType::QuestAccept)
 	{
 		UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-		QuestSubsystem->GrantQuest(Response.QuestId, PlayerStateRef.Get());
+		bool bResult = QuestSubsystem->TryGrantQuest(Response.QuestId, PlayerStateRef.Get());
 
 		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
 		int32 Node = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Accepted];
@@ -141,6 +117,20 @@ void UDialogueSubsystem::UpdateDialogueNode(int NextNodeIndex)
 	OnDialogueUpdate.ExecuteIfBound(DialogueInfo);
 }
 
+void UDialogueSubsystem::HandleQuestSelectResponse(const FDialogueResponse& Response)
+{
+	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
+	const UQuestData* QuestData = QuestSubsystem->Get(Response.QuestId);
+
+	CurrentDialogueData = QuestData->DialogueData;
+	UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
+
+	EQuestSelectionResult Result = QuestSubsystem->ResolveQuestSelection(Response.QuestId, PlayerStateRef.Get());
+
+	int NextNode = QuestDialogue->ContextEntryNodes[ConvertQuestSelectionResultToContext(Result)];
+	UpdateDialogueNode(NextNode);
+}
+
 FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 {
 	FDialogueInfo DialogueInfo;
@@ -158,27 +148,16 @@ FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 	return DialogueInfo;
 }
 
-EQuestDialogueContext UDialogueSubsystem::ResolveQuestDialogueContext(FPrimaryAssetId QuestId)
+EQuestDialogueContext UDialogueSubsystem::ConvertQuestSelectionResultToContext(EQuestSelectionResult SelectionResult)
 {
-	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-	EQuestStatus QuestStatus = QuestSubsystem->GetQuestStatus(QuestId, PlayerStateRef.Get());
-
-	/*if (QuestStatus == EQuestStatus::NotStarted)
+	switch (SelectionResult)
 	{
+	case EQuestSelectionResult::Available:
 		return EQuestDialogueContext::Available;
+	case EQuestSelectionResult::Cleared:
+		return EQuestDialogueContext::Cleared;
+	case EQuestSelectionResult::ClearFailed:
+		return EQuestDialogueContext::ClearFailed;
 	}
-	else if (QuestStatus == EQuestStatus::InProgress)
-	{
-		if (QuestSubsystem->CanClearQuest(QuestId, PlayerStateRef.Get()))
-		{
-			return EQuestDialogueContext::Completed;
-		}
-		else
-		{
-			return EQuestDialogueContext::CompletionFailed;
-		}
-	}*/
-	
-	// invalid case
-	return EQuestDialogueContext::Available;
+	return EQuestDialogueContext();
 }

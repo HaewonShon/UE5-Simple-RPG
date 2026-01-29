@@ -86,6 +86,28 @@ void UQuestManagerSubsystem::ProcessInteraction(FPrimaryAssetId NPCId, ASimpleRP
 
 }
 
+EQuestSelectionResult UQuestManagerSubsystem::ResolveQuestSelection(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
+{
+    EQuestStatus QuestStatus = GetQuestStatus(QuestId, PlayerState);
+    if (QuestStatus == EQuestStatus::NotStarted)
+    {
+        return EQuestSelectionResult::Available;
+    }
+    else if (QuestStatus == EQuestStatus::InProgress)
+    {
+        bool bIsQuestCleared = TryClearQuest(QuestId, PlayerState);
+        if(bIsQuestCleared)
+        {
+            return EQuestSelectionResult::Cleared;
+        }
+        else
+        {
+            return EQuestSelectionResult::ClearFailed;
+        }
+    };
+    return EQuestSelectionResult::Available;
+}
+
 EQuestStatus UQuestManagerSubsystem::GetQuestStatus(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
 {
     if (UQuestManagerComponent* Component = PlayerState->GetQuestManagerComponent().Get())
@@ -95,27 +117,29 @@ EQuestStatus UQuestManagerSubsystem::GetQuestStatus(FPrimaryAssetId QuestId, ASi
     return EQuestStatus::Count;
 }
 
-void UQuestManagerSubsystem::GrantQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
+bool UQuestManagerSubsystem::TryGrantQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)
 {
     if (!PlayerState)
     {
         UE_LOG(LogQuest, Warning, TEXT("GrantQuest Received Player is not valid"));
-        return;
+        return false;
     }
 
     const UQuestData* Quest = Get(QuestId);
     if (!Quest)
     {
         UE_LOG(LogQuest, Warning, TEXT("GrantQuest cannot find quest with Id: %s"), *QuestId.ToString());
-        return;
+        return false;
     }
 
     if (UQuestManagerComponent* QuestComponent = PlayerState->GetComponentByClass<UQuestManagerComponent>())
     {
         bool bResult = QuestComponent->RecevieQuest(Quest);
+        return bResult;
 
         // update available quest?
     }
+    return false;
 }
 
 bool UQuestManagerSubsystem::CanClearQuest(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)

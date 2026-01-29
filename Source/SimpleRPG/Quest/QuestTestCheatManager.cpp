@@ -17,6 +17,6 @@ void UQuestTestCheatManager::GiveQuest(int32 Index)
 
 	if (UQuestManagerSubsystem* QuestManagerSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{
-		QuestManagerSubsystem->GrantQuest(QuestList[Index]->AssetId, Cast<ASimpleRPGPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0)));
+		//QuestManagerSubsystem->TryGrantQuest(QuestList[Index]->AssetId, Cast<ASimpleRPGPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0)));
 	}
 }

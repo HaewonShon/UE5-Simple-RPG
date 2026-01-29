@@ -101,7 +101,7 @@ void UDialogueWidget::OnRespond(int32 ResponseIndex)
 
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		Subsystem->OnDialogueResponses(CachedResponses[ResponseIndex]);
+		Subsystem->OnDialogueResponse(CachedResponses[ResponseIndex]);
 	}
 }
 
@@ -112,7 +112,7 @@ void UDialogueWidget::SetNextPage()
 
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		Subsystem->OnDialogueResponses(Response);
+		Subsystem->OnDialogueResponse(Response);
 	}
 }
 
@@ -120,7 +120,7 @@ void UDialogueWidget::OnQuestAcceptButtonClicked()
 {
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		Subsystem->OnDialogueResponses(CachedResponses[AcceptResponseIndex]);
+		Subsystem->OnDialogueResponse(CachedResponses[AcceptResponseIndex]);
 	}
 }
 
@@ -128,6 +128,6 @@ void UDialogueWidget::OnQuestDeclineButtonClicked()
 {
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		Subsystem->OnDialogueResponses(CachedResponses[DeclineResponseIndex]);
+		Subsystem->OnDialogueResponse(CachedResponses[DeclineResponseIndex]);
 	}
 }

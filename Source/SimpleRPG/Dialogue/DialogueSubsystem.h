@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "DialogueData.h"
+#include "../Quest/QuestManagerSubsystem.h"
 #include "DialogueSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnDialogueBegin)
@@ -51,7 +52,7 @@ public:
 	void BeginDialogue(class ANPCCharacter* NPC, class ASimpleRPGPlayerState* PS);
 
 	UFUNCTION()
-	void OnDialogueResponses(FDialogueResponse Response);
+	void OnDialogueResponse(FDialogueResponse Response);
 
 	FDialogueInfo RequestCurrentDialogueInfo();
 
@@ -61,8 +62,9 @@ public:
 
 protected:
 	void UpdateDialogueNode(int NextNodeIndex);
+	void HandleQuestSelectResponse(const FDialogueResponse& Response);
 	FDialogueInfo BuildDialogueWithCurrentNode();
-	EQuestDialogueContext ResolveQuestDialogueContext(FPrimaryAssetId QuestId);
+	EQuestDialogueContext ConvertQuestSelectionResultToContext(EQuestSelectionResult SelectionResult);
 	
 	TWeakObjectPtr<class UDialogueData> CurrentDialogueData;
 	int32 CurrentNodeIndex;

@@ -7,9 +7,13 @@
 #include "QuestData.h"
 #include "QuestManagerSubsystem.generated.h"
 
-/**
- *		Subsystem for Quest in game
- */
+UENUM()
+enum EQuestSelectionResult : uint8
+{
+	Available,
+	Cleared,
+	ClearFailed
+};
 
 USTRUCT()
 struct FQuestStatusEntry
@@ -19,6 +23,10 @@ struct FQuestStatusEntry
 	FPrimaryAssetId Id;
 	EQuestStatus Status;
 };
+
+/**
+ *		Subsystem for Quest in game
+ */
 
 
 UCLASS()
@@ -32,10 +40,11 @@ public:
 	void RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId);
 	TArray<FQuestStatusEntry> GetAvailableQuestListForNPC(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PlayerState);
 
-	void ProcessInteraction(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PS);
 	EQuestStatus GetQuestStatus(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 
-	void GrantQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
+	void ProcessInteraction(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PS);
+	EQuestSelectionResult ResolveQuestSelection(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
+	bool TryGrantQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 	bool CanClearQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 	bool TryClearQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 
