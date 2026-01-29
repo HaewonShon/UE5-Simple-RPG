@@ -2,12 +2,12 @@
 
 
 #include "DialogueWidget.h"
-#include "../Character/SimpleRPGPlayerController.h"
-#include "../Dialogue/DialogueData.h"
+#include "../../Character/SimpleRPGPlayerController.h"
+#include "../../Dialogue/DialogueData.h"
 #include "Components/TextBlock.h"
-#include "../Dialogue/DialogueSubsystem.h"
+#include "../../Dialogue/DialogueSubsystem.h"
 #include "Components/VerticalBox.h"
-#include "QuestOfferButtonWidget.h"
+#include "../Quest/QuestOfferButtonWidget.h"
 #include "Components/Button.h"
 
 void UDialogueWidget::IntializeDialogue(const UDialogueData* Dialogue)

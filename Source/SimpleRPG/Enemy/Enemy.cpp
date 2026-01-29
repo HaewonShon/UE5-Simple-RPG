@@ -3,7 +3,7 @@
 
 #include "Enemy.h"
 #include "../Gameplay/CharacterAttributeSet.h"
-#include "../UI/EnemyHPDisplayWidgetComponent.h"
+#include "../UI/Gameplay/EnemyHPDisplayWidgetComponent.h"
 #include "../Gameplay/DamageTextActor.h"
 #include "../Item/ItemLootSubsystem.h"
 #include "../Quest/QuestManagerSubsystem.h"

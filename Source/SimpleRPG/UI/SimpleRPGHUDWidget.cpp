@@ -3,7 +3,7 @@
 
 #include "SimpleRPGHUDWidget.h"
 #include "Inventory/InventoryWidget.h"
-#include "BackdropWidget.h"
+#include "Inventory/BackdropWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Inventory/ItemDescriptionWidget.h"

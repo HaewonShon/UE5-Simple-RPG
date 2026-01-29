@@ -2,7 +2,7 @@
 
 
 #include "QuestStatusWidget.h"
-#include "../Quest/QuestData.h"
+#include "../../Quest/QuestData.h"
 #include "Components/TextBlock.h"
 
 void UQuestStatusWidget::RegisterQuest(const UQuestData* QuestData)

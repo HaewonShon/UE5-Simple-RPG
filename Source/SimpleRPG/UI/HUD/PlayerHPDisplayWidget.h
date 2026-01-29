@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ProgressDisplayWidget.h"
+#include "../ProgressDisplayWidget.h"
 #include "GameplayEffectTypes.h"
 #include "PlayerHPDisplayWidget.generated.h"
 

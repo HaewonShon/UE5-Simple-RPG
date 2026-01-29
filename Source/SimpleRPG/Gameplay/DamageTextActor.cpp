@@ -3,7 +3,7 @@
 
 #include "DamageTextActor.h"
 #include "Components/WidgetComponent.h"
-#include "../UI/DamageTextWidget.h"
+#include "../UI/Gameplay/DamageTextWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 

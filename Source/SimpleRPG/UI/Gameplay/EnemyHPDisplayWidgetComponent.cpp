@@ -2,9 +2,9 @@
 
 
 #include "EnemyHPDisplayWidgetComponent.h"
-#include "ProgressDisplayWidget.h"
-#include "../Enemy/Enemy.h"
-#include "../Gameplay/CharacterAttributeSet.h"
+#include "../ProgressDisplayWidget.h"
+#include "../../Enemy/Enemy.h"
+#include "../../Gameplay/CharacterAttributeSet.h"
 #include "Kismet/GameplayStatics.h"
 
 UEnemyHPDisplayWidgetComponent::UEnemyHPDisplayWidgetComponent()

@@ -10,7 +10,7 @@
 #include "../../Character/SimpleRPGPlayerState.h"
 #include "../../Character/Inventory/InventoryComponent.h"
 #include "InventorySlotDragWidget.h"
-#include "../BackdropWidget.h"
+#include "BackdropWidget.h"
 #include "ItemDescriptionWidget.h"
 #include "Misc/OutputDeviceDebug.h"
 #include "Blueprint/WidgetLayoutLibrary.h"

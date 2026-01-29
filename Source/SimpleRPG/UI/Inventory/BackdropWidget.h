@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Inventory/InventorySlotWidget.h"
+#include "InventorySlotWidget.h"
 #include "BackdropWidget.generated.h"
 
 DECLARE_DELEGATE_OneParam(FOnItemDiscard, FSlotInfo);

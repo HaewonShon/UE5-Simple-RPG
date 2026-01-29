@@ -8,7 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "../UI/SimpleRPGHUDWidget.h"
 #include "../Dialogue/DialogueCameraActor.h"
-#include "../UI/DialogueWidget.h"
+#include "../UI/Dialogue/DialogueWidget.h"
 #include "../Dialogue/DialogueSubsystem.h"
 #include "NPCCharacter.h"
 #include "SimpleRPGPlayerState.h"

@@ -2,8 +2,8 @@
 
 
 #include "QuestDisplayWidget.h"
-#include "../Character/SimpleRPGPlayerState.h"
-#include "../Quest/QuestManagerComponent.h"
+#include "../../Character/SimpleRPGPlayerState.h"
+#include "../../Quest/QuestManagerComponent.h"
 #include "Components/VerticalBox.h"
 #include "QuestStatusWidget.h"
 
