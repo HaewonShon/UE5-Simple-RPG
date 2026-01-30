@@ -6,6 +6,8 @@
 #include "../Character/SimpleRPGPlayerState.h"
 #include "../Enemy/Enemy.h"
 #include "QuestManagerComponent.h"
+#include "../Item/ItemDatabaseSubsystem.h"
+#include "../Character/Inventory/InventoryComponent.h"
 
 void UQuestManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -156,11 +158,23 @@ bool UQuestManagerSubsystem::TryClearQuest(FPrimaryAssetId QuestId, ASimpleRPGPl
 {
     if (UQuestManagerComponent* QuestComponent = PlayerState->GetComponentByClass<UQuestManagerComponent>())
     {
-        if (QuestComponent->CanClearQuest(QuestId))
+        if (!QuestComponent->CanClearQuest(QuestId))
         {
-            QuestComponent->ClearQuest(QuestId);
-            return true;
+            UE_LOG(LogQuest, Warning, TEXT("TryClearQuest Failed: not able to clear quest"), *QuestId.ToString());
+            return false;
         }
+
+        FRewardContext RewardContext;
+        RewardContext.Inventory = PlayerState->GetComponentByClass<UInventoryComponent>();
+        if (!RewardGrantHelper::TryGrantReward(Get(QuestId)->Reward, RewardContext))
+        {
+            UE_LOG(LogQuest, Warning, TEXT("TryClearQuest Failed: not able to grant reward"), *QuestId.ToString());
+            return false;
+        }
+
+        UE_LOG(LogQuest, Warning, TEXT("TryClearQuest success: cleared %s"), *QuestId.ToString());
+        QuestComponent->ClearQuest(QuestId);
+        return true;
     }
 
     return false;
@@ -189,7 +203,7 @@ void UQuestManagerSubsystem::OnPlaceVisited(const FGameplayTag& PlaceTag, class 
 }
 
 void UQuestManagerSubsystem::BuildCache()
-{
+{//
     TArray<FPrimaryAssetId> ItemIds;
     USimpleRPGAssetManager::Get().GetPrimaryAssetIdList(FPrimaryAssetType("QuestData"), ItemIds);
 

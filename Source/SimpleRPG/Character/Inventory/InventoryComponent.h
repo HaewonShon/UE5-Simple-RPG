@@ -43,12 +43,14 @@ public:
 	*/
 	bool AddItem(FItemInstance& ItemInstance);
 
-	/* Remove Item From slot. ex) throw out, quest.. */
 	void RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem);
 
 	void SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2);
 
 	bool UseItem(EInventoryCategory PageCategory, int32 SlotIndex);
+
+	bool CanAddRewardItems(const TArray<struct FItemReward>& RewardItems);
+	bool AddRewardItems(const TArray<struct FItemReward>& RewardItems);
 
 	/*
 	*	Equipment Management functions

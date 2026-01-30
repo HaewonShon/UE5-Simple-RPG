@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "../../Item/ItemLootSubsystem.h"
 #include "../../Item/ItemDatabaseSubsystem.h"
+#include "../../GameSystem/Reward.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -121,6 +122,79 @@ bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotInd
 {
 	UE_LOG(LogInventory, Log, TEXT("UseItem SlotIndex %i"), SlotIndex);
 	return false;
+}
+
+bool UInventoryComponent::CanAddRewardItems(const TArray<FItemReward>& RewardItems)
+{
+	bool bResult = true;
+	TMap<EInventoryCategory, int32> RequiredSlot;
+	RequiredSlot.Add({ EInventoryCategory::Equipment, 0 });
+	RequiredSlot.Add({ EInventoryCategory::Consumable , 0 });
+	RequiredSlot.Add({ EInventoryCategory::Material, 0 });
+
+	UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
+	check(ItemDB);
+
+	for (const FItemReward& Reward : RewardItems)
+	{
+		const UItemData* ItemData = ItemDB->Get(Reward.ItemId);
+		EInventoryCategory Category = ConvertItemToInventoryCategory(ItemData->Category);
+
+		if (ItemData->bIsStackable)
+		{
+			// TODO : consider existing slot first
+			RequiredSlot[Category] += (Reward.Amount + ItemData->MaxStackSize - 1) / ItemData->MaxStackSize;
+		}
+		else
+		{
+			RequiredSlot[Category] += Reward.Amount;
+		}
+	}
+
+	for (auto& InventoryPagePair : InventoryPages)
+	{
+		const FInventoryPage& InventoryPage = InventoryPagePair.Value;
+
+		int32 RemainingSlot = InventoryPage.CountMaxSlot - InventoryPage.CountFilledSlot;
+		if (RemainingSlot < RequiredSlot[InventoryPagePair.Key])
+		{
+			bResult = false;
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool UInventoryComponent::AddRewardItems(const TArray<struct FItemReward>& RewardItems)
+{
+	UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
+	check(ItemDB);
+
+	for (const FItemReward& Reward : RewardItems)
+	{
+		const UItemData* ItemData = ItemDB->Get(Reward.ItemId);
+
+		if (ItemData->bIsStackable)
+		{
+			FItemInstance RewardItemInstance;
+			RewardItemInstance.SetItem(ItemData, Reward.Amount);
+
+			AddItem(RewardItemInstance);
+		}
+		else
+		{
+			for (int32 i = 0; i < Reward.Amount; ++i)
+			{
+				FItemInstance RewardItemInstance;
+				RewardItemInstance.SetItem(ItemData);
+
+				AddItem(RewardItemInstance);
+			}
+		}
+	}
+
+	return true;
 }
 
 void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType EquipmentType)

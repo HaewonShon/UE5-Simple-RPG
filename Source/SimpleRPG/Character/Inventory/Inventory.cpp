@@ -56,7 +56,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 				if (ItemInstance.StackCount == 0)
 				{
 					return true;
-				}
+				} 
 			}
 			else if(EmptySlot == nullptr && Slot.IsEmpty())
 			{

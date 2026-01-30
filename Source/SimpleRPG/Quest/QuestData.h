@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
+#include "../GameSystem/Reward.h" // FReward
 #include "QuestData.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogQuest, Log, All);
@@ -16,14 +17,6 @@ enum class EQuestObjectiveType : uint8
 	Collect,
 	Explore,
 	Interact,
-	Count UMETA(Hidden)
-};
-
-UENUM(Blueprintable)
-enum class EQuestRewardType : uint8
-{
-	Exp,
-	Item,
 	Count UMETA(Hidden)
 };
 
@@ -57,19 +50,25 @@ struct FQuestObjective
 	int32 RequiredCount;
 };
 
+USTRUCT()
+struct FRewardItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	FPrimaryAssetId ItemId;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 Amount;
+};
+
 USTRUCT(Blueprintable)
 struct FQuestReward
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	EQuestRewardType Type;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	FPrimaryAssetId RewardID;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	int32 RewardAmount;
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FRewardItem> Items;
 };
 
 /**
@@ -98,7 +97,7 @@ public:
 	TArray<FQuestObjective> Objectives;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
-	TArray<FQuestReward> Rewards;
+	FReward Reward;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Quest")
 	class UQuestDialogueData* DialogueData;
