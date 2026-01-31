@@ -3,7 +3,7 @@
 
 #include "SimpleRPGPlayerState.h"
 #include "../Gameplay/CharacterAttributeSet.h"
-#include "Inventory/InventoryComponent.h"
+#include "Components/Inventory/InventoryComponent.h"
 #include "../Quest/QuestManagerComponent.h"
 
 ASimpleRPGPlayerState::ASimpleRPGPlayerState()

@@ -7,7 +7,10 @@
 #include "../Enemy/Enemy.h"
 #include "QuestManagerComponent.h"
 #include "../Item/ItemDatabaseSubsystem.h"
-#include "../Character/Inventory/InventoryComponent.h"
+
+// reward context
+#include "../Character/Components/Inventory/InventoryComponent.h"
+#include "../Character/Components/LevelComponent.h"
 
 void UQuestManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -165,7 +168,8 @@ bool UQuestManagerSubsystem::TryClearQuest(FPrimaryAssetId QuestId, ASimpleRPGPl
         }
 
         FRewardContext RewardContext;
-        RewardContext.Inventory = PlayerState->GetComponentByClass<UInventoryComponent>();
+        RewardContext.InventoryComponent = PlayerState->GetComponentByClass<UInventoryComponent>();
+        RewardContext.LevelComponent = PlayerState->GetComponentByClass<ULevelComponent>();
         if (!RewardGrantHelper::TryGrantReward(Get(QuestId)->Reward, RewardContext))
         {
             UE_LOG(LogQuest, Warning, TEXT("TryClearQuest Failed: not able to grant reward"), *QuestId.ToString());

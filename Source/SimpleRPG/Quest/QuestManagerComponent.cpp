@@ -3,7 +3,7 @@
 
 #include "QuestManagerComponent.h"
 #include "QuestData.h"
-#include "../Character/Inventory/InventoryComponent.h"
+#include "../Character/Components/Inventory/InventoryComponent.h"
 
 // Sets default values for this component's properties
 UQuestManagerComponent::UQuestManagerComponent()

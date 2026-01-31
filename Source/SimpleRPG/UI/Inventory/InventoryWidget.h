@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "../../Character/Inventory/Inventory.h"
+#include "../../Character/Components/Inventory/InventoryComponent.h"
 #include "InventorySlotWidget.h"
 #include "InventoryWidget.generated.h"
 

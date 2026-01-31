@@ -28,6 +28,9 @@ struct FReward
 
 	UPROPERTY(EditAnywhere)
 	TArray<FItemReward> Items;
+
+	UPROPERTY(EditAnywhere)
+	int32 ExpAmount;
 };
 
 USTRUCT()
@@ -35,7 +38,8 @@ struct FRewardContext
 {
 	GENERATED_BODY()
 
-	class UInventoryComponent* Inventory;
+	TWeakObjectPtr<class UInventoryComponent> InventoryComponent;
+	TWeakObjectPtr<class ULevelComponent> LevelComponent;
 };
 
 class SIMPLERPG_API RewardGrantHelper

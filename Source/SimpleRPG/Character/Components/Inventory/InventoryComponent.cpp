@@ -5,9 +5,9 @@
 #include "Misc/EnumRange.h"
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemComponent.h"
-#include "../../Item/ItemLootSubsystem.h"
-#include "../../Item/ItemDatabaseSubsystem.h"
-#include "../../GameSystem/Reward.h"
+#include "../../../Item/ItemLootSubsystem.h"
+#include "../../../Item/ItemDatabaseSubsystem.h"
+#include "../../../GameSystem/Reward.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 

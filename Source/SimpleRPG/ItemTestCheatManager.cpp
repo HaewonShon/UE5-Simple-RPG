@@ -4,7 +4,7 @@
 #include "ItemTestCheatManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/SimpleRPGPlayerState.h"
-#include "Character/Inventory/InventoryComponent.h"
+#include "Character/Components/Inventory/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogCheat)
 

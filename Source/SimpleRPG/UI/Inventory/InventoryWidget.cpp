@@ -8,7 +8,6 @@
 #include "InventorySlotWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
 #include "../../Character/SimpleRPGPlayerState.h"
-#include "../../Character/Inventory/InventoryComponent.h"
 #include "InventorySlotDragWidget.h"
 #include "BackdropWidget.h"
 #include "ItemDescriptionWidget.h"

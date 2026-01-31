@@ -13,7 +13,7 @@
 #include "Abilities/PlayerAttackAbilityBase.h"
 #include "SimpleRPGPlayerState.h"
 #include "SimpleRPGPlayerController.h"
-#include "Inventory/InventoryComponent.h"
+#include "Components/Inventory/InventoryComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InteractionRotationComponent.h"
 

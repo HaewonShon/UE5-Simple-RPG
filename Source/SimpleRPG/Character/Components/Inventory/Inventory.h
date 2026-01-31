@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../../Item/ItemData.h"
+#include "../../../Item/ItemData.h"
 #include "Misc/EnumRange.h"
 #include "Inventory.generated.h"
 

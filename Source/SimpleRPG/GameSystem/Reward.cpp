@@ -2,7 +2,8 @@
 
 
 #include "Reward.h"
-#include "../Character/Inventory/InventoryComponent.h"
+#include "../Character/Components/Inventory/InventoryComponent.h"
+#include "../Character/Components/LevelComponent.h"
 
 bool RewardGrantHelper::TryGrantReward(const FReward& Reward, const FRewardContext& Context)
 {
@@ -10,7 +11,7 @@ bool RewardGrantHelper::TryGrantReward(const FReward& Reward, const FRewardConte
 
 	// Item reward resolve
 	{
-		bCanGrantReward &= Context.Inventory->CanAddRewardItems(Reward.Items);
+		bCanGrantReward &= Context.InventoryComponent->CanAddRewardItems(Reward.Items);
 	}
 
 	if (!bCanGrantReward)
@@ -19,7 +20,8 @@ bool RewardGrantHelper::TryGrantReward(const FReward& Reward, const FRewardConte
 	}
 
 	// Grant Reward
-	Context.Inventory->AddRewardItems(Reward.Items);
+	Context.InventoryComponent->AddRewardItems(Reward.Items);
+	Context.LevelComponent->GrantExp(Reward.ExpAmount);
 
 	return true;
 }

@@ -21,8 +21,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateCurrentValue(float CurrentValueAmount);
 
+protected:
 	virtual void NativeTick(const FGeometry& Geometry, float InDeltaTime) override;
-
 	/*
 	*	Variables
 	*/

@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Inventory.h"
-#include "../../Item/ItemData.h"
-#include "../../Item/EquipmentItemData.h"
+#include "../../../Item/ItemData.h"
+#include "../../../Item/EquipmentItemData.h"
 #include "GameplayEffectTypes.h"
 #include "InventoryComponent.generated.h"
 
