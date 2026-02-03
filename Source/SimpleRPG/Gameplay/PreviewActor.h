@@ -24,5 +24,8 @@ protected:
 	TObjectPtr<class USkeletalMeshComponent> SkeletalMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<class USceneCaptureComponent2D> SceneCaptureComponent;
+	TObjectPtr<class USceneCaptureComponent2D> PortraitCaptureComponent;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class USceneCaptureComponent2D> FullBodyCaptureComponent;
 };

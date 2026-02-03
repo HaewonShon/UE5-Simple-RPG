@@ -20,19 +20,35 @@ APreviewActor::APreviewActor()
 	SkeletalMeshComponent->bCastDynamicShadow = false;
 	SkeletalMeshComponent->CastShadow = false;
 
-	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComp"));
-	SceneCaptureComponent->SetupAttachment(SkeletalMeshComponent);
+	// capture component for portrait
+	PortraitCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PortraitSceneCaptureComp"));
+	PortraitCaptureComponent->SetupAttachment(SkeletalMeshComponent);
 
-	SceneCaptureComponent->SetRelativeLocation(FVector(-450.f, 0.f, 0.f));
-	SceneCaptureComponent->SetRelativeRotation(FRotator::ZeroRotator);
-	SceneCaptureComponent->SetRelativeScale3D(FVector::OneVector);
+	PortraitCaptureComponent->SetRelativeLocation(FVector(-450.f, 0.f, 0.f));
+	PortraitCaptureComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	PortraitCaptureComponent->SetRelativeScale3D(FVector::OneVector);
 
-	SceneCaptureComponent->bCaptureEveryFrame = false;
-	SceneCaptureComponent->bCaptureOnMovement = false;
-	SceneCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	PortraitCaptureComponent->bCaptureEveryFrame = false;
+	PortraitCaptureComponent->bCaptureOnMovement = false;
+	PortraitCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 
-	SceneCaptureComponent->ShowFlags.MotionBlur = false;
-	SceneCaptureComponent->ShowFlags.TemporalAA = false;
+	PortraitCaptureComponent->ShowFlags.MotionBlur = false;
+	PortraitCaptureComponent->ShowFlags.TemporalAA = false;
+
+	// capture component for full-body image
+	FullBodyCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("FullBodySceneCaptureComp"));
+	FullBodyCaptureComponent->SetupAttachment(SkeletalMeshComponent);
+
+	FullBodyCaptureComponent->SetRelativeLocation(FVector(-450.f, 0.f, 0.f));
+	FullBodyCaptureComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	FullBodyCaptureComponent->SetRelativeScale3D(FVector::OneVector);
+
+	FullBodyCaptureComponent->bCaptureEveryFrame = false;
+	FullBodyCaptureComponent->bCaptureOnMovement = false;
+	FullBodyCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+
+	FullBodyCaptureComponent->ShowFlags.MotionBlur = false;
+	FullBodyCaptureComponent->ShowFlags.TemporalAA = false;
 }
 
 void APreviewActor::BeginPlay()
@@ -42,9 +58,13 @@ void APreviewActor::BeginPlay()
 
 void APreviewActor::Capture()
 {
-	if (SceneCaptureComponent)
+	if (PortraitCaptureComponent)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Preview captured"));
-		SceneCaptureComponent->CaptureScene();
+		PortraitCaptureComponent->CaptureScene();
+	}
+
+	if (FullBodyCaptureComponent)
+	{
+		FullBodyCaptureComponent->CaptureScene();
 	}
 }
