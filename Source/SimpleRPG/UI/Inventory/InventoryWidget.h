@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "../../Character/Components/Inventory/InventoryComponent.h"
+#include "Character/Components/Inventory/InventoryComponent.h"
 #include "InventorySlotWidget.h"
 #include "InventoryWidget.generated.h"
 
@@ -57,18 +57,21 @@ protected:
 protected:
 	/* Update Inventory manually when interface opened */
 	UFUNCTION()
-	void OnContentChanged(EInventoryCategory ChangedPageCategory);
+	void UpdateContents(EInventoryCategory ChangedPageCategory);
 
 	UFUNCTION()
-	void OnEquipmentChanged();
+	void UpdateEquipmentSlotWidgets();
 
 	UFUNCTION()
 	void UpdateCurrentPageContents();
 
+	UFUNCTION()
+	void UpdateGoldAmount(int32 Amount);
 
-	/*
+
+	/**************************
 	*   Widget Properties 
-	*/
+	***************************/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	int32 PageWidth;
 
@@ -84,16 +87,19 @@ protected:
 	UPROPERTY()
 	TMap<ESlotType, class UInventorySlotWidget*> EquipmentSlotMap;
 
-	/*
+	/************************
 	*   Bind Widgets
-	*/
+	*************************/
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInvalidationBox> InvalidationBox;
 
-	// Equipment Slots
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> GoldDisplayText;
+
+	/**** Equipment Slots ****/
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInventorySlotWidget> HelmetSlot;
 
@@ -110,9 +116,9 @@ protected:
 	TObjectPtr<class UInventorySlotWidget> WeaponSlot;
 
 
-	/*
+	/************************
 	*   Other members for inventory widget
-	*/
+	*************************/
 	UPROPERTY()
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 

@@ -14,6 +14,7 @@
 #include "SimpleRPGPlayerState.h"
 #include "SimpleRPGPlayerController.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "Components/CurrencyComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InteractionRotationComponent.h"
 
@@ -80,6 +81,18 @@ bool APlayerCharacter::AddItem(FItemInstance& Item)
 		if (InventoryComponent.IsValid())
 		{
 			return InventoryComponent->AddItem(Item);
+		}
+	}
+	return false;
+}
+
+bool APlayerCharacter::AddGold(int32 GoldAmount)
+{
+	if (ASimpleRPGPlayerState* PS = Cast<ASimpleRPGPlayerState>(GetPlayerState()))
+	{
+		if (UCurrencyComponent* CurrencyComponent = PS->GetComponentByClass<UCurrencyComponent>())
+		{
+			return CurrencyComponent->TryAddCurrency(ECurrencyType::Gold, GoldAmount);
 		}
 	}
 	return false;

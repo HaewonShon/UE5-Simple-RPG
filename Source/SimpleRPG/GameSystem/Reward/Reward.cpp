@@ -2,8 +2,8 @@
 
 
 #include "Reward.h"
-#include "../Character/Components/Inventory/InventoryComponent.h"
-#include "../Character/Components/LevelComponent.h"
+#include "../../Character/Components/Inventory/InventoryComponent.h"
+#include "../../Character/Components/LevelComponent.h"
 
 bool RewardGrantHelper::TryGrantReward(const FReward& Reward, const FRewardContext& Context)
 {

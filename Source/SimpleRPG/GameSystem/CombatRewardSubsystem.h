@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GameplayTagContainer.h"
-#include "ItemData.h"
-#include "ItemLootSubsystem.generated.h"
+#include "../Item/ItemData.h"
+#include "CombatRewardSubsystem.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogItemLootSubsystem, Log, All)
+DECLARE_LOG_CATEGORY_EXTERN(LogCombatRewardSystem, Log, All)
 
 /**
  *	Subsystem manages item loot table & determine item to drop, spawn item
@@ -34,6 +34,9 @@ struct FLootInfo
 	TArray<FLootItem> Item;
 	float TotalWeight;
 	int32 ItemCount;
+
+	int32 MinGoldAmount;
+	int32 MaxGoldAmount;
 };
 
 USTRUCT(BlueprintType)
@@ -46,20 +49,23 @@ struct FLootTableRow : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FLootItem> LootItemList;
+
+	UPROPERTY(EditAnywhere)
+	FIntPoint Gold; // { Min, Max }
 };
 
 UCLASS(Blueprintable)
-class SIMPLERPG_API UItemLootSubsystem : public UGameInstanceSubsystem
+class SIMPLERPG_API UCombatRewardSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	
 public:
-	UItemLootSubsystem();
+	UCombatRewardSubsystem();
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	/* Item spawn by request from enemy death event */
-	void SpawnItem(FGameplayTag EnemyTag, FVector Location);
+	void SpawnDropFromEnemy(FGameplayTag EnemyTag, FVector Location);
 
 	/* Item spawn by request from inventory item drop */
 	void SpawnItem(const FItemInstance& ItemInstance, FVector Location);
@@ -67,12 +73,14 @@ public:
 private:
 	void ReadLootTable();
 
-	const class UItemData* SelectRandomItem(FGameplayTag EnemyTag);
+	const class UItemData* SelectRandomItem(FGameplayTag EnemyTag) const;
+	int32 GetRandomGoldAmount(FGameplayTag EnemyTag) const;
 
 	TSubclassOf<class AItemActor> ItemActor;
+	TSubclassOf<class AGoldDropActor> GoldDropActor;
 
 	UPROPERTY()
-	TMap<FGameplayTag, FLootInfo> Cache;
+	TMap<FGameplayTag, FLootInfo> EnemyLootInfoCache;
 
 	static constexpr float ItemPickupDelay = 5.f;
 };

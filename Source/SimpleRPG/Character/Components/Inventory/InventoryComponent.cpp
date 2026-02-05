@@ -5,9 +5,9 @@
 #include "Misc/EnumRange.h"
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemComponent.h"
-#include "../../../Item/ItemLootSubsystem.h"
+#include "../../../GameSystem/CombatRewardSubsystem.h"
 #include "../../../Item/ItemDatabaseSubsystem.h"
-#include "../../../GameSystem/Reward.h"
+#include "../../../GameSystem/Reward/Reward.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -92,12 +92,12 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 		const FItemInstance& ItemInstance = TargetPage.GetItemInstance(SlotIndex);
 
 		// spawn actor
-		if (UItemLootSubsystem* ItemLootSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemLootSubsystem>())
+		if (UCombatRewardSubsystem* CombatRewardSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UCombatRewardSubsystem>())
 		{
 			if (APlayerState* PlayerState = Cast<APlayerState>(GetOwner()))
 			{
 				UE_LOG(LogInventory, Log, TEXT("Item spawn %i requested"), SlotIndex);
-				ItemLootSubsystem->SpawnItem(ItemInstance, PlayerState->GetPawn()->GetActorLocation());
+				CombatRewardSubsystem->SpawnItem(ItemInstance, PlayerState->GetPawn()->GetActorLocation());
 			}
 		}
 	}

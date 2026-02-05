@@ -5,7 +5,7 @@
 #include "../Gameplay/CharacterAttributeSet.h"
 #include "../UI/Gameplay/EnemyHPDisplayWidgetComponent.h"
 #include "../Gameplay/DamageTextActor.h"
-#include "../Item/ItemLootSubsystem.h"
+#include "../GameSystem/CombatRewardSubsystem.h"
 #include "../Quest/QuestManagerSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEnemy);
@@ -105,10 +105,10 @@ void AEnemy::OnDeath()
 	}
 
 	// Item Drop Request
-	if (UItemLootSubsystem* ItemLootSubsystem = GetGameInstance()->GetSubsystem<UItemLootSubsystem>())
+	if (UCombatRewardSubsystem* CombatRewardSubsystem = GetGameInstance()->GetSubsystem<UCombatRewardSubsystem>())
 	{
 		UE_LOG(LogEnemy, Verbose, TEXT("Item spawn requested"));
-		ItemLootSubsystem->SpawnItem(EnemyTag, GetActorLocation());
+		CombatRewardSubsystem->SpawnDropFromEnemy(EnemyTag, GetActorLocation());
 	}
 
 	// Death Notify for quest system

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "GameplayTagContainer.h"
-#include "../GameSystem/Reward.h" // FReward
+#include "../GameSystem/Reward/Reward.h" // FReward
 #include "QuestData.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogQuest, Log, All);

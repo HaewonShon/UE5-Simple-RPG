@@ -2,17 +2,21 @@
 
 
 #include "InventoryWidget.h"
-#include "Components/Border.h"
-#include "Components/UniformGridPanel.h"
-#include "Components/InvalidationBox.h"
 #include "InventorySlotWidget.h"
-#include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
-#include "../../Character/SimpleRPGPlayerState.h"
 #include "InventorySlotDragWidget.h"
 #include "BackdropWidget.h"
 #include "ItemDescriptionWidget.h"
-#include "Misc/OutputDeviceDebug.h"
+
+#include "Components/Border.h"
+#include "Components/UniformGridPanel.h"
+#include "Components/InvalidationBox.h"
+#include "Components/TextBlock.h"
+#include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "Misc/OutputDeviceDebug.h"
+
+#include "Character/SimpleRPGPlayerState.h"
+#include "Character/Components/CurrencyComponent.h"
 
 EEquipmentType ConvertSlotTypeToEquipmentType(ESlotType SlotType)
 {
@@ -87,26 +91,31 @@ void UInventoryWidget::NativeConstruct()
 		}
 	}
 
+	// Init component-related
 	if (ASimpleRPGPlayerState* PlayerState = GetOwningPlayerState<ASimpleRPGPlayerState>())
 	{
-		// Register components from PS
 		InventoryComponentRef = PlayerState->GetInventoryComponent();
 		check(InventoryComponentRef.IsValid());
 
-		InventoryComponentRef->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::OnContentChanged);
-		InventoryComponentRef->OnEquipmentContentChanged.BindUObject(this, &UInventoryWidget::OnEquipmentChanged);
+		InventoryComponentRef->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::UpdateContents);
+		InventoryComponentRef->OnEquipmentContentChanged.BindUObject(this, &UInventoryWidget::UpdateEquipmentSlotWidgets);
 		UE_LOG(LogInventory, Log, TEXT("Inventory Component bound to ui"));
 		
 		OnNativeVisibilityChanged.AddUObject(this, &UInventoryWidget::OnInventoryToggled);
+
+		if (UCurrencyComponent* CurrencyComponent = PlayerState->GetComponentByClass<UCurrencyComponent>())
+		{
+			CurrencyComponent->OnGoldAmountChanged.AddUObject(this, &UInventoryWidget::UpdateGoldAmount);
+		}
 	}
 
+	// Inventory Widget Initialization
 	SelectedPage = EInventoryCategory::Equipment;
 	for (EInventoryCategory InventoryCategory : TEnumRange<EInventoryCategory>())
 	{
 		bIsPageContentChanged.Add({InventoryCategory, true});
 	}
 
-	//UUserWidget* Widget = CreateWidget<UUserWidget>(this, SlotWidgetClass);
 	SlotVisualWidget = CreateWidget<UInventorySlotDragWidget>(GetOwningPlayer(), SlotVisualWidgetClass);
 	if (SlotVisualWidget)
 	{
@@ -118,7 +127,6 @@ void UInventoryWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to create SlotVisualWidget"));
 	}
-
 }
 
 void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
@@ -205,12 +213,12 @@ void UInventoryWidget::OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2)
 	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
 	{
 		InventoryComponentRef->TryEquipItem(Slot1.SlotIndex, ConvertSlotTypeToEquipmentType(Slot2.SlotType));
-		OnEquipmentChanged();
+		UpdateEquipmentSlotWidgets();
 	}
 	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
 	{
 		InventoryComponentRef->TryEquipItem(Slot2.SlotIndex, ConvertSlotTypeToEquipmentType(Slot1.SlotType));
-		OnEquipmentChanged();
+		UpdateEquipmentSlotWidgets();
 	}
 
 	UpdateCurrentPageContents();
@@ -266,7 +274,7 @@ void UInventoryWidget::OnSlotHoverEnded()
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::Collapsed);
 }
 
-void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
+void UInventoryWidget::UpdateContents(EInventoryCategory ChangedPageCategory)
 {
 	UE_LOG(LogInventory, Verbose, TEXT("Inventory Widget OnChanged Called"));
 	bIsPageContentChanged[ChangedPageCategory] = true;
@@ -276,7 +284,7 @@ void UInventoryWidget::OnContentChanged(EInventoryCategory ChangedPageCategory)
 	}
 }
 
-void UInventoryWidget::OnEquipmentChanged()
+void UInventoryWidget::UpdateEquipmentSlotWidgets()
 {
 	EEquipmentType Types[5] = 
 		{ EEquipmentType::Helmet, EEquipmentType::Chest, EEquipmentType::Pants, EEquipmentType::Boots, EEquipmentType::Weapon };
@@ -316,4 +324,14 @@ void UInventoryWidget::UpdateCurrentPageContents()
 	}
 	UE_LOG(LogInventory, Verbose, TEXT("Inventory Widget Updated page %i"), SelectedPage);
 	bIsPageContentChanged[SelectedPage] = false;
+}
+
+void UInventoryWidget::UpdateGoldAmount(int32 Amount)
+{
+	FNumberFormattingOptions Opts;
+	Opts.UseGrouping = true;
+	Opts.MinimumIntegralDigits = 1;
+
+	FText FormattedText = FText::AsNumber(Amount, &Opts);
+	GoldDisplayText->SetText(FormattedText);
 }

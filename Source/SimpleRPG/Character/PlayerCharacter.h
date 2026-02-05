@@ -40,6 +40,7 @@ public:
 	virtual void PossessedBy(AController* NewController);
 
 	bool AddItem(FItemInstance& Item);
+	bool AddGold(int32 GoldAmount);
 
 	void SetInteractableNPC(class ANPCCharacter* NPC);
 	void ClearInteractableNPC(class ANPCCharacter* NPC);
