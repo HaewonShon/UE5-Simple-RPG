@@ -12,16 +12,9 @@
 void UDialogueSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	//for (auto& Pair : QuestStatusIcons)
-	//{
-	//	//Pair.Value.LoadSynchronous();
-	//}
-
-	QuestAvailableIcon = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Icons/Quest_Available"));
-	QuestInProgressIcon = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Icons/Quest_InProgress"));
 }
 
-void UDialogueSubsystem::BeginDialogue(ANPCCharacter* NPC, ASimpleRPGPlayerState* PS)
+void UDialogueSubsystem::BeginDefaultDialogue(ANPCCharacter* NPC, ASimpleRPGPlayerState* PS)
 {
 	if (!PS)
 	{
@@ -41,66 +34,43 @@ void UDialogueSubsystem::BeginDialogue(ANPCCharacter* NPC, ASimpleRPGPlayerState
 	}
 	FDialogueInfo DialogueInfo = BuildDialogueWithCurrentNode();
 
-	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-	check(QuestSubsystem);
-
-	for (const FQuestStatusEntry& Quest : QuestSubsystem->GetAvailableQuestListForNPC(InteractingTargetRef->GetPrimaryAssetId(), PlayerStateRef.Get()))
+	/* add actions using IActionProvider*/
+	for (UActorComponent* Component : NPC->GetComponentsByInterface(UActionProvider::StaticClass()))
 	{
-		if (const UQuestData* QuestData = QuestSubsystem->Get(Quest.Id))
-		{
-			DialogueInfo.Responses.Add({ EDialogueResponseType::QuestSelect,
-				QuestData->GetPrimaryAssetId(),
-				QuestData->Title,
-				(Quest.Status == EQuestStatus::NotStarted) ? QuestAvailableIcon : QuestInProgressIcon });
-		}
+		TArray<FActionInfo> Actions = Cast<IActionProvider>(Component)->GetAvailableActions(PS);
+		DialogueInfo.Actions.Append(Actions);
 	}
 
 	OnDialogueUpdate.ExecuteIfBound(DialogueInfo);
 }
 
-void UDialogueSubsystem::OnDialogueResponse(FDialogueResponse Response)
+void UDialogueSubsystem::BeginDialogue(UDialogueData* Dialogue, int32 DialogueBeginNode)
 {
-	if (Response.Type == EDialogueResponseType::Continue)
-	{
-		if (!CurrentDialogueData.Get())
-		{
-			OnDialogueEnd.Broadcast();
-			return;
-		}
+	CurrentDialogueData = Dialogue;
+	UpdateDialogueNode(DialogueBeginNode);
+}
 
-		int32 NextNode = CurrentDialogueData->DialogueNodes[CurrentNodeIndex].NextNode;
-		if (NextNode == -1)
-		{
-			OnDialogueEnd.Broadcast();
-		}
-		else
-		{
-			UpdateDialogueNode(NextNode);
-		}
+void UDialogueSubsystem::SetContextOwner(const UActorComponent* Owner)
+{
+	ContextOwnerRef = Owner;
+}
+
+void UDialogueSubsystem::SetNextPage()
+{
+	if (!CurrentDialogueData.Get())
+	{
+		OnDialogueEnd.Broadcast();
+		return;
 	}
-	else if (Response.Type == EDialogueResponseType::Exit)
+
+	int32 NextNode = CurrentDialogueData->DialogueNodes[CurrentNodeIndex].NextNode;
+	if (NextNode == -1)
 	{
 		OnDialogueEnd.Broadcast();
 	}
-	else if (Response.Type == EDialogueResponseType::QuestSelect)
+	else
 	{
-		CurrentQuestId = Response.QuestId;
-		HandleQuestSelectResponse(Response);
-	}
-	else if (Response.Type == EDialogueResponseType::QuestAccept)
-	{
-		UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-		bool bResult = QuestSubsystem->TryGrantQuest(Response.QuestId, PlayerStateRef.Get());
-
-		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
-		int32 Node = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Accepted];
-		UpdateDialogueNode(Node);
-	}
-	else if (Response.Type == EDialogueResponseType::QuestDecline)
-	{
-		UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
-		int32 Node = QuestDialogue->ContextEntryNodes[EQuestDialogueContext::Declined];
-		UpdateDialogueNode(Node);
+		UpdateDialogueNode(NextNode);
 	}
 }
 
@@ -117,47 +87,25 @@ void UDialogueSubsystem::UpdateDialogueNode(int NextNodeIndex)
 	OnDialogueUpdate.ExecuteIfBound(DialogueInfo);
 }
 
-void UDialogueSubsystem::HandleQuestSelectResponse(const FDialogueResponse& Response)
-{
-	UQuestManagerSubsystem* QuestSubsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>();
-	const UQuestData* QuestData = QuestSubsystem->Get(Response.QuestId);
-
-	CurrentDialogueData = QuestData->DialogueData;
-	UQuestDialogueData* QuestDialogue = Cast<UQuestDialogueData>(CurrentDialogueData);
-
-	EQuestSelectionResult Result = QuestSubsystem->ResolveQuestSelection(Response.QuestId, PlayerStateRef.Get());
-
-	int NextNode = QuestDialogue->ContextEntryNodes[ConvertQuestSelectionResultToContext(Result)];
-	UpdateDialogueNode(NextNode);
-}
-
 FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 {
 	FDialogueInfo DialogueInfo;
-	if (CurrentDialogueData.IsValid() && (CurrentNodeIndex != -1 && CurrentNodeIndex < CurrentDialogueData->DialogueNodes.Num()))
+	if (CurrentDialogueData.IsValid() && 
+		(CurrentNodeIndex != -1 && CurrentNodeIndex < CurrentDialogueData->DialogueNodes.Num()))
 	{
 		const FDialogueNode& Node = CurrentDialogueData->DialogueNodes[CurrentNodeIndex];
 		DialogueInfo.NPCName = CurrentDialogueData->NPCName;
 		DialogueInfo.DialogueText = Node.DialogueText;
 
-		for (EDialogueResponseType ResponseType : Node.Responses)
+		UE_LOG(LogTemp, Warning, TEXT("Builddialogue with custom actions: %i, %i"), Node.CustomActions.Num(), ContextOwnerRef.IsValid());
+		// request custom action to owner if exist
+		if (ContextOwnerRef.IsValid())
 		{
-			DialogueInfo.Responses.Add({ ResponseType, CurrentQuestId });
+			for(FGameplayTag CustomAction : Node.CustomActions)
+			{
+				DialogueInfo.Actions.Append(Cast<IActionProvider>(ContextOwnerRef)->GetContextAction(CustomAction, PlayerStateRef.Get()));
+			}
 		}
 	}
 	return DialogueInfo;
-}
-
-EQuestDialogueContext UDialogueSubsystem::ConvertQuestSelectionResultToContext(EQuestSelectionResult SelectionResult)
-{
-	switch (SelectionResult)
-	{
-	case EQuestSelectionResult::Available:
-		return EQuestDialogueContext::Available;
-	case EQuestSelectionResult::Cleared:
-		return EQuestDialogueContext::Cleared;
-	case EQuestSelectionResult::ClearFailed:
-		return EQuestDialogueContext::ClearFailed;
-	}
-	return EQuestDialogueContext();
 }

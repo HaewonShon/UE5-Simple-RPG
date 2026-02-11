@@ -21,6 +21,7 @@ struct FQuestStatusEntry
 	GENERATED_BODY()
 
 	FPrimaryAssetId Id;
+	FText Title;
 	EQuestStatus Status;
 };
 
@@ -35,15 +36,19 @@ class SIMPLERPG_API UQuestManagerSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+
 	const UQuestData* Get(const FPrimaryAssetId& ID) const;
 
 	void RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId);
-	TArray<FQuestStatusEntry> GetAvailableQuestListForNPC(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PlayerState);
+	TArray<struct FActionInfo> CreateQuestActions(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PlayerState);
+	TArray<struct FActionInfo> CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS);
 
 	EQuestStatus GetQuestStatus(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 
-	void ProcessInteraction(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PS);
-	EQuestSelectionResult ResolveQuestSelection(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
+	void ResolveQuestSelection(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PS);
+	void ResolveQuestDecision(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PS, bool bAccepted);
+
 	bool TryGrantQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 	bool CanClearQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 	bool TryClearQuest(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
@@ -54,7 +59,18 @@ public:
 protected:
 	void BuildCache();
 
+	void LoadIconData();
+	void OnIconDataLoaded();
+
+	TWeakObjectPtr<class UDialogueSubsystem> DialogueSubsystemRef;
+
 	TMap<FPrimaryAssetId, TArray<FPrimaryAssetId>> NPCQuestMap; // {npc id, quest ids}
 
 	TMap<FPrimaryAssetId, class UQuestData*> QuestCache;
+
+	// icons for dialogue
+	UPROPERTY()
+	TObjectPtr<class UQuestIconData> IconDataAsset;
+
+	FPrimaryAssetId CurrentSelectedQuestId;
 };

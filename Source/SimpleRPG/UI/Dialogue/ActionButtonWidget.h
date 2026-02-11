@@ -4,28 +4,25 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "QuestOfferButtonWidget.generated.h"
-
-DECLARE_DELEGATE_OneParam(FOnResponseSelected, int32 ResponseIndex)
+#include "../../GameSystem/Interactions/ActionProvider.h"
+#include "ActionButtonWidget.generated.h"
 
 /**
  *  A button for quest selection in dialogue interface
  */
 UCLASS()
-class SIMPLERPG_API UQuestOfferButtonWidget : public UUserWidget
+class SIMPLERPG_API UActionButtonWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-    void SetContent(class UTexture2D* Icon, FText QuestTitle, int32 ResponseIndex);
+    void SetContent(const FActionInfo& Action);
 
     UFUNCTION()
     void OnButtonClicked();
 
-    FOnResponseSelected OnResponseSelected;
-
 protected:
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<class UButton> OfferButton;
+    TObjectPtr<class UButton> ActionButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<class UImage> IconImage;
@@ -33,5 +30,5 @@ protected:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<class UTextBlock> TitleText;
 
-    int32 SelfResponseIndex;
+    FActionInfo CachedAction;
 };

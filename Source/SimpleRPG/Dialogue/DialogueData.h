@@ -4,20 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "GameplayTagContainer.h"
 #include "DialogueData.generated.h"
-
-/*
-*   Dialogue response from UI
-*/
-UENUM(Blueprintable)
-enum EDialogueResponseType : int8
-{
-	Continue,
-	Exit,
-	QuestSelect,
-	QuestAccept,
-	QuestDecline,
-};
 
 USTRUCT(BlueprintType)
 struct FDialogueNode
@@ -31,7 +19,7 @@ struct FDialogueNode
 	int32 NextNode = -1;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TEnumAsByte<EDialogueResponseType>> Responses;
+	TArray<FGameplayTag> CustomActions;
 };
 
 /**

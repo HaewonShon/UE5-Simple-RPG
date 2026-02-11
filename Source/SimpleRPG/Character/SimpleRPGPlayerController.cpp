@@ -124,7 +124,7 @@ void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 
 	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
-		DialogueSubsystem->BeginDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
+		DialogueSubsystem->BeginDefaultDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
 	}
 }
 

@@ -6,22 +6,12 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "DialogueData.h"
 #include "../Quest/QuestManagerSubsystem.h"
+#include "GameSystem/Interactions/ActionProvider.h"
 #include "DialogueSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnDialogueBegin)
 DECLARE_MULTICAST_DELEGATE(FOnDialogueEnd)
 DECLARE_DELEGATE_OneParam(FOnDialogueUpdate, FDialogueInfo)
-
-USTRUCT()
-struct FDialogueResponse
-{
-	GENERATED_BODY()
-	
-	EDialogueResponseType Type;
-	FPrimaryAssetId QuestId; // temporary paylaod for quest selection
-	FText QuestTitle;
-	class UTexture2D* QuestStatusTexture;
-};
 
 /*
 *   struct for passing dialogue to UI
@@ -33,7 +23,7 @@ struct FDialogueInfo
 
 	FText NPCName;
 	FText DialogueText;
-	TArray<FDialogueResponse> Responses;
+	TArray<FActionInfo> Actions;
 };
 
 /**
@@ -49,10 +39,13 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection);
 
 	UFUNCTION()
-	void BeginDialogue(class ANPCCharacter* NPC, class ASimpleRPGPlayerState* PS);
+	void BeginDefaultDialogue(class ANPCCharacter* NPC, class ASimpleRPGPlayerState* PS);
 
 	UFUNCTION()
-	void OnDialogueResponse(FDialogueResponse Response);
+	void BeginDialogue(UDialogueData* Dialogue, int32 DialogueBeginNode = -1);
+
+	void SetContextOwner(const UActorComponent* Owner);
+	void SetNextPage();
 
 	FDialogueInfo RequestCurrentDialogueInfo();
 
@@ -62,22 +55,15 @@ public:
 
 protected:
 	void UpdateDialogueNode(int NextNodeIndex);
-	void HandleQuestSelectResponse(const FDialogueResponse& Response);
+
 	FDialogueInfo BuildDialogueWithCurrentNode();
-	EQuestDialogueContext ConvertQuestSelectionResultToContext(EQuestSelectionResult SelectionResult);
 	
 	TWeakObjectPtr<class UDialogueData> CurrentDialogueData;
 	int32 CurrentNodeIndex;
 
 	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
 	TWeakObjectPtr<AActor> InteractingTargetRef;
+	TWeakObjectPtr<const UActorComponent> ContextOwnerRef;
 	FPrimaryAssetId CurrentQuestId;
-
-	// TEMP ICONS
-	UPROPERTY()
-	TObjectPtr<class UTexture2D> QuestAvailableIcon;
-
-	UPROPERTY()
-	TObjectPtr<class UTexture2D> QuestInProgressIcon; 
 };
 

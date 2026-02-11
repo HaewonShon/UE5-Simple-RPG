@@ -18,8 +18,36 @@ void UQuestGiverComponent::Oninteraction(FPrimaryAssetId NPCId, ASimpleRPGPlayer
 	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{
 		//Subsystem->GrantQuest(QuestList[0], PS);
-		Subsystem->ProcessInteraction(NPCId, PS);
+		//Subsystem->ProcessInteraction(NPCId, PS);
 	}
+}
+
+TArray<FActionInfo> UQuestGiverComponent::GetAvailableActions(ASimpleRPGPlayerState* PS) const
+{
+	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
+	{
+		TArray<FActionInfo> Actions = Subsystem->CreateQuestActions(Cast<ANPCCharacter>(GetOwner())->GetPrimaryAssetId(), PS);
+		for (FActionInfo& Action : Actions)
+		{
+			Action.ContextOwner = this;
+		}
+		return Actions;
+	}
+	return TArray<FActionInfo>();
+}
+
+TArray<FActionInfo> UQuestGiverComponent::GetContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS) const
+{
+	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
+	{
+		TArray<FActionInfo> Actions = Subsystem->CreateContextAction(ActionTag, PS);
+		for (FActionInfo& Action : Actions)
+		{
+			Action.ContextOwner = this;
+		}
+		return Actions;
+	}
+	return TArray<FActionInfo>();
 }
 
 // Called when the game starts
@@ -35,4 +63,5 @@ void UQuestGiverComponent::BeginPlay()
 
 void UQuestGiverComponent::RequestAvailableQuestList()
 {
+
 }

@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "../GameSystem/Interactions/ActionProvider.h"
+#include "GameplayTagContainer.h"
 #include "QuestGiverComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SIMPLERPG_API UQuestGiverComponent : public UActorComponent
+class SIMPLERPG_API UQuestGiverComponent : public UActorComponent, public IActionProvider
 {
 	GENERATED_BODY()
 
@@ -17,6 +19,9 @@ public:
 	UQuestGiverComponent();
 
 	void Oninteraction(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PS);
+
+	virtual TArray<FActionInfo> GetAvailableActions(class ASimpleRPGPlayerState* PS) const;
+	virtual TArray<FActionInfo> GetContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS) const;
 
 protected:
 	// Called when the game starts
