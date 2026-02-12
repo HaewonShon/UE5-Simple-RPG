@@ -3,8 +3,8 @@
 
 #include "ItemTestCheatManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "Character/SimpleRPGPlayerState.h"
-#include "Character/Components/Inventory/InventoryComponent.h"
+#include "Player/SimpleRPGPlayerState.h"
+#include "Player/Components/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogCheat)
 

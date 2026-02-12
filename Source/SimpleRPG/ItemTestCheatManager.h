@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/CheatManager.h"
-#include "Item/ItemData.h"
+#include "Shared/Item/ItemData.h"
 #include "ItemTestCheatManager.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogCheat, Log, All)
