@@ -73,14 +73,18 @@ public:
 private:
 	void ReadLootTable();
 
+	void LoadDropActorData();
+	void OnDropActorDataLoaded();
+
 	const class UItemData* SelectRandomItem(FGameplayTag EnemyTag) const;
 	int32 GetRandomGoldAmount(FGameplayTag EnemyTag) const;
-
-	TSubclassOf<class AItemActor> ItemActor;
-	TSubclassOf<class AGoldDropActor> GoldDropActor;
 
 	UPROPERTY()
 	TMap<FGameplayTag, FLootInfo> EnemyLootInfoCache;
 
 	static constexpr float ItemPickupDelay = 5.f;
+
+	// actors to spawn
+	UPROPERTY()
+	TObjectPtr<class UDropActorData> DropActorAsset;
 };

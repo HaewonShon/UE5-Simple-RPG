@@ -88,14 +88,16 @@ TArray<FActionInfo> UQuestManagerSubsystem::CreateContextAction(FGameplayTag Act
 		FActionInfo ActionInfo;
 		ActionInfo.DisplayName = FText::FromName(TEXT("Accept"));
 		ActionInfo.Type = EActionType::QuestAccept;
+		ActionInfo.Icon = nullptr;
 		ActionInfo.OnActionExecuted.BindUObject(this, &UQuestManagerSubsystem::ResolveQuestDecision, CurrentSelectedQuestId, PS, true);
 		Actions.Add(ActionInfo);
 	}
 	else if (ActionTag == FGameplayTag::RequestGameplayTag("Action.Quest.Decline"))
 	{
 		FActionInfo ActionInfo;
-		ActionInfo.DisplayName = FText::FromName(TEXT("Accept"));
+		ActionInfo.DisplayName = FText::FromName(TEXT("Decline"));
 		ActionInfo.Type = EActionType::QuestDecline;
+		ActionInfo.Icon = nullptr;
 		ActionInfo.OnActionExecuted.BindUObject(this, &UQuestManagerSubsystem::ResolveQuestDecision, CurrentSelectedQuestId, PS, false);
 		Actions.Add(ActionInfo);
 	}

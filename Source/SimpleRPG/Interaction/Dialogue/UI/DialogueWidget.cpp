@@ -47,6 +47,8 @@ void UDialogueWidget::UpdateDialogue(FDialogueInfo DialogueInfo)
 
 void UDialogueWidget::NativeConstruct()
 {
+	Super::NativeConstruct();
+
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
 		Subsystem->OnDialogueUpdate.BindUObject(this, &UDialogueWidget::UpdateDialogue);

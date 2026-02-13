@@ -4,6 +4,7 @@
 #include "ItemSpawnSubsystem.h"
 #include "ItemActor.h"
 #include "GoldDropActor.h"
+#include "DropActorData.h"
 #include "Shared/Item/ItemDatabaseSubsystem.h"
 #include "Core/SimpleRPGGameInstance.h"
 #include "Core/SimpleRPGAssetManager.h" // item
@@ -12,32 +13,12 @@ DEFINE_LOG_CATEGORY(LogCombatRewardSystem);
 
 UItemSpawnSubsystem::UItemSpawnSubsystem()
 {
-	static ConstructorHelpers::FClassFinder<AItemActor> ItemActorBP(TEXT("/Game/Gameplay/BP_ItemActor2.BP_ItemActor2_C"));
-	if (ItemActorBP.Succeeded())
-	{
-		ItemActor = ItemActorBP.Class;
-		UE_LOG(LogCombatRewardSystem, Warning, TEXT("Could not find Game/Gameplay/BP_ItemActor2.BP_ItemActor2_C2 %i"), ItemActor.Get() != nullptr);
-	}
-	else
-	{
-		UE_LOG(LogCombatRewardSystem, Warning, TEXT("Could not find Game/Gameplay/BP_ItemActor2.BP_ItemActor2_C"));
-	}
-
-	static ConstructorHelpers::FClassFinder<AGoldDropActor> GoldDropActorBP(TEXT("/Game/Gameplay/BP_GoldDropActor.BP_GoldDropActor_C"));
-	if (GoldDropActorBP.Succeeded())
-	{
-		GoldDropActor = GoldDropActorBP.Class;
-		UE_LOG(LogCombatRewardSystem, Warning, TEXT("Could not find Game/Gameplay/BP_GoldDropActor.BP_GoldDropActor_C2 %i"), GoldDropActor.Get() != nullptr);
-	}
-	else
-	{
-		UE_LOG(LogCombatRewardSystem, Warning, TEXT("Could not find Game/Gameplay/BP_GoldDropActor.BP_GoldDropActor_C"));
-	}
 }
 
 void UItemSpawnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	ReadLootTable();
+	LoadDropActorData();
 }
 
 void UItemSpawnSubsystem::SpawnDropFromEnemy(FGameplayTag EnemyTag, FVector Location)
@@ -56,7 +37,7 @@ void UItemSpawnSubsystem::SpawnDropFromEnemy(FGameplayTag EnemyTag, FVector Loca
 		FItemInstance ItemInstance;
 		ItemInstance.SetItem(ItemData);
 
-		AItemActor* ItemActorInWorld = GetWorld()->SpawnActor<AItemActor>(ItemActor, Location, FRotator());
+		AItemActor* ItemActorInWorld = GetWorld()->SpawnActor<AItemActor>(DropActorAsset->ItemActor, Location, FRotator());
 		if (ItemActorInWorld)
 		{
 			ItemActorInWorld->SetItem(ItemInstance);
@@ -74,7 +55,7 @@ void UItemSpawnSubsystem::SpawnDropFromEnemy(FGameplayTag EnemyTag, FVector Loca
 	
 	// Drop Gold
 	int32 GoldAmount = GetRandomGoldAmount(EnemyTag);
-	AGoldDropActor* GoldDropActorInWorld = GetWorld()->SpawnActor<AGoldDropActor>(GoldDropActor, Location, FRotator());
+	AGoldDropActor* GoldDropActorInWorld = GetWorld()->SpawnActor<AGoldDropActor>(DropActorAsset->GoldDropActor, Location, FRotator());
 	if (GoldDropActorInWorld)
 	{
 		GoldDropActorInWorld->SetGoldAmount(GoldAmount);
@@ -94,7 +75,7 @@ void UItemSpawnSubsystem::SpawnItem(const FItemInstance& ItemInstance, FVector L
 		return;
 	}
 
-	AItemActor* ItemActorInWorld = GetWorld()->SpawnActor<AItemActor>(ItemActor, Location, FRotator());
+	AItemActor* ItemActorInWorld = GetWorld()->SpawnActor<AItemActor>(DropActorAsset->ItemActor, Location, FRotator());
 	if (ItemActorInWorld)
 	{
 		ItemActorInWorld->SetItem(ItemInstance);
@@ -169,4 +150,27 @@ int32 UItemSpawnSubsystem::GetRandomGoldAmount(FGameplayTag EnemyTag) const
 {
 	const FLootInfo& LootInfo = EnemyLootInfoCache.FindRef(EnemyTag);
 	return FMath::RandRange(LootInfo.MinGoldAmount, LootInfo.MaxGoldAmount);
+}
+
+void UItemSpawnSubsystem::LoadDropActorData()
+{
+	UAssetManager& Manager = UAssetManager::Get();
+
+	// 1. 특정 타입의 모든 에셋 리스트를 가져오거나, 특정 ID를 직접 지정
+	FPrimaryAssetId TargetId = FPrimaryAssetId("DropActorData", FName("DA_DropActor"));
+
+	// 2. 경로 정보(SoftObjectPath) 가져오기 (메모리 로드 X, 경로만 확보)
+	FSoftObjectPath AssetPath = Manager.GetPrimaryAssetPath(TargetId);
+	UE_LOG(LogTemp, Log, TEXT("Drop actors Load request! %s"), *AssetPath.ToString());
+
+	// 3. 필요할 때 비동기 로드 시작
+	Manager.LoadPrimaryAsset(TargetId, TArray<FName>(), FStreamableDelegate::CreateUObject(this, &UItemSpawnSubsystem::OnDropActorDataLoaded));
+}
+
+void UItemSpawnSubsystem::OnDropActorDataLoaded()
+{
+	FPrimaryAssetId TargetId = FPrimaryAssetId("DropActorData", FName("DA_DropActor"));
+	DropActorAsset = UAssetManager::Get().GetPrimaryAssetObject<UDropActorData>(TargetId);
+
+	UE_LOG(LogTemp, Log, TEXT("Drop Actors Loaded Successfully! %i"), DropActorAsset != nullptr);
 }

@@ -21,6 +21,8 @@ public:
     void OnButtonClicked();
 
 protected:
+    virtual void NativeConstruct() override;
+
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<class UButton> ActionButton;
 

@@ -16,8 +16,6 @@ void UActionButtonWidget::SetContent(const FActionInfo& Action)
 	{
 		IconImage->SetBrushFromTexture(Action.Icon);
 	}
-
-	ActionButton->OnClicked.AddDynamic(this, &UActionButtonWidget::OnButtonClicked);
 }
 
 void UActionButtonWidget::OnButtonClicked()
@@ -29,4 +27,11 @@ void UActionButtonWidget::OnButtonClicked()
 		Subsystem->SetContextOwner(CachedAction.ContextOwner);
 	}
 	CachedAction.OnActionExecuted.ExecuteIfBound();
+}
+
+void UActionButtonWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	ActionButton->OnClicked.AddDynamic(this, &UActionButtonWidget::OnButtonClicked);
 }
