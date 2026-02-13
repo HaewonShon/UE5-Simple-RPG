@@ -45,7 +45,7 @@ void UEnemyHPDisplayWidgetComponent::BeginPlay()
 
 				float MaxHealth = ASC->GetNumericAttribute(UCharacterAttributeSet::GetMaxHealthAttribute());
 				DisplayWidget->SetMaxValue(MaxHealth);
-				UE_LOG(LogEnemy, Log, TEXT("Enemy HPBar Widget registered"));
+				UE_LOG(LogEnemy, Verbose, TEXT("Enemy HPBar Widget registered for %s"), *ASC->GetOwnerActor()->GetName());
 			}
 		}
 

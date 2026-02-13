@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "SimpleRPGGameplayAbility.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAbility, Log, All)
+
 /**
  *	A Base class for all GameplayAbility in this project
  */

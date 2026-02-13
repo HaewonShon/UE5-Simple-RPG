@@ -7,10 +7,12 @@
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "GE_Cooldown.h"
 
+DEFINE_LOG_CATEGORY(LogAbility)
 
 void USimpleRPGGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	UE_LOG(LogAbility, Verbose, TEXT("Ability %s Activate"), *(GetClass()->GetName()));
 
 	if (!MontageToPlay)
 	{
@@ -43,8 +45,7 @@ void USimpleRPGGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Hand
 void USimpleRPGGameplayAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
 {
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-
-	UE_LOG(LogTemp, Log, TEXT("Cancleed"));
+	UE_LOG(LogAbility, Verbose, TEXT("Ability %s Cancled"), *(GetClass()->GetName()));
 }
 
 void USimpleRPGGameplayAbility::OnCompleted()

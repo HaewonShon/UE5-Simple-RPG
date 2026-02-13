@@ -66,7 +66,7 @@ void ADamageTextActor::SetDamageValue(float DamageValue, bool bCrit)
 {
 	Damage = DamageValue;
 	bIsCrit = bCrit;
-	UE_LOG(LogTemp, Log, TEXT("SetDamageValue in actor: %f"), Damage);
+	UE_LOG(LogTemp, Verbose, TEXT("SetDamageValue in actor: %f"), Damage);
 	InitializeText();
 }
 
@@ -74,11 +74,10 @@ void ADamageTextActor::InitializeText()
 {
 	if (!DamageTextWidget.IsValid())
 	{
-		UE_LOG(LogTemp, Log, TEXT("initialize failed"));
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Damage in actor: %f"), Damage);
+	UE_LOG(LogTemp, Verbose, TEXT("Damage in actor: %f"), Damage);
 	DamageTextWidget->InitializeText(Damage, bIsCrit);
 }
 

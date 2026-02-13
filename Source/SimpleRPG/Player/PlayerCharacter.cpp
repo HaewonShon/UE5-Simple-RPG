@@ -17,6 +17,7 @@
 #include "Components/CurrencyComponent.h"
 #include "Shared/GameAbilitySystem/CharacterAttributeSet.h"
 #include "Shared/Utils/InteractionRotationComponent.h"
+#include "World/NPCCharacter.h"
 
 DEFINE_LOG_CATEGORY(LogCharacter);
 
@@ -231,7 +232,6 @@ void APlayerCharacter::AddWeaponAbilities()
 	}
 }
 
-#include "World/NPCCharacter.h"
 void APlayerCharacter::Interact()
 {
 	if (!InteractableNPC.IsValid())
@@ -254,4 +254,3 @@ void APlayerCharacter::OnHealthChanged(const FOnAttributeChangeData& Data)
 {
 
 }
-

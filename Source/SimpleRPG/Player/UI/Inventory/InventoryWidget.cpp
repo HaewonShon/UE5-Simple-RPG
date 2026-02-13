@@ -121,7 +121,6 @@ void UInventoryWidget::NativeConstruct()
 	{
 		SlotVisualWidget->SetDesiredSize(FVector2D{ SlotGridPanel->GetMinDesiredSlotWidth(), SlotGridPanel->GetMinDesiredSlotHeight() });
 		SlotVisualWidget->SetVisibility(ESlateVisibility::Hidden);
-		UE_LOG(LogTemp, Log, TEXT("Set Desired Size: %f"), SlotGridPanel->GetMinDesiredSlotWidth());
 	}
 	else
 	{
@@ -138,7 +137,7 @@ void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
 	}
 
 	Widget->OnItemDiscard.BindUObject(this, &UInventoryWidget::OnItemDiscarded);
-	UE_LOG(LogInventory, Log, TEXT("OnItemDiscard Registtered"));
+	UE_LOG(LogInventory, Verbose, TEXT("OnItemDiscard Registtered"));
 }
 
 void UInventoryWidget::SetDescriptionWidgetRef(UItemDescriptionWidget* DescriptionWidgetRef)
@@ -167,8 +166,6 @@ void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
 
 void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 {
-	UE_LOG(LogInventory, Log, TEXT("Slot Drag detected"));
-
 	UItemSlotWidget* SlotWidget;
 	if (SlotInfo.SlotType == ESlotType::Storage)
 	{
@@ -181,7 +178,7 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 
 	if (!SlotWidget)
 	{
-		UE_LOG(LogInventory, Log, TEXT("Failed to cast InventorySlotWidget"));
+		UE_LOG(LogInventory, Warning, TEXT("Failed to cast InventorySlotWidget"));
 		return;
 	}
 

@@ -4,6 +4,8 @@
 #include "SimpleRPGPlayerState.h"
 #include "Shared/GameAbilitySystem/CharacterAttributeSet.h"
 #include "Components/InventoryComponent.h"
+#include "Components/CurrencyComponent.h"
+#include "Components/LevelComponent.h"
 #include "Interaction/Quest/QuestManagerComponent.h"
 
 ASimpleRPGPlayerState::ASimpleRPGPlayerState()
@@ -14,6 +16,8 @@ ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	QuestManagerComponent = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManagerComponent"));
+	CurrencyComponent = CreateDefaultSubobject<UCurrencyComponent>(TEXT("CurrencyComponent"));
+	LevelComponent = CreateDefaultSubobject<ULevelComponent>(TEXT("LevelComponent"));
 }
 
 void ASimpleRPGPlayerState::BeginPlay()

@@ -20,8 +20,6 @@ void UActionButtonWidget::SetContent(const FActionInfo& Action)
 
 void UActionButtonWidget::OnButtonClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("%s Button clicked"), *(TitleText->GetText().ToString()));
-
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
 		Subsystem->SetContextOwner(CachedAction.ContextOwner);

@@ -96,8 +96,6 @@ FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 		const FDialogueNode& Node = CurrentDialogueData->DialogueNodes[CurrentNodeIndex];
 		DialogueInfo.NPCName = CurrentDialogueData->NPCName;
 		DialogueInfo.DialogueText = Node.DialogueText;
-
-		UE_LOG(LogTemp, Warning, TEXT("Builddialogue with custom actions: %i, %i"), Node.CustomActions.Num(), ContextOwnerRef.IsValid());
 		// request custom action to owner if exist
 		if (ContextOwnerRef.IsValid())
 		{

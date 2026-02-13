@@ -27,7 +27,7 @@ void ANPCCharacter::Interact(ACharacter* Character, ASimpleRPGPlayerController* 
 {
 	if (UDialogueComponent* DialogoueComponent = GetComponentByClass<UDialogueComponent>())
 	{
-		UE_LOG(LogNPC, Log, TEXT("Dialogue requested"));
+		UE_LOG(LogNPC, Log, TEXT("Dialogue interaction with %s requested"), *GetName());
 		PS->OnDialogueRequested.Broadcast(this);
 	}
 
@@ -53,7 +53,6 @@ void ANPCCharacter::BeginPlay()
 
 void ANPCCharacter::OnInteractRangeBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogNPC, Log, TEXT("Begin overlap"));
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
 		Player->SetInteractableNPC(this);
@@ -62,7 +61,6 @@ void ANPCCharacter::OnInteractRangeBeginOverlap(UPrimitiveComponent* OverlappedC
 
 void ANPCCharacter::OnInteractRangeEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogNPC, Log, TEXT("End overlap"));
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
 		Player->ClearInteractableNPC(this);

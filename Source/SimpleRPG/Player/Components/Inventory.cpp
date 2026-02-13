@@ -40,7 +40,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 {
 	if (!ItemInstance.ItemData->bIsStackable && !HasEmptySlot())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("no empty slot"));
+		UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item"));
 		return false;
 	}
 

@@ -36,8 +36,6 @@ void UStatWidget::NativeConstruct()
 
 		FText Content = FText::Format(FText::FromString("{0} : {1}"), DisplayName, FText::AsNumber(Value));
 		TextBlock->SetText(Content);
-
-		UE_LOG(LogTemp, Log, TEXT("Set Attribute display %s"), *Attribute.GetName());
 	}
 }
 
@@ -47,6 +45,4 @@ void UStatWidget::OnAttributeValueChanged(const FOnAttributeChangeData& Data)
 
 	FText Content = FText::Format(FText::FromString("{0} : {1}"), DisplayName, FText::AsNumber(Value));
 	TextBlock->SetText(Content);
-
-	UE_LOG(LogTemp, Log, TEXT("Set Attribute %s value: %f"), *Attribute.GetName(), Value);
 }

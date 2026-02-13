@@ -18,7 +18,7 @@ void UPortraitDisplayWidget::NativeConstruct()
 
 	if (UCharacterPrieviewSubsystem* Subsystem = World->GetSubsystem<UCharacterPrieviewSubsystem>())
 	{
-		UE_LOG(LogTemp, Log, TEXT("UPortraitDisplayWidget Preview requested"));
+		UE_LOG(LogTemp, Verbose, TEXT("UPortraitDisplayWidget Preview requested"));
 		Subsystem->RequestPreview();
 	}
 

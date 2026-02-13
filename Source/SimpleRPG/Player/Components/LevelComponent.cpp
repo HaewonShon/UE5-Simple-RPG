@@ -3,6 +3,8 @@
 
 #include "LevelComponent.h"
 
+DEFINE_LOG_CATEGORY(LogPlayerLevel)
+
 ULevelComponent::ULevelComponent()
 {
 	CurrentLevel = 1;
@@ -17,6 +19,7 @@ void ULevelComponent::GrantExp(int32 Amount)
 	}
 
 	CurrentExp += Amount;
+	UE_LOG(LogPlayerLevel, Verbose, TEXT("Exp point %i granted"), Amount);
 
 	while (CanLevelUp())
 	{
@@ -24,6 +27,7 @@ void ULevelComponent::GrantExp(int32 Amount)
 		++CurrentLevel;
 
 		OnLevelChanged.Broadcast(CurrentLevel);
+		UE_LOG(LogPlayerLevel, Verbose, TEXT("Player level increased: %i"), CurrentLevel);
 	}
 	OnExpChanged.Broadcast(CurrentExp, GetRequiredExp(CurrentLevel));
 }

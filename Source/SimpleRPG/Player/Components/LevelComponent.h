@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "LevelComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogPlayerLevel, Log, All)
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnLevelChanged, int32) // new level
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnExpChanged, int32, int32) // new level
 

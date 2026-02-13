@@ -37,4 +37,10 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UQuestManagerComponent> QuestManagerComponent;
+
+	UPROPERTY()
+	TObjectPtr<class UCurrencyComponent> CurrencyComponent;
+
+	UPROPERTY()
+	TObjectPtr<class ULevelComponent> LevelComponent;
 };

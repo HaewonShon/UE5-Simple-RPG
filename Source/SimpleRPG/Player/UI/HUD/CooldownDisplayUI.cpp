@@ -19,7 +19,7 @@ void UCooldownDisplayUI::NativeConstruct()
 		if (UAbilitySystemComponent* ASC = Player->GetAbilitySystemComponent())
 		{
 			ASC->OnActiveGameplayEffectAddedDelegateToSelf.AddUObject(this, &UCooldownDisplayUI::OnCooldownApplied);
-			UE_LOG(LogCharacter, Log, TEXT("Cooldown ui setup"));
+			UE_LOG(LogCharacter, Verbose, TEXT("Cooldown ui setup"));
 		}
 	}
 
@@ -65,7 +65,7 @@ void UCooldownDisplayUI::OnCooldownApplied(UAbilitySystemComponent* AbilitySyste
 {
 	if (ActiveHandle.IsValid() && SpecApplied.DynamicGrantedTags.HasTag(CooldownTag))
 	{
-		UE_LOG(LogCharacter, Log, TEXT("Cooldown status changed. %f"), SpecApplied.GetDuration());
+		UE_LOG(LogCharacter, Verbose, TEXT("Cooldown status changed. %f"), SpecApplied.GetDuration());
 
 		CooldownInitial = SpecApplied.GetDuration();
 		CooldownProgress = CooldownInitial;

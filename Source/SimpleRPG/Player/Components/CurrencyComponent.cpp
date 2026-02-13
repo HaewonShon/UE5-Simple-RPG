@@ -3,6 +3,8 @@
 
 #include "CurrencyComponent.h"
 
+DEFINE_LOG_CATEGORY(LogCurrency)
+
 // Sets default values for this component's properties
 UCurrencyComponent::UCurrencyComponent()
 {
@@ -58,6 +60,7 @@ void UCurrencyComponent::BeginPlay()
 bool UCurrencyComponent::AddCurrency(ECurrencyType CurrencyType, int32 Amount)
 {	
 	CurrencyAmounts[CurrencyType] += Amount;
+	UE_LOG(LogCurrency, Verbose, TEXT("%i %s added to owner"), Amount, *(StaticEnum<ECurrencyType>()->GetDisplayNameTextByValue((int64)CurrencyType).ToString()));
 
 	switch (CurrencyType)
 	{

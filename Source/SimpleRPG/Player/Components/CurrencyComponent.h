@@ -6,8 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CurrencyComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogCurrency, Log, All)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrencyAmountChanged, int32)
-
 
 UENUM(BlueprintType)
 enum class ECurrencyType : uint8

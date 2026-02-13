@@ -41,7 +41,7 @@ void AExploreCheckActor::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedCo
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("OnTriggerBeginOverlap called for %s"), *PlaceTag.ToString());
+	UE_LOG(LogTemp, Verbose, TEXT("AExploreCheckActor OnTriggerBeginOverlap called for %s"), *PlaceTag.ToString());
 
 	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{

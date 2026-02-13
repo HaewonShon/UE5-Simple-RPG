@@ -54,6 +54,6 @@ void UQuestDisplayWidget::RemovedCompletedQuest(FPrimaryAssetId QuestId)
 		StatusWidgetSlot->RemoveChild(StatusWidget);
 		StatusWidget->Destruct();
 
-		UE_LOG(LogQuest, Log, TEXT("Remove Quest from widget: %s"), *QuestId.ToString());
+		UE_LOG(LogQuest, Verbose, TEXT("Remove Quest from widget: %s"), *QuestId.ToString());
 	}
 }

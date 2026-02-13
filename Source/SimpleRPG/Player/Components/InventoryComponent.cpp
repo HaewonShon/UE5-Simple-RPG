@@ -28,7 +28,6 @@ EInventoryCategory ConvertItemToInventoryCategory(EItemCategory ItemCategory)
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
-	//UE_LOG(LogInventory, Log, TEXT("Inventory Init"));
 }
 
 void UInventoryComponent::BeginPlay()
@@ -96,7 +95,7 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 		{
 			if (APlayerState* PlayerState = Cast<APlayerState>(GetOwner()))
 			{
-				UE_LOG(LogInventory, Log, TEXT("Item spawn %i requested"), SlotIndex);
+				UE_LOG(LogInventory, Verbose, TEXT("Item spawn %i requested"), SlotIndex);
 				ItemSpawnSubsystem->SpawnItem(ItemInstance, PlayerState->GetPawn()->GetActorLocation());
 			}
 		}
@@ -120,7 +119,7 @@ void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index
 
 bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotIndex)
 {
-	UE_LOG(LogInventory, Log, TEXT("UseItem SlotIndex %i"), SlotIndex);
+	UE_LOG(LogInventory, Verbose, TEXT("UseItem SlotIndex %i requested"), SlotIndex);
 	return false;
 }
 
@@ -358,17 +357,8 @@ void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 	}
 	else
 	{
-		UE_LOG(LogInventory, Log, TEXT("Succeed to apply equipment stats to the player"));
+		UE_LOG(LogInventory, Verbose, TEXT("Succeed to apply equipment stats to the player"));
 		EquipmentSlots[EquipmentType].ActiveSpecHandle = Handle;
-
-		FGameplayTagContainer OwnedTags;
-		SourceASC->GetOwnedGameplayTags(OwnedTags);
-
-		for (const FGameplayTag& Tag : OwnedTags)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ASC Tag: %s"), *Tag.ToString());
-		}
-		UE_LOG(LogTemp, Warning, TEXT("ASC owner: %s"), *SourceASC->GetOwner()->GetName());
 	}
 }
 

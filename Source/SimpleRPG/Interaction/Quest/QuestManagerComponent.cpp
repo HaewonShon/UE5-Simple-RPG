@@ -77,7 +77,7 @@ bool UQuestManagerComponent::RecevieQuest(const UQuestData* Quest)
 	QuestInstance.ObjectiveStatus.SetNum(Quest->Objectives.Num());
 
 	QuestInProgress.Add({ QuestInstance.AssetId, QuestInstance });
-	UE_LOG(LogQuest, Log, TEXT("Quest added: %s"), *QuestInstance.AssetId.ToString());
+	UE_LOG(LogQuest, Log, TEXT("Quest received: %s"), *QuestInstance.AssetId.ToString());
 
 	OnQuestAccepted.ExecuteIfBound(Quest);
 

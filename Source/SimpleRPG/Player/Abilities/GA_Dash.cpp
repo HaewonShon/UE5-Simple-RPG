@@ -15,8 +15,6 @@ void UGA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FG
 	{
 		if (UCharacterMovementComponent* MovementComponent = Character->GetCharacterMovement())
 		{
-			UE_LOG(LogTemp, Log, TEXT("Dash Activated"));
-
 			MovementComponent->SetMovementMode(MOVE_Falling);
 			FVector InputVector = MovementComponent->GetPendingInputVector();
 			if (InputVector.IsNearlyZero())

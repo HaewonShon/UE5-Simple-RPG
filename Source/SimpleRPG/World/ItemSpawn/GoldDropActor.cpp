@@ -31,7 +31,6 @@ void AGoldDropActor::BeginPlay()
 
 void AGoldDropActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Log, TEXT("goldcoin overlapped"));
 	if (ElapsedTime < PickupDelay)
 	{
 		return;
