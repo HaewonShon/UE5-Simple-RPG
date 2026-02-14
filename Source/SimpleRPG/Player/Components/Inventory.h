@@ -44,6 +44,9 @@ struct FInventoryPage
 	bool IsSlotEmpty(int32 SlotIndex) const;
 
 	bool AddItem(FItemInstance& Item);
+	// Tester function if item can be added by simulating.
+	bool CanAddItem(FItemInstance Item) const;
+
 	void RemoveItem(int32 SlotIndex);
 	void SwapItems(int32 Index1, int32 Index2);
 	bool HasEmptySlot() const;

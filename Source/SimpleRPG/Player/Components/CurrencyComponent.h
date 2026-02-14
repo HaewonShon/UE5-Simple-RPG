@@ -27,7 +27,10 @@ public:
 	UCurrencyComponent();
 
 	bool CanAddCurrency(ECurrencyType CurrencyType, int32 Amount);
+	bool CanSpendCurrency(ECurrencyType CurrencyType, int32 Amount);
 	bool TryAddCurrency(ECurrencyType CurrencyType, int32 Amount);
+	bool TrySpendCurrency(ECurrencyType CurrencyType, int32 Amount);
+
 	FORCEINLINE int32 GetCurrencyAmount(ECurrencyType CurrencyType) const { return CurrencyAmounts.FindRef(CurrencyType); }
 
 	FOnCurrencyAmountChanged OnGoldAmountChanged;

@@ -83,8 +83,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	FText DescriptionText;
-	// TSubclassOf<class UGameplayEffect> StatEffect; - dynamicalliy generated
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Shop")
+	int32 SellPrice;
 };
 
 /**
@@ -98,13 +99,15 @@ struct FItemInstance
 
 	FItemInstance();
 
-	FItemInstance(UItemData* Item, int32 StackCount = 1);
+	FItemInstance(const UItemData* Item, int32 StackCount = 1);
 
 	/* Set item data for Instance */
 	bool SetItem(const UItemData* Item, int32 StackCount = 1);
 
 	/* Combine 2 Instances */
 	bool AddStack(FItemInstance& OtherInstance);
+
+	bool RemoveStack(int32 Count);
 
 	FPrimaryAssetId ItemID;
 

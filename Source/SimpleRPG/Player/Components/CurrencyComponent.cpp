@@ -25,11 +25,17 @@ bool UCurrencyComponent::CanAddCurrency(ECurrencyType CurrencyType, int32 Amount
 	int32 MaxAmount = CurrencyMaxAmount[CurrencyType];
 	MaxAmount = (MaxAmount == -1) ? INT32_MAX : MaxAmount;
 
-	if (CurrentAmount + Amount <= MaxAmount)
+	int32 NewAmount = CurrentAmount + Amount;
+	if (NewAmount >= 0 && NewAmount <= MaxAmount)
 	{
 		return true;
 	}
 	return false;
+}
+
+bool UCurrencyComponent::CanSpendCurrency(ECurrencyType CurrencyType, int32 Amount)
+{
+	return CanAddCurrency(CurrencyType, -Amount);
 }
 
 bool UCurrencyComponent::TryAddCurrency(ECurrencyType CurrencyType, int32 Amount)
@@ -44,6 +50,11 @@ bool UCurrencyComponent::TryAddCurrency(ECurrencyType CurrencyType, int32 Amount
 		return AddCurrency(CurrencyType, Amount);
 	}
 	return false;
+}
+
+bool UCurrencyComponent::TrySpendCurrency(ECurrencyType CurrencyType, int32 Amount)
+{
+	return TryAddCurrency(CurrencyType, -Amount);
 }
 
 void UCurrencyComponent::BeginPlay()

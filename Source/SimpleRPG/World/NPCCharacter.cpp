@@ -23,12 +23,12 @@ ANPCCharacter::ANPCCharacter()
 	InteractRangeSphere->SetSphereRadius(150.f);
 }
 
-void ANPCCharacter::Interact(ACharacter* Character, ASimpleRPGPlayerController* PS)
+void ANPCCharacter::Interact(ACharacter* Character, ASimpleRPGPlayerController* PC)
 {
 	if (UDialogueComponent* DialogoueComponent = GetComponentByClass<UDialogueComponent>())
 	{
 		UE_LOG(LogNPC, Log, TEXT("Dialogue interaction with %s requested"), *GetName());
-		PS->OnDialogueRequested.Broadcast(this);
+		PC->OnDialogueRequested.Broadcast(this);
 	}
 
 	if (UInteractionRotationComponent* RotationComponent = GetComponentByClass<UInteractionRotationComponent>())

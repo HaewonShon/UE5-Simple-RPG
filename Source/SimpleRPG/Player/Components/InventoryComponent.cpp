@@ -34,6 +34,7 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InventoryMode = EInventoryMode::Normal;
 	const int32 SlotCountPerPage = 24;
 
 	// Page & Equipment slots init
@@ -53,6 +54,22 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC)
 {
 	AbilitySystemComponentRef = ASC;
+}
+
+bool UInventoryComponent::CanAddItem(FItemInstance ItemInstance) const
+{
+	if (!ItemInstance.ItemData)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("AddItem: Item is not valid"));
+		return false;
+	}
+
+	EItemCategory ItemCategory = ItemInstance.ItemData->Category;
+	EInventoryCategory PageCategory = ConvertItemToInventoryCategory(ItemCategory);
+	check(PageCategory != EInventoryCategory::Count);
+
+	const FInventoryPage& TargetPage = InventoryPages[PageCategory];
+	return TargetPage.CanAddItem(ItemInstance);
 }
 
 bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
@@ -120,6 +137,15 @@ void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index
 bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotIndex)
 {
 	UE_LOG(LogInventory, Verbose, TEXT("UseItem SlotIndex %i requested"), SlotIndex);
+
+	if (InventoryMode == EInventoryMode::Shop)
+	{
+		// Try Selling Item
+	}
+	
+	// use otherwise..
+
+
 	return false;
 }
 
@@ -283,6 +309,13 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 
 	return Count;
 }
+
+
+/****************************************************************************************
+*
+*   Equipment Related functions
+* 
+****************************************************************************************/
 
 bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType)
 {

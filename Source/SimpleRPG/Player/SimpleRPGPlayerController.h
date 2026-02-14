@@ -7,6 +7,7 @@
 #include "SimpleRPGPlayerController.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnDialogueRequested, class ANPCCharacter*); // target NPC
+DECLARE_DELEGATE_OneParam(FOnShopOpenRequest, class UShopComponent*);
 
 /**
  *	Player Controller Class for registering HUD
@@ -23,6 +24,7 @@ public:
 	void ToggleInventory();
 
 	FOnDialogueRequested OnDialogueRequested;
+	FOnShopOpenRequest OnShopOpenRequested;
 
 	UFUNCTION()
 	void BeginDialogue(class ANPCCharacter* NPC);

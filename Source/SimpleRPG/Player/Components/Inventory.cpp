@@ -44,10 +44,9 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 		return false;
 	}
 
-	// If stackable slot exist, place it. Otherwise place in empty slot
 	if (ItemInstance.ItemData->bIsStackable)
 	{
-		FInventorySlot* EmptySlot = nullptr;
+		// If stackable slot exist, place it first.
 		for (FInventorySlot& Slot : Slots)
 		{
 			if (!Slot.IsEmpty() && ItemInstance.ItemID == Slot.Item.ItemID)
@@ -58,29 +57,94 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 					return true;
 				} 
 			}
-			else if(EmptySlot == nullptr && Slot.IsEmpty())
-			{
-				EmptySlot = &Slot;
-			}
 		}
 
-		if (EmptySlot)
-		{
-			EmptySlot->Item = ItemInstance;
-			++CountFilledSlot;
-			return true;
-		}
-	}
-	else
-	{
-		// Find 1st empty slot and place item
+		// place left items in empty slotss
 		for (FInventorySlot& Slot : Slots)
 		{
 			if (Slot.IsEmpty())
 			{
-				Slot.Item = ItemInstance;
+				Slot.Item.SetItem(ItemInstance.ItemData, 
+					FMath::Min(ItemInstance.ItemData->MaxStackSize, ItemInstance.StackCount));
 				++CountFilledSlot;
-				return true;
+
+				ItemInstance.StackCount -= Slot.Item.StackCount;
+				if (ItemInstance.StackCount == 0)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	else
+	{
+		// place left items in empty slotss
+		for (FInventorySlot& Slot : Slots)
+		{
+			if (Slot.IsEmpty())
+			{
+				Slot.Item.SetItem(ItemInstance.ItemData,
+					FMath::Min(ItemInstance.ItemData->MaxStackSize, ItemInstance.StackCount));
+				++CountFilledSlot;
+
+				ItemInstance.StackCount -= Slot.Item.StackCount;
+				if (ItemInstance.StackCount == 0)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool FInventoryPage::CanAddItem(FItemInstance Item) const
+{
+	if (!Item.ItemData->bIsStackable && !HasEmptySlot())
+	{
+		return false;
+	}
+
+	if (Item.ItemData->bIsStackable)
+	{
+		// If stackable slot exist, allocate possible max count first.
+		for (const FInventorySlot& Slot : Slots)
+		{
+			if (!Slot.IsEmpty() && Item.ItemID == Slot.Item.ItemID)
+			{
+				Item.StackCount -= (Item.ItemData->MaxStackSize - Slot.Item.StackCount); 
+				if (Item.StackCount == 0)
+				{
+					return true;
+				}
+			}
+		}
+
+		// place left items in empty slotss
+		for (const FInventorySlot& Slot : Slots)
+		{
+			if (Slot.IsEmpty())
+			{
+				Item.StackCount -= Item.ItemData->MaxStackSize;
+				if (Item.StackCount <= 0)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	else
+	{
+		// place left items in empty slotss
+		for (const FInventorySlot& Slot : Slots)
+		{
+			if (Slot.IsEmpty())
+			{
+				Item.StackCount -= Item.ItemData->MaxStackSize;
+				if (Item.StackCount <= 0)
+				{
+					return true;
+				}
 			}
 		}
 	}

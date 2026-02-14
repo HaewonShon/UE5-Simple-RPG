@@ -17,6 +17,13 @@ DECLARE_DELEGATE_OneParam(FInventoryContentChangedDelegate, EInventoryCategory)
 DECLARE_DELEGATE(FEquipmentChangedDelegate)
 DECLARE_DELEGATE_OneParam(FItemCountChangedDelegate, const FPrimaryAssetId&)
 
+UENUM()
+enum class EInventoryMode : uint8
+{
+	Normal,
+	Shop,
+};
+
 USTRUCT()
 struct FEquipmentInfo
 {
@@ -41,6 +48,7 @@ public:
 	/*
 	*	Inventory Management functions 
 	*/
+	bool CanAddItem(FItemInstance ItemInstance) const;
 	bool AddItem(FItemInstance& ItemInstance);
 
 	void RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem);
@@ -94,4 +102,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Equipment")
 	TSubclassOf<class UGameplayEffect> EquipmentGE;
+
+	EInventoryMode InventoryMode;
 };

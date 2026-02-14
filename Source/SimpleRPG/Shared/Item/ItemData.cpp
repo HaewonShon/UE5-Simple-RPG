@@ -9,7 +9,7 @@ FItemInstance::FItemInstance()
 	StackCount = 0;
 }
 
-FItemInstance::FItemInstance(UItemData* Item, int32 Count)
+FItemInstance::FItemInstance(const UItemData* Item, int32 Count)
 {
 	ItemData = Item;
 	ItemID = ItemData->GetPrimaryAssetId();
@@ -46,6 +46,17 @@ bool FItemInstance::AddStack(FItemInstance& OtherInstance)
 	StackCount += FMath::Min(OtherInstance.StackCount, RemainingStackCount);
 	OtherInstance.StackCount -= FMath::Min(OtherInstance.StackCount, RemainingStackCount);
 
+	return true;
+}
+
+bool FItemInstance::RemoveStack(int32 Count)
+{
+	if (StackCount < Count)
+	{
+		return false;
+	}
+
+	StackCount -= Count;
 	return true;
 }
 
