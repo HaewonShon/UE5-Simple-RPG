@@ -33,6 +33,7 @@ struct FItemDescription
 {
 	FText Name;
 	UTexture2D* Icon;
+	int32 Price;
 	FItemDetailPayload Payload;
 };
 

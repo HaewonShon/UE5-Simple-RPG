@@ -18,24 +18,26 @@ UShopComponent::UShopComponent()
 	// ...
 }
 
-TArray<FActionInfo> UShopComponent::GetAvailableActions(ASimpleRPGPlayerState* PS) const
+TArray<FActionInfo> UShopComponent::CreateAvailableActions(ASimpleRPGPlayerState* PS)
 {
 	TArray<FActionInfo> Actions;
-	
+
 	FActionInfo Action;
 	Action.ContextOwner = this;
 	Action.DisplayName = FText::FromString("Shop");
 	Action.Icon = nullptr;
 	Action.Type = EActionType::Shop;
-	//Action.OnActionExecuted.BindUObject(this, &UShopComponent::OpenShop, PS);
-	Actions.Add(Action);
 
+	ASimpleRPGPlayerController* PC = Cast<ASimpleRPGPlayerController>(PS->GetPlayerController());
+	Action.OnActionExecuted.BindUObject(PC, &ASimpleRPGPlayerController::OpenShop, this);
+
+	Actions.Add(Action);
 	return Actions;
 }
 
-TArray<FActionInfo> UShopComponent::GetContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS) const
+FActionInfo UShopComponent::CreateContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS)
 {
-	return TArray<FActionInfo>();
+	return FActionInfo();
 }
 
 void UShopComponent::OpenShop(ASimpleRPGPlayerState* PS)
@@ -83,7 +85,7 @@ bool UShopComponent::TryPurchaseItem(FPrimaryAssetId ItemId, int32 Count)
 		CurrencyComponent->TryAddCurrency(ECurrencyType::Gold, RequiredCost);
 		return false;
 	}
-	
+
 	// TODO : UI Notify Success
 	return true;
 }
@@ -114,10 +116,28 @@ bool UShopComponent::TrySellItem(FPrimaryAssetId ItemId, int32 SellingCount)
 		// UI Notify failed - Cannot grant gold
 		return false;
 	}
-	
+
 
 
 	return true;
+}
+
+const TArray<FItemInstance>& UShopComponent::GetShopItems() const
+{
+	return InstancedShopItems;
+}
+
+FItemDescription UShopComponent::GetItemDescription(int32 SlotIndex) const
+{
+	if (SlotIndex >= 0 && SlotIndex < InstancedShopItems.Num())
+	{
+		const FItemInstance& Item = InstancedShopItems[SlotIndex];
+		if (Item.ItemData)
+		{
+			return Item.ItemData->BuildDescriptionData();
+		}
+	}	
+	return FItemDescription();
 }
 
 
@@ -139,10 +159,31 @@ void UShopComponent::BeginPlay()
 	}
 }
 
+FActionInfo UShopComponent::CreateAction(class ASimpleRPGPlayerState* PS)
+{
+	FActionInfo Action;
+	Action.ContextOwner = this;
+	Action.DisplayName = FText::FromString("Shop");
+	Action.Icon = nullptr;
+	Action.Type = EActionType::Shop;
+	Action.OnActionExecuted.BindUObject(this, &UShopComponent::OpenShop, PS);
+	//Actions.Add(Action);
+
+	return Action;
+}
+
 void UShopComponent::ReadShopDataTable()
 {
 	ShopDataTable->ForeachRow<FShopItemRow>(TEXT("Reading shop data table"), [this](const FName& RowName, const FShopItemRow& Row) {
-		ShopItems.Emplace(Row.ItemId, { FItemInstance(ItemDBSubsystem->Get(Row.ItemId), Row.Stock), Row.Price });
+		const UItemData* Item = ItemDBSubsystem->Get(Row.ItemId);
+		if (!Item)
+		{
+			UE_LOG(LogShop, Warning, TEXT("Item ID not valid: %s"), *Row.ItemId.ToString());
+		}
+		else
+		{
+			ShopItems.Emplace(Row.ItemId, { FItemInstance(ItemDBSubsystem->Get(Row.ItemId), Row.Stock), Row.Price });
+		}
 		});
 
 	UE_LOG(LogShop, Log, TEXT("%s's shop items initialized with total count: %i"), *GetOwner()->GetName(), ShopItems.Num());

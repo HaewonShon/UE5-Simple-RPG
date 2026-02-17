@@ -44,7 +44,7 @@ public:
 	UFUNCTION()
 	void BeginDialogue(UDialogueData* Dialogue, int32 DialogueBeginNode = -1);
 
-	void SetContextOwner(const UActorComponent* Owner);
+	void SetContextOwner(UActorComponent* Owner);
 	void SetNextPage();
 
 	FDialogueInfo RequestCurrentDialogueInfo();
@@ -63,7 +63,7 @@ protected:
 
 	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
 	TWeakObjectPtr<AActor> InteractingTargetRef;
-	TWeakObjectPtr<const UActorComponent> ContextOwnerRef;
+	TWeakObjectPtr<UActorComponent> ContextOwnerRef;
 	FPrimaryAssetId CurrentQuestId;
 };
 

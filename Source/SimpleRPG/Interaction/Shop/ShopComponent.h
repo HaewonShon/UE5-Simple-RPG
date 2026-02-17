@@ -44,17 +44,22 @@ public:
 	UShopComponent();
 
 	/* Action Provider Interface */
-	virtual TArray<FActionInfo> GetAvailableActions(class ASimpleRPGPlayerState* PS) const;
-	virtual TArray<FActionInfo> GetContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS) const;
+	virtual TArray<FActionInfo> CreateAvailableActions(class ASimpleRPGPlayerState* PS);
+	virtual FActionInfo CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS);
 
 	void OpenShop(class ASimpleRPGPlayerState* PS);
 
 	bool TryPurchaseItem(FPrimaryAssetId ItemId, int32 Count);
 	bool TrySellItem(FPrimaryAssetId ItemId, int32 Count);
 
+	const TArray<struct FItemInstance>& GetShopItems() const;
+
+	FItemDescription GetItemDescription(int32 SlotIndex) const;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+	FActionInfo CreateAction(class ASimpleRPGPlayerState* PS);
 
 	void ReadShopDataTable();
 	bool CanPurchaseItem(FItemInstance& Item, int32 SellingCount);
@@ -62,7 +67,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Shop")
 	UDataTable* ShopDataTable;
 
+	UPROPERTY()
 	TMap<FPrimaryAssetId, FShopItem> ShopItems;
+
+	UPROPERTY()
+	TArray<struct FItemInstance> InstancedShopItems;
 
 	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
 	TWeakObjectPtr<class UItemDatabaseSubsystem> ItemDBSubsystem;

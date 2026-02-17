@@ -17,6 +17,7 @@ enum class EActionType : uint8
 	QuestDecline,
 	Shop,
 	Enforcement,
+	INVALID,
 };
 
 USTRUCT()
@@ -24,11 +25,13 @@ struct FActionInfo
 {
 	GENERATED_BODY()
 
+	FActionInfo() : Type(EActionType::INVALID) {}
+
 	FText DisplayName;
 	class UTexture2D* Icon;
 	EActionType Type;
 	FOnActionExecuted OnActionExecuted;
-	const class UActorComponent* ContextOwner;
+	class UActorComponent* ContextOwner;
 };
 
 // This class does not need to be modified.
@@ -46,6 +49,6 @@ class SIMPLERPG_API IActionProvider
 	GENERATED_BODY()
 
 public:
-	virtual TArray<FActionInfo> GetAvailableActions(class ASimpleRPGPlayerState* PS) const = 0;
-	virtual TArray<FActionInfo> GetContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS) const = 0;
+	virtual TArray<FActionInfo> CreateAvailableActions(class ASimpleRPGPlayerState* PS) = 0;
+	virtual FActionInfo CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS) = 0;
 };

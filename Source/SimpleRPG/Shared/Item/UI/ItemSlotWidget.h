@@ -19,6 +19,7 @@ enum class ESlotType
 	Pants,
 	Boots,
 	Storage,
+	Shop,
 	Count UMETA(Hidden)
 };
 ENUM_RANGE_BY_COUNT(ESlotType, ESlotType::Count); // Register Enum Range using Count

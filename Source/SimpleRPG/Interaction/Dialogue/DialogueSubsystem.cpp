@@ -37,7 +37,7 @@ void UDialogueSubsystem::BeginDefaultDialogue(ANPCCharacter* NPC, ASimpleRPGPlay
 	/* add actions using IActionProvider*/
 	for (UActorComponent* Component : NPC->GetComponentsByInterface(UActionProvider::StaticClass()))
 	{
-		TArray<FActionInfo> Actions = Cast<IActionProvider>(Component)->GetAvailableActions(PS);
+		TArray<FActionInfo> Actions = Cast<IActionProvider>(Component)->CreateAvailableActions(PS);
 		DialogueInfo.Actions.Append(Actions);
 	}
 
@@ -50,7 +50,7 @@ void UDialogueSubsystem::BeginDialogue(UDialogueData* Dialogue, int32 DialogueBe
 	UpdateDialogueNode(DialogueBeginNode);
 }
 
-void UDialogueSubsystem::SetContextOwner(const UActorComponent* Owner)
+void UDialogueSubsystem::SetContextOwner(UActorComponent* Owner)
 {
 	ContextOwnerRef = Owner;
 }
@@ -101,7 +101,7 @@ FDialogueInfo UDialogueSubsystem::BuildDialogueWithCurrentNode()
 		{
 			for(FGameplayTag CustomAction : Node.CustomActions)
 			{
-				DialogueInfo.Actions.Append(Cast<IActionProvider>(ContextOwnerRef)->GetContextAction(CustomAction, PlayerStateRef.Get()));
+				DialogueInfo.Actions.Add(Cast<IActionProvider>(ContextOwnerRef)->CreateContextAction(CustomAction, PlayerStateRef.Get()));
 			}
 		}
 	}

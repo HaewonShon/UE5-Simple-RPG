@@ -11,7 +11,7 @@ UQuestGiverComponent::UQuestGiverComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-TArray<FActionInfo> UQuestGiverComponent::GetAvailableActions(ASimpleRPGPlayerState* PS) const
+TArray<FActionInfo> UQuestGiverComponent::CreateAvailableActions(ASimpleRPGPlayerState* PS)
 {
 	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{
@@ -25,18 +25,15 @@ TArray<FActionInfo> UQuestGiverComponent::GetAvailableActions(ASimpleRPGPlayerSt
 	return TArray<FActionInfo>();
 }
 
-TArray<FActionInfo> UQuestGiverComponent::GetContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS) const
+FActionInfo UQuestGiverComponent::CreateContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS)
 {
 	if (UQuestManagerSubsystem* Subsystem = GetWorld()->GetSubsystem<UQuestManagerSubsystem>())
 	{
-		TArray<FActionInfo> Actions = Subsystem->CreateContextAction(ActionTag, PS);
-		for (FActionInfo& Action : Actions)
-		{
-			Action.ContextOwner = this;
-		}
-		return Actions;
+		FActionInfo Action = Subsystem->CreateContextAction(ActionTag, PS);
+		Action.ContextOwner = this;
+		return Action;
 	}
-	return TArray<FActionInfo>();
+	return FActionInfo();
 }
 
 // Called when the game starts

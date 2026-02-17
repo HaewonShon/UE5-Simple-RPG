@@ -32,6 +32,12 @@ public:
 	UFUNCTION()
 	void FinishDialogue();
 
+	UFUNCTION()
+	void OpenShop(class UShopComponent* ShopComponent);
+
+	UFUNCTION()
+	void CloseShop();
+
 protected:
 
 	/*
@@ -61,19 +67,33 @@ protected:
 
 	TWeakObjectPtr<class UEnhancedInputLocalPlayerSubsystem> InputSystemRef;
 
-	// Dialogue System
+	/*************************************************
+	*	Dialogue System
+	*************************************************/
 	void BuildDialogueCamera(class ANPCCharacter* NPC);
 	void ClearDialogueCamera();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	TSubclassOf<class ADialogueCameraActor> DialogueCameraActorClass;
 
+	UPROPERTY()
 	TObjectPtr<class ADialogueCameraActor> DialogueCameraActor;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Dialogue")
 	TSubclassOf<class UDialogueWidget> DialogueDisplayWidgetClass;
 
+	UPROPERTY()
 	TObjectPtr<class UDialogueWidget> DialogueDisplayWidget;
+
+	/*************************************************
+	*	Shop UI
+	*************************************************/
+	UPROPERTY(EditDefaultsOnly, Category = "Shop")
+	TSubclassOf<class UShopWidget> ShopWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<class UShopWidget> ShopWidget;
+
 
 #if !UE_BUILD_SHIPPING
 	void CheatFunction1();

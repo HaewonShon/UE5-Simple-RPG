@@ -8,10 +8,12 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "UI/SimpleRPGHUDWidget.h"
+#include "UI/Inventory/InventoryWidget.h"
 
 #include "Interaction/Dialogue/DialogueCameraActor.h"
 #include "Interaction/Dialogue/UI/DialogueWidget.h"
 #include "Interaction/Dialogue/DialogueSubsystem.h"
+#include "Interaction/Shop/UI/ShopWidget.h"
 #include "World/NPCCharacter.h"
 
 
@@ -145,6 +147,41 @@ void ASimpleRPGPlayerController::FinishDialogue()
 
 	InputSystemRef->RemoveMappingContext(DialogueInputMapping);
 	ClearDialogueCamera();
+}
+
+void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
+{
+	// create shop ui widget
+	ShopWidget = CreateWidget<UShopWidget>(this, ShopWidgetClass.Get());
+	if (DialogueDisplayWidget)
+	{
+		constexpr int32 SHOP_ZORDER = 2000;
+		ShopWidget->AddToViewport(SHOP_ZORDER);
+		ShopWidget->Initialize(ShopComponent);
+
+		ShopWidget->SetDescriptionWidgetRef(HUDWidget->GetItemDescriptionWidget());
+	}
+
+	// open inventory widget
+	ToggleInventory();
+	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
+	{
+		PS->GetInventoryComponent()->SetShopMode();
+	}
+
+	// ui widget - put shop component 주입, 주입된 shop component에 bind
+	// 구매를 ACTION 어떻게 할까???????
+
+}
+
+void ASimpleRPGPlayerController::CloseShop()
+{
+	ShopWidget->RemoveFromParent();
+	ToggleInventory();
+	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
+	{
+		PS->GetInventoryComponent()->SetNormalMode();
+	}
 }
 
 void ASimpleRPGPlayerController::BuildDialogueCamera(ANPCCharacter* NPC)

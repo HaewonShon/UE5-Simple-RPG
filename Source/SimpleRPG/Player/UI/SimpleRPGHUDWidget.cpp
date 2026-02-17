@@ -54,7 +54,12 @@ void USimpleRPGHUDWidget::ToggleInventory()
     }
 }
 
-TWeakObjectPtr<UUserWidget> USimpleRPGHUDWidget::GetInventoryWidget() const
+UUserWidget* USimpleRPGHUDWidget::GetInventoryWidget()
 {
     return InventoryWidget;
+}
+
+UUserWidget* USimpleRPGHUDWidget::GetItemDescriptionWidget()
+{
+    return ItemDescriptionWidget;
 }

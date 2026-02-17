@@ -42,7 +42,7 @@ public:
 
 	void RegisterNPCQuestPair(FPrimaryAssetId NPCId, FPrimaryAssetId QuestId);
 	TArray<struct FActionInfo> CreateQuestActions(FPrimaryAssetId NPCId, class ASimpleRPGPlayerState* PlayerState);
-	TArray<struct FActionInfo> CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS);
+	struct FActionInfo CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS);
 
 	EQuestStatus GetQuestStatus(FPrimaryAssetId QuestId, class ASimpleRPGPlayerState* PlayerState);
 

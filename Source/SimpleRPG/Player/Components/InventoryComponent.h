@@ -46,7 +46,7 @@ public:
 	void SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC);
 
 	/*
-	*	Inventory Management functions 
+	*	Inventory Management functions
 	*/
 	bool CanAddItem(FItemInstance ItemInstance) const;
 	bool AddItem(FItemInstance& ItemInstance);
@@ -84,6 +84,9 @@ public:
 	FEquipmentChangedDelegate OnEquipmentContentChanged;
 	FItemCountChangedDelegate OnItemCountChanged;
 
+	void SetShopMode() { InventoryMode = EInventoryMode::Shop; }
+	void SetNormalMode() { InventoryMode = EInventoryMode::Normal; }
+	EInventoryMode GetCurrentMode() const { return InventoryMode; }
 protected:
 	/* Checker for equipment - category */
 	bool CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType);

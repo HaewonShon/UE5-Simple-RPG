@@ -19,7 +19,8 @@ public:
 	
 	void ToggleInventory();
 
-	TWeakObjectPtr<UUserWidget> GetInventoryWidget() const;
+	UUserWidget* GetInventoryWidget();
+	UUserWidget* GetItemDescriptionWidget();
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -35,5 +36,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
 	TSubclassOf<class UItemDescriptionWidget> ItemDescriptionWidgetClass;
+
+	UPROPERTY()
 	TObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidget;
 };

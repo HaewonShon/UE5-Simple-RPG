@@ -197,28 +197,37 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 
 void UInventoryWidget::OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2)
 {
-	// no support for swap between different equipment slots
-	if (Slot1.SlotType != ESlotType::Storage && Slot2.SlotType != ESlotType::Storage)
+	if (InventoryComponentRef->GetCurrentMode() == EInventoryMode::Shop)
 	{
-		return;
+		if (Slot1.SlotType == ESlotType::Shop)
+		{
+			// Buy Request
+		}
 	}
+	else
+	{
+		// no support for swap between different equipment slots
+		if (Slot1.SlotType != ESlotType::Storage && Slot2.SlotType != ESlotType::Storage)
+		{
+			return;
+		}
 
-	if (Slot1.SlotType == ESlotType::Storage && Slot2.SlotType == ESlotType::Storage)
-	{
-		InventoryComponentRef->SwapItems(SelectedPage, Slot1.SlotIndex, Slot2.SlotIndex);
-	}
-	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
-	{
-		InventoryComponentRef->TryEquipItem(Slot1.SlotIndex, ConvertSlotTypeToEquipmentType(Slot2.SlotType));
-		UpdateEquipmentSlotWidgets();
-	}
-	else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
-	{
-		InventoryComponentRef->TryEquipItem(Slot2.SlotIndex, ConvertSlotTypeToEquipmentType(Slot1.SlotType));
-		UpdateEquipmentSlotWidgets();
-	}
-
-	UpdateCurrentPageContents();
+		if (Slot1.SlotType == ESlotType::Storage && Slot2.SlotType == ESlotType::Storage)
+		{
+			InventoryComponentRef->SwapItems(SelectedPage, Slot1.SlotIndex, Slot2.SlotIndex);
+		}
+		else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
+		{
+			InventoryComponentRef->TryEquipItem(Slot1.SlotIndex, ConvertSlotTypeToEquipmentType(Slot2.SlotType));
+			UpdateEquipmentSlotWidgets();
+		}
+		else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
+		{
+			InventoryComponentRef->TryEquipItem(Slot2.SlotIndex, ConvertSlotTypeToEquipmentType(Slot1.SlotType));
+			UpdateEquipmentSlotWidgets();
+		}
+		UpdateCurrentPageContents();
+	}	
 }
 
 void UInventoryWidget::OnItemDiscarded(FSlotInfo SlotWidget)

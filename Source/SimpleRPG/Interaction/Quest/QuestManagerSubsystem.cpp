@@ -79,9 +79,8 @@ TArray<FActionInfo> UQuestManagerSubsystem::CreateQuestActions(FPrimaryAssetId N
 	return Actions;
 }
 
-TArray<FActionInfo> UQuestManagerSubsystem::CreateContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS)
+FActionInfo UQuestManagerSubsystem::CreateContextAction(FGameplayTag ActionTag, ASimpleRPGPlayerState* PS)
 {
-	TArray<FActionInfo> Actions;
 	if (ActionTag == FGameplayTag::RequestGameplayTag("Action.Quest.Accept"))
 	{
 		FActionInfo ActionInfo;
@@ -89,7 +88,7 @@ TArray<FActionInfo> UQuestManagerSubsystem::CreateContextAction(FGameplayTag Act
 		ActionInfo.Type = EActionType::QuestAccept;
 		ActionInfo.Icon = nullptr;
 		ActionInfo.OnActionExecuted.BindUObject(this, &UQuestManagerSubsystem::ResolveQuestDecision, CurrentSelectedQuestId, PS, true);
-		Actions.Add(ActionInfo);
+		return ActionInfo;
 	}
 	else if (ActionTag == FGameplayTag::RequestGameplayTag("Action.Quest.Decline"))
 	{
@@ -98,9 +97,9 @@ TArray<FActionInfo> UQuestManagerSubsystem::CreateContextAction(FGameplayTag Act
 		ActionInfo.Type = EActionType::QuestDecline;
 		ActionInfo.Icon = nullptr;
 		ActionInfo.OnActionExecuted.BindUObject(this, &UQuestManagerSubsystem::ResolveQuestDecision, CurrentSelectedQuestId, PS, false);
-		Actions.Add(ActionInfo);
+		return ActionInfo;
 	}
-	return Actions;
+	return FActionInfo();
 }
 
 void UQuestManagerSubsystem::ResolveQuestSelection(FPrimaryAssetId QuestId, ASimpleRPGPlayerState* PlayerState)

@@ -18,8 +18,8 @@ public:
 	// Sets default values for this component's properties
 	UQuestGiverComponent();
 
-	virtual TArray<FActionInfo> GetAvailableActions(class ASimpleRPGPlayerState* PS) const;
-	virtual TArray<FActionInfo> GetContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS) const;
+	virtual TArray<FActionInfo> CreateAvailableActions(class ASimpleRPGPlayerState* PS) override;
+	virtual FActionInfo CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS) override;
 
 protected:
 	// Called when the game starts
