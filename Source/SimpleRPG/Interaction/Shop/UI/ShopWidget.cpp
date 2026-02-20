@@ -78,13 +78,15 @@ void UShopWidget::SetDescriptionWidgetRef(UUserWidget* DescriptionWidgetRef)
 
 void UShopWidget::UpdateShopContents()
 {
-	const TArray<FItemInstance>& Items = ShopComponentRef->GetShopItems();
-	for (int32 Index = 0; Index < FMath::Min(PageWidth * PageHeight, Items.Num()); ++Index)
+	const TMap<FPrimaryAssetId, FShopItem>& ShopItems = ShopComponentRef->GetShopItems();
+	int32 Index = 0;
+	for(const auto& Pair : ShopItems)
 	{
-		UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(Index));
-		if (Items[Index].ItemData)
+		const FShopItem& ShopItem = Pair.Value;
+		if (ShopItem.Item.ItemData)
 		{
-			SlotWidget->SetItem(Items[Index]);
+			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(Index));
+			SlotWidget->SetItem(ShopItem.Item);
 		}
 	}
 }

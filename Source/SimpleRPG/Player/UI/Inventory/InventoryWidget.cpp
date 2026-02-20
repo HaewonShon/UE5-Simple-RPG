@@ -79,7 +79,7 @@ void UInventoryWidget::NativeConstruct()
 
 		for(ESlotType SlotType : TEnumRange<ESlotType>())
 		{
-			if (SlotType == ESlotType::Storage) continue;
+			if (SlotType == ESlotType::Storage || SlotType == ESlotType::Shop) continue;
 
 			UItemSlotWidget* SlotWidget = EquipmentSlotMap[SlotType];
 			SlotWidget->SlotType = SlotType;

@@ -25,6 +25,9 @@ public:
 protected:
 	void UpdateShopContents();
 
+	//void RequestBuyItem();
+	//void RequestSellItem();
+
 	UFUNCTION()
 	void OnSlotDragBegin(FSlotInfo SlotWidget);
 

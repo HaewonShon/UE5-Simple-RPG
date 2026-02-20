@@ -52,14 +52,13 @@ public:
 	bool TryPurchaseItem(FPrimaryAssetId ItemId, int32 Count);
 	bool TrySellItem(FPrimaryAssetId ItemId, int32 Count);
 
-	const TArray<struct FItemInstance>& GetShopItems() const;
+	const TMap<FPrimaryAssetId, FShopItem>& GetShopItems() const;
 
 	FItemDescription GetItemDescription(int32 SlotIndex) const;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	FActionInfo CreateAction(class ASimpleRPGPlayerState* PS);
 
 	void ReadShopDataTable();
 	bool CanPurchaseItem(FItemInstance& Item, int32 SellingCount);

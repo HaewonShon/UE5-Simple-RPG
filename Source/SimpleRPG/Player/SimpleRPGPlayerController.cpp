@@ -153,7 +153,7 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 {
 	// create shop ui widget
 	ShopWidget = CreateWidget<UShopWidget>(this, ShopWidgetClass.Get());
-	if (DialogueDisplayWidget)
+	if (ShopWidget)
 	{
 		constexpr int32 SHOP_ZORDER = 2000;
 		ShopWidget->AddToViewport(SHOP_ZORDER);

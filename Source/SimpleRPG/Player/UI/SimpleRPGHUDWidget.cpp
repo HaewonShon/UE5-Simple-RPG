@@ -24,11 +24,12 @@ void USimpleRPGHUDWidget::NativeConstruct()
         InventoryWidgetSlot->SetOffsets(FMargin(-(20.f), 20.f, InventoryWidgetSize.X, InventoryWidgetSize.Y));
 
         InventoryWidget->BindItemDiscardDelegate(BackdropWidget.Get());
+        InventoryWidget->AddToViewport(1000);
 
         ItemDescriptionWidget = CreateWidget<UItemDescriptionWidget>(GetOwningPlayer(), ItemDescriptionWidgetClass.Get());
         if (ItemDescriptionWidget)
         {
-            ItemDescriptionWidget->AddToViewport(10); // magic number for z-order
+            ItemDescriptionWidget->AddToViewport(2000); // magic number for z-order
             ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
             InventoryWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
         }

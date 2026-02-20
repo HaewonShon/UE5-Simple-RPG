@@ -122,9 +122,9 @@ bool UShopComponent::TrySellItem(FPrimaryAssetId ItemId, int32 SellingCount)
 	return true;
 }
 
-const TArray<FItemInstance>& UShopComponent::GetShopItems() const
+const TMap<FPrimaryAssetId, FShopItem>& UShopComponent::GetShopItems() const
 {
-	return InstancedShopItems;
+	return ShopItems;
 }
 
 FItemDescription UShopComponent::GetItemDescription(int32 SlotIndex) const
@@ -157,19 +157,6 @@ void UShopComponent::BeginPlay()
 
 		ReadShopDataTable();
 	}
-}
-
-FActionInfo UShopComponent::CreateAction(class ASimpleRPGPlayerState* PS)
-{
-	FActionInfo Action;
-	Action.ContextOwner = this;
-	Action.DisplayName = FText::FromString("Shop");
-	Action.Icon = nullptr;
-	Action.Type = EActionType::Shop;
-	Action.OnActionExecuted.BindUObject(this, &UShopComponent::OpenShop, PS);
-	//Actions.Add(Action);
-
-	return Action;
 }
 
 void UShopComponent::ReadShopDataTable()
