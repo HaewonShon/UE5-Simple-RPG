@@ -18,7 +18,7 @@ class SIMPLERPG_API UShopWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	void Initialize(class UShopComponent* ShopComponent);
+	void InitializeShop(class UShopComponent* ShopComponent);
 
 	void SetDescriptionWidgetRef(UUserWidget* DescriptionWidgetRef);
 

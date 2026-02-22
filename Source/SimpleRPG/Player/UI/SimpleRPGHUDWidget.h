@@ -16,27 +16,8 @@ class SIMPLERPG_API USimpleRPGHUDWidget : public UUserWidget
 	
 public:
 	virtual void NativeConstruct() override;
-	
-	void ToggleInventory();
-
-	UUserWidget* GetInventoryWidget();
-	UUserWidget* GetItemDescriptionWidget();
 
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UCanvasPanel> MainCanvas;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UBackdropWidget> BackdropWidget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<class UInventoryWidget> InventoryWidgetClass;
-
-	TObjectPtr<class UInventoryWidget> InventoryWidget;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<class UItemDescriptionWidget> ItemDescriptionWidgetClass;
-
-	UPROPERTY()
-	TObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidget;
 };

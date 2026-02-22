@@ -94,6 +94,9 @@ protected:
 	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
 
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UBackdropWidget> BackdropWidget;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInvalidationBox> InvalidationBox;
 
 	UPROPERTY(meta = (BindWidget))

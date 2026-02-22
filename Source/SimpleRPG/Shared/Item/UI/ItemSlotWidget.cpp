@@ -56,6 +56,11 @@ UTexture2D* UItemSlotWidget::GetIconTexture() const
 	return nullptr;
 }
 
+void UItemSlotWidget::NativeConstruct()
+{
+	ClearItem();
+}
+
 FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	FEventReply Reply;

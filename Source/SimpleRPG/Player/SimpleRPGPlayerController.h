@@ -39,14 +39,16 @@ public:
 	void CloseShop();
 
 protected:
+	void ConstructUI();
 
-	/*
+	/*************************************************
 	*	UI & Input
-	*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<class USimpleRPGHUDWidget> HUDWidgetClass;
+	*************************************************/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class URootWidget> RootWidgetClass;
 
-	TObjectPtr<class USimpleRPGHUDWidget>  HUDWidget;
+	UPROPERTY()
+	TObjectPtr<class URootWidget> RootWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* DialogueInputMapping;

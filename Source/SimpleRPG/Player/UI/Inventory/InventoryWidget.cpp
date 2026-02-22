@@ -126,6 +126,8 @@ void UInventoryWidget::NativeConstruct()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to create SlotVisualWidget"));
 	}
+
+	BindItemDiscardDelegate(BackdropWidget);
 }
 
 void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
@@ -137,7 +139,7 @@ void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
 	}
 
 	Widget->OnItemDiscard.BindUObject(this, &UInventoryWidget::OnItemDiscarded);
-	UE_LOG(LogInventory, Verbose, TEXT("OnItemDiscard Registtered"));
+	UE_LOG(LogInventory, Verbose, TEXT("OnItemDiscard Registered"));
 }
 
 void UInventoryWidget::SetDescriptionWidgetRef(UItemDescriptionWidget* DescriptionWidgetRef)
@@ -158,7 +160,7 @@ void UInventoryWidget::OnCurrentPageSort()
 
 void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
 {
-	if (bIsPageContentChanged[SelectedPage])
+	if (ChangedVisibility == ESlateVisibility::Visible && bIsPageContentChanged[SelectedPage])
 	{
 		UpdateCurrentPageContents();
 	}
@@ -257,6 +259,7 @@ void UInventoryWidget::OnItemUsed(FSlotInfo SlotWidget)
 void UInventoryWidget::OnSlotHovered(FSlotInfo SlotWidget)
 {
 	UE_LOG(LogInventory, Verbose, TEXT("Inventory Widget OnSlotHovered Called"));
+
 	FItemDescription Description;
 	if (SlotWidget.SlotType != ESlotType::Storage)
 	{

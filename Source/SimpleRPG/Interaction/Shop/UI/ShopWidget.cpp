@@ -52,7 +52,7 @@ void UShopWidget::NativeConstruct()
 	}
 }
 
-void UShopWidget::Initialize(UShopComponent* ShopComponent)
+void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
 {
 	if (!ShopComponent)
 	{

@@ -7,15 +7,13 @@
 #include "Blueprint/UserWidget.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "UI/SimpleRPGHUDWidget.h"
-#include "UI/Inventory/InventoryWidget.h"
 
 #include "Interaction/Dialogue/DialogueCameraActor.h"
 #include "Interaction/Dialogue/UI/DialogueWidget.h"
 #include "Interaction/Dialogue/DialogueSubsystem.h"
 #include "Interaction/Shop/UI/ShopWidget.h"
 #include "World/NPCCharacter.h"
-
+#include "Shared/UI/RootWidget.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
 {
@@ -29,43 +27,28 @@ void ASimpleRPGPlayerController::BeginPlay()
 	InputSystemRef = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(InputSystemRef.IsValid())
 
-		// Input setup for UI
-		if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
-		{
-			EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
-			InputSystemRef->AddMappingContext(UIMapping, 1);
+	// Input setup for UI
+	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
+	{
+		EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
+		InputSystemRef->AddMappingContext(UIMapping, 1);
 
 #if !UE_BUILD_SHIPPING
-			ensure(CheatAction.Num() >= 4);
-			EIC->BindAction(CheatAction[0], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction1);
-			EIC->BindAction(CheatAction[1], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction2);
-			EIC->BindAction(CheatAction[2], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction3);
-			EIC->BindAction(CheatAction[3], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction4);
-			InputSystemRef->AddMappingContext(CheatMapping, 0);
+		ensure(CheatAction.Num() >= 4);
+		EIC->BindAction(CheatAction[0], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction1);
+		EIC->BindAction(CheatAction[1], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction2);
+		EIC->BindAction(CheatAction[2], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction3);
+		EIC->BindAction(CheatAction[3], ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::CheatFunction4);
+		InputSystemRef->AddMappingContext(CheatMapping, 0);
 #endif
 
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("PlayerController requires EnhancedInputComponent"));
-		}
-
-	if (HUDWidgetClass)
-	{
-		HUDWidget = CreateWidget<USimpleRPGHUDWidget>(this, HUDWidgetClass);
-		if (HUDWidget)
-		{
-			HUDWidget->AddToViewport();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create HUD"));
-		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HUDWidget in PlayerController not registered."));
+		UE_LOG(LogTemp, Error, TEXT("PlayerController requires EnhancedInputComponent"));
 	}
+
+	ConstructUI();
 
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
@@ -78,44 +61,45 @@ void ASimpleRPGPlayerController::BeginPlay()
 
 void ASimpleRPGPlayerController::AddPitchInput(float Val)
 {
-    Super::AddPitchInput(Val);
+	Super::AddPitchInput(Val);
 }
 
 void ASimpleRPGPlayerController::ToggleInventory()
 {
-	if (HUDWidget)
+	RootWidget->ToggleInventory();
+	bIsInvenetoryOn = !bIsInvenetoryOn;
+	if (bIsInvenetoryOn)
 	{
-		HUDWidget->ToggleInventory();
-		bIsInvenetoryOn = !bIsInvenetoryOn;
+		bShowMouseCursor = true;
 
-		if(bIsInvenetoryOn)
-		{
-			bShowMouseCursor = true;
+		FInputModeGameAndUI InputMode;
+		InputMode.SetHideCursorDuringCapture(false);
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		//InputMode.SetWidgetToFocus(InventoryWidget->GetCachedWidget());
 
-			FInputModeGameAndUI InputMode;
-			InputMode.SetHideCursorDuringCapture(false);
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			InputMode.SetWidgetToFocus(HUDWidget->GetInventoryWidget()->TakeWidget());
-
-			SetInputMode(InputMode);
-		}
-		else
-		{
-			bShowMouseCursor = false;
-			SetInputMode(FInputModeGameOnly());
-		}
+		SetInputMode(InputMode);
+	}
+	else
+	{
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
 	}
 }
 
 void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 {
+	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		DialogueSubsystem->BeginDefaultDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
+	}
+
 	// Input setting
 	bShowMouseCursor = true;
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
-	 
+	//InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
+
 	SetInputMode(FInputModeUIOnly());
 
 	// prevent input from player
@@ -126,10 +110,8 @@ void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 
 	BuildDialogueCamera(NPC);
 
-	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
-	{
-		DialogueSubsystem->BeginDefaultDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
-	}
+	// Create Dialogue Widget
+	DialogueDisplayWidget = Cast<UDialogueWidget>(RootWidget->AddWidgetToLayer(EWidgetLayer::Dialogue, DialogueDisplayWidgetClass, true));
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
@@ -147,6 +129,12 @@ void ASimpleRPGPlayerController::FinishDialogue()
 
 	InputSystemRef->RemoveMappingContext(DialogueInputMapping);
 	ClearDialogueCamera();
+
+	if (DialogueDisplayWidget)
+	{
+		DialogueDisplayWidget->RemoveFromParent();
+		DialogueDisplayWidget = nullptr;
+	}
 }
 
 void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
@@ -157,16 +145,16 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 	{
 		constexpr int32 SHOP_ZORDER = 2000;
 		ShopWidget->AddToViewport(SHOP_ZORDER);
-		ShopWidget->Initialize(ShopComponent);
-
-		ShopWidget->SetDescriptionWidgetRef(HUDWidget->GetItemDescriptionWidget());
+		ShopWidget->InitializeShop(ShopComponent);
+		// TODO : dSet Description widget
+		//ShopWidget->SetDescriptionWidgetRef(HUDWidget->GetItemDescriptionWidget());
 	}
 
 	// open inventory widget
 	ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
-		PS->GetInventoryComponent()->SetShopMode();
+		//PS->GetInventoryComponent()->SetShopMode();
 	}
 
 	// ui widget - put shop component 주입, 주입된 shop component에 bind
@@ -180,28 +168,27 @@ void ASimpleRPGPlayerController::CloseShop()
 	ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
-		PS->GetInventoryComponent()->SetNormalMode();
+		//PS->GetInventoryComponent()->SetNormalMode();
 	}
 }
 
+void ASimpleRPGPlayerController::ConstructUI()
+{
+	check(RootWidgetClass);
+
+	RootWidget = CreateWidget<URootWidget>(this, RootWidgetClass.Get());
+	RootWidget->AddToViewport();
+}
+
 void ASimpleRPGPlayerController::BuildDialogueCamera(ANPCCharacter* NPC)
-{// Controller setting
+{
 	constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
 
 	DialogueCameraActor = GetWorld()->SpawnActor<ADialogueCameraActor>(DialogueCameraActorClass);
 	DialogueCameraActor->SetupCameraTransform(GetCharacter()->GetActorLocation(), NPC->GetActorLocation());
 	SetViewTargetWithBlend(DialogueCameraActor.Get(), DIALOGUE_CAM_BLEND_TIME);
-
-	// Create Dialogue Widget
-	DialogueDisplayWidget = CreateWidget<UDialogueWidget>(this, DialogueDisplayWidgetClass.Get());
-	if (DialogueDisplayWidget)
-	{
-		constexpr int32 DIALOGUE_ZORDER = 1000;
-		DialogueDisplayWidget->AddToViewport(DIALOGUE_ZORDER);
-		//DialogueDisplayWidget->IntializeDialogue(NPC, Dialogue);
-	}
-
 }
+
 void ASimpleRPGPlayerController::ClearDialogueCamera()
 {
 	if (DialogueCameraActor)
