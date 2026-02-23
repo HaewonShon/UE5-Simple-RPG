@@ -4,12 +4,13 @@
 #include "Shared/UI/RootWidget.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
+#include "Components/Image.h"
 
 #include "Player/UI/SimpleRPGHUDWidget.h"
 #include "Player/UI/Inventory/InventoryWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
 
-UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUserWidget> WidgetClass, bool bFillScreen)
+UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUserWidget> WidgetClass, bool bFillScreen, bool bIsAliveAlways)
 {
 	UOverlay* Overlay = GetLayer(Layer);
 	check(Overlay);
@@ -24,8 +25,11 @@ UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUser
 			ChildSlot->SetVerticalAlignment(VAlign_Fill);
 			ChildSlot->SetPadding(FMargin(0.f));
 		}
-		++LiveWidgetCountForLayer[Layer];
-		UpdateBlockingImageStatus(Layer);
+		if (!bIsAliveAlways)
+		{
+			++LiveWidgetCountForLayer[Layer];
+			UpdateBlockingImageStatus(Layer);
+		}
 	}
 	else
 	{
@@ -39,14 +43,11 @@ void URootWidget::ToggleInventory()
 	if (InventoryWidget->GetVisibility() == ESlateVisibility::Collapsed)
 	{
 		InventoryWidget->SetVisibility(ESlateVisibility::Visible);
-		++LiveWidgetCountForLayer[EWidgetLayer::Menu];
 	}
 	else
 	{
 		InventoryWidget->SetVisibility(ESlateVisibility::Collapsed);
-		--LiveWidgetCountForLayer[EWidgetLayer::Menu];
 	}
-	UpdateBlockingImageStatus(EWidgetLayer::Menu);
 }
 
 void URootWidget::NotifyWidgetRemoved(EWidgetLayer Layer)
@@ -63,14 +64,14 @@ void URootWidget::NativeConstruct()
 	LiveWidgetCountForLayer.Add({ EWidgetLayer::System, 0 });
 
 	check(HUDWidgetClass);
-	AddWidgetToLayer(EWidgetLayer::HUD, HUDWidgetClass, true);
+	AddWidgetToLayer(EWidgetLayer::HUD, HUDWidgetClass, true, true);
 
 	check(InventoryWidgetClass);
-	InventoryWidget = Cast<UInventoryWidget>(AddWidgetToLayer(EWidgetLayer::Menu, InventoryWidgetClass, true));
+	InventoryWidget = Cast<UInventoryWidget>(AddWidgetToLayer(EWidgetLayer::Menu, InventoryWidgetClass, true, true));
 	ToggleInventory();
 
 	check(ItemDescriptionWidgetClass);
-	ItemDescriptionWidget = Cast<UItemDescriptionWidget>(AddWidgetToLayer(EWidgetLayer::System, ItemDescriptionWidgetClass));
+	ItemDescriptionWidget = Cast<UItemDescriptionWidget>(AddWidgetToLayer(EWidgetLayer::System, ItemDescriptionWidgetClass, false, true));
 	ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 	InventoryWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
@@ -80,13 +81,19 @@ void URootWidget::NativeConstruct()
 void URootWidget::UpdateBlockingImageStatus(EWidgetLayer Layer)
 {
 	check(LiveWidgetCountForLayer[Layer] >= 0);
-	if (LiveWidgetCountForLayer[Layer] > 0)
+	
+	ESlateVisibility NewVisibility = (LiveWidgetCountForLayer[Layer] > 0) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	switch (Layer)
 	{
-		// turn on blocking image for layer
-	}
-	else
-	{
-		// turn off blocking image for layer
+	case EWidgetLayer::Dialogue:
+		DialogueLayerBlockingImage->SetVisibility(NewVisibility);
+		break;
+	case EWidgetLayer::Menu:
+		MenuLayerBlockingImage->SetVisibility(NewVisibility);
+		break;
+	case EWidgetLayer::System:
+		SystemLayerBlockingImage->SetVisibility(NewVisibility);
+		break;
 	}
 }
 

@@ -24,7 +24,8 @@ class SIMPLERPG_API URootWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-	UUserWidget* AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUserWidget> WidgetClass, bool bFillScreen = false);
+	UUserWidget* AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUserWidget> WidgetClass, 
+		bool bFillScreen = false, bool bIsAliveAlways = false);
 
 	void ToggleInventory();
 	void NotifyWidgetRemoved(EWidgetLayer Layer);
@@ -36,17 +37,29 @@ private:
 	void UpdateBlockingImageStatus(EWidgetLayer Layer);
 	class UOverlay* GetLayer(EWidgetLayer Layer);
 
-	UPROPERTY(EditAnywhere, meta = (Bindwidget))
+	/************************************************
+	***    Root widget members
+	************************************************/
+	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UOverlay> HUDLayer;
 
-	UPROPERTY(EditAnywhere, meta = (Bindwidget))
+	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UOverlay> DialogueLayer;
 
-	UPROPERTY(EditAnywhere, meta = (Bindwidget))
+	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UOverlay> MenuLayer;
 
-	UPROPERTY(EditAnywhere, meta = (Bindwidget))
+	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UOverlay> SystemLayer;
+
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UImage> DialogueLayerBlockingImage;
+
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UImage> MenuLayerBlockingImage;
+
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UImage> SystemLayerBlockingImage;
 
 	/************************************************
 	***    Widgets
