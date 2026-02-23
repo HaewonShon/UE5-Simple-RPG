@@ -64,16 +64,9 @@ void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
 	UpdateShopContents();
 }
 
-void UShopWidget::SetDescriptionWidgetRef(UUserWidget* DescriptionWidgetRef)
+void UShopWidget::SetDescriptionWidgetRef(UItemDescriptionWidget* DescriptionWidget)
 {
-	if (UItemDescriptionWidget* DescriptionWidget = Cast<UItemDescriptionWidget>(DescriptionWidgetRef))
-	{
-		ItemDescriptionWidgetRef = DescriptionWidget;
-	}
-	else
-	{
-		UE_LOG(LogShop, Warning, TEXT("ShopWidget Description pointer is not valid"));
-	}
+	ItemDescriptionWidgetRef = DescriptionWidget;
 }
 
 void UShopWidget::UpdateShopContents()

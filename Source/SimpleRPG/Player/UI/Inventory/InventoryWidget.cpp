@@ -274,7 +274,7 @@ void UInventoryWidget::OnSlotHovered(FSlotInfo SlotWidget)
 	ItemDescriptionWidgetRef->SetDescription(Description);
 
 	FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
-	ItemDescriptionWidgetRef->SetPositionInViewport(MousePos, false);
+	ItemDescriptionWidgetRef->SetPositionInScreen(MousePos);
 }
 
 void UInventoryWidget::OnSlotHoverEnded()

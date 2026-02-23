@@ -29,6 +29,8 @@ public:
 	void ToggleInventory();
 	void NotifyWidgetRemoved(EWidgetLayer Layer);
 
+	class UItemDescriptionWidget* GetItemDescriptionWidgetRef() { return ItemDescriptionWidget; }
+
 private:
 	virtual void NativeConstruct() override;
 	void UpdateBlockingImageStatus(EWidgetLayer Layer);

@@ -4,6 +4,8 @@
 #include "ItemDescriptionWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/OverlaySlot.h"
+#include "Components/CanvasPanelSlot.h"
 
 void UItemDescriptionWidget::SetDescription(const FItemDescription& Description)
 {
@@ -28,5 +30,17 @@ void UItemDescriptionWidget::SetDescription(const FItemDescription& Description)
 			);
 		}
 		DetailedText->SetText(Builder.ToText());
+	}
+}
+
+void UItemDescriptionWidget::SetPositionInScreen(FVector2D Pos)
+{
+	if (UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(Slot))
+	{
+		OverlaySlot->SetPadding(FMargin(Pos.X, Pos.Y, 0.f, 0.f));
+	}
+	else if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Slot))
+	{
+		CanvasSlot->SetPosition(Pos);
 	}
 }

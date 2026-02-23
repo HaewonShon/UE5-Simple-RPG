@@ -71,8 +71,10 @@ void URootWidget::NativeConstruct()
 
 	check(ItemDescriptionWidgetClass);
 	ItemDescriptionWidget = Cast<UItemDescriptionWidget>(AddWidgetToLayer(EWidgetLayer::System, ItemDescriptionWidgetClass));
-	
+	ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
+
 	InventoryWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
+	// shop->SetDescriptionWidgetRef
 }
 
 void URootWidget::UpdateBlockingImageStatus(EWidgetLayer Layer)

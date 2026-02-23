@@ -16,6 +16,7 @@ class SIMPLERPG_API UItemDescriptionWidget : public UUserWidget
 	
 public:
 	void SetDescription(const FItemDescription& Description);
+	void SetPositionInScreen(FVector2D Pos);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

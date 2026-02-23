@@ -14,6 +14,7 @@
 #include "Interaction/Shop/UI/ShopWidget.h"
 #include "World/NPCCharacter.h"
 #include "Shared/UI/RootWidget.h"
+#include "Components/InventoryComponent.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
 {
@@ -88,6 +89,8 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 {
+	DialogueDisplayWidget = Cast<UDialogueWidget>(RootWidget->AddWidgetToLayer(EWidgetLayer::Dialogue, DialogueDisplayWidgetClass, true));
+	
 	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
 		DialogueSubsystem->BeginDefaultDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
@@ -111,7 +114,6 @@ void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 	BuildDialogueCamera(NPC);
 
 	// Create Dialogue Widget
-	DialogueDisplayWidget = Cast<UDialogueWidget>(RootWidget->AddWidgetToLayer(EWidgetLayer::Dialogue, DialogueDisplayWidgetClass, true));
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
@@ -140,21 +142,18 @@ void ASimpleRPGPlayerController::FinishDialogue()
 void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 {
 	// create shop ui widget
-	ShopWidget = CreateWidget<UShopWidget>(this, ShopWidgetClass.Get());
+	ShopWidget = Cast<UShopWidget>(RootWidget->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false));
 	if (ShopWidget)
 	{
-		constexpr int32 SHOP_ZORDER = 2000;
-		ShopWidget->AddToViewport(SHOP_ZORDER);
 		ShopWidget->InitializeShop(ShopComponent);
-		// TODO : dSet Description widget
-		//ShopWidget->SetDescriptionWidgetRef(HUDWidget->GetItemDescriptionWidget());
+		ShopWidget->SetDescriptionWidgetRef(RootWidget->GetItemDescriptionWidgetRef());
 	}
 
 	// open inventory widget
 	ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
-		//PS->GetInventoryComponent()->SetShopMode();
+		PS->GetInventoryComponent()->SetShopMode();
 	}
 
 	// ui widget - put shop component 주입, 주입된 shop component에 bind
@@ -168,7 +167,7 @@ void ASimpleRPGPlayerController::CloseShop()
 	ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
-		//PS->GetInventoryComponent()->SetNormalMode();
+		PS->GetInventoryComponent()->SetNormalMode();
 	}
 }
 

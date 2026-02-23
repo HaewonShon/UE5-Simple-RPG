@@ -20,7 +20,7 @@ public:
 
 	void InitializeShop(class UShopComponent* ShopComponent);
 
-	void SetDescriptionWidgetRef(UUserWidget* DescriptionWidgetRef);
+	void SetDescriptionWidgetRef(class UItemDescriptionWidget* DescriptionWidget);
 
 protected:
 	void UpdateShopContents();
