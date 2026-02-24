@@ -9,6 +9,7 @@
 #include "Player/UI/SimpleRPGHUDWidget.h"
 #include "Player/UI/Inventory/InventoryWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
+#include "Shared/UI/Common/SessionWidget.h"
 
 UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUserWidget> WidgetClass, bool bFillScreen, bool bIsAliveAlways)
 {
@@ -24,9 +25,15 @@ UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUser
 			ChildSlot->SetHorizontalAlignment(HAlign_Fill);
 			ChildSlot->SetVerticalAlignment(VAlign_Fill);
 			ChildSlot->SetPadding(FMargin(0.f));
+			
 		}
 		if (!bIsAliveAlways)
 		{
+			if (USessionWidget* SessionWidget = Cast<USessionWidget>(Widget))
+			{
+				UE_LOG(LogTemp, Log, TEXT("Widget close event registered"));
+				SessionWidget->OnWidgetClosed.AddUObject(this, &URootWidget::RequestRemoveWidget, Layer, Widget);
+			}
 			++LiveWidgetCountForLayer[Layer];
 			UpdateBlockingImageStatus(Layer);
 		}
@@ -50,8 +57,16 @@ void URootWidget::ToggleInventory()
 	}
 }
 
-void URootWidget::NotifyWidgetRemoved(EWidgetLayer Layer)
+void URootWidget::RequestRemoveWidget(EWidgetLayer Layer, UUserWidget* Widget)
 {
+	UE_LOG(LogTemp, Warning, TEXT("RequestRemoveWidget"));
+	if (!Widget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed RequestRemoveWidget"));
+		return;
+	}
+
+	Widget->RemoveFromParent();
 	--LiveWidgetCountForLayer[Layer];
 	UpdateBlockingImageStatus(Layer);
 }

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Shared/UI/Common/SessionWidget.h"
 #include "DialogueWidget.generated.h"
 
 DECLARE_DELEGATE(FOnDialogueFinished)
@@ -12,7 +12,7 @@ DECLARE_DELEGATE(FOnDialogueFinished)
  *		Widget for displaying dialogue with NPC
  */
 UCLASS()
-class SIMPLERPG_API UDialogueWidget : public UUserWidget
+class SIMPLERPG_API UDialogueWidget : public USessionWidget
 {
 	GENERATED_BODY()
 

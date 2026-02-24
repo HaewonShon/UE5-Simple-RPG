@@ -28,9 +28,9 @@ public:
 		bool bFillScreen = false, bool bIsAliveAlways = false);
 
 	void ToggleInventory();
-	void NotifyWidgetRemoved(EWidgetLayer Layer);
+	void RequestRemoveWidget(EWidgetLayer Layer, UUserWidget* Widget);
 
-	class UItemDescriptionWidget* GetItemDescriptionWidgetRef() { return ItemDescriptionWidget; }
+	class UItemDescriptionWidget* GetItemDescriptionWidget() { return ItemDescriptionWidget; }
 
 private:
 	virtual void NativeConstruct() override;

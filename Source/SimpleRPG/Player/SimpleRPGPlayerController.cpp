@@ -14,6 +14,7 @@
 #include "Interaction/Shop/UI/ShopWidget.h"
 #include "World/NPCCharacter.h"
 #include "Shared/UI/RootWidget.h"
+#include "Shared/UI/UISubsystem.h"
 #include "Components/InventoryComponent.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
@@ -67,7 +68,7 @@ void ASimpleRPGPlayerController::AddPitchInput(float Val)
 
 void ASimpleRPGPlayerController::ToggleInventory()
 {
-	RootWidget->ToggleInventory();
+	UISubsystem->ToggleInventory();
 	bIsInvenetoryOn = !bIsInvenetoryOn;
 	if (bIsInvenetoryOn)
 	{
@@ -89,12 +90,14 @@ void ASimpleRPGPlayerController::ToggleInventory()
 
 void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 {
-	DialogueDisplayWidget = Cast<UDialogueWidget>(RootWidget->AddWidgetToLayer(EWidgetLayer::Dialogue, DialogueDisplayWidgetClass, true));
-	
+	// Build UI, camera and begin dialogue
+	DialogueDisplayWidget = Cast<UDialogueWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Dialogue, DialogueDisplayWidgetClass, true));
+
 	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
 		DialogueSubsystem->BeginDefaultDialogue(NPC, GetPlayerState<ASimpleRPGPlayerState>());
 	}
+	BuildDialogueCamera(NPC);
 
 	// Input setting
 	bShowMouseCursor = true;
@@ -111,9 +114,6 @@ void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 
 	InputSystemRef->AddMappingContext(DialogueInputMapping, 10);
 
-	BuildDialogueCamera(NPC);
-
-	// Create Dialogue Widget
 }
 
 void ASimpleRPGPlayerController::FinishDialogue()
@@ -134,7 +134,7 @@ void ASimpleRPGPlayerController::FinishDialogue()
 
 	if (DialogueDisplayWidget)
 	{
-		DialogueDisplayWidget->RemoveFromParent();
+		DialogueDisplayWidget->CloseWidget();
 		DialogueDisplayWidget = nullptr;
 	}
 }
@@ -142,11 +142,11 @@ void ASimpleRPGPlayerController::FinishDialogue()
 void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 {
 	// create shop ui widget
-	ShopWidget = Cast<UShopWidget>(RootWidget->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false));
+	ShopWidget = Cast<UShopWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false));
 	if (ShopWidget)
 	{
 		ShopWidget->InitializeShop(ShopComponent);
-		ShopWidget->SetDescriptionWidgetRef(RootWidget->GetItemDescriptionWidgetRef());
+		ShopWidget->SetDescriptionWidgetRef(UISubsystem->GetItemDescriptionWidget());
 	}
 
 	// open inventory widget
@@ -155,15 +155,16 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 	{
 		PS->GetInventoryComponent()->SetShopMode();
 	}
-
-	// ui widget - put shop component 주입, 주입된 shop component에 bind
-	// 구매를 ACTION 어떻게 할까???????
-
 }
 
 void ASimpleRPGPlayerController::CloseShop()
 {
-	ShopWidget->RemoveFromParent();
+	if (ShopWidget)
+	{
+		ShopWidget->CloseWidget();
+		ShopWidget = nullptr;
+	}
+
 	ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
@@ -174,9 +175,15 @@ void ASimpleRPGPlayerController::CloseShop()
 void ASimpleRPGPlayerController::ConstructUI()
 {
 	check(RootWidgetClass);
-
-	RootWidget = CreateWidget<URootWidget>(this, RootWidgetClass.Get());
-	RootWidget->AddToViewport();
+	UISubsystem = GetLocalPlayer()->GetSubsystem<UUISubsystem>();
+	if (UISubsystem.IsValid())
+	{
+		UISubsystem->InitializeRootWidget(this, RootWidgetClass);
+	}
+	else
+	{
+		UE_LOG(LogPlayerController, Warning, TEXT("UI Susbystem not set"));
+	}
 }
 
 void ASimpleRPGPlayerController::BuildDialogueCamera(ANPCCharacter* NPC)
@@ -195,12 +202,6 @@ void ASimpleRPGPlayerController::ClearDialogueCamera()
 		constexpr float DIALOGUE_CAM_BLEND_TIME = 0.5f;
 		DialogueCameraActor->SetLifeSpan(DIALOGUE_CAM_BLEND_TIME);
 		DialogueCameraActor = nullptr;
-	}
-
-	if (DialogueDisplayWidget)
-	{
-		DialogueDisplayWidget->RemoveFromParent();
-		DialogueDisplayWidget = nullptr;
 	}
 }
 

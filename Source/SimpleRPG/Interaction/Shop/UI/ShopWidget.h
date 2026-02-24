@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Shared/UI/Common/SessionWidget.h"
 #include "Shared/Item/UI/ItemSlotWidget.h"
 #include "ShopWidget.generated.h"
 
@@ -11,7 +11,7 @@
  *	A Widget class for NPC shop
  */
 UCLASS()
-class SIMPLERPG_API UShopWidget : public UUserWidget
+class SIMPLERPG_API UShopWidget : public USessionWidget
 {
 	GENERATED_BODY()
 	

@@ -41,14 +41,13 @@ public:
 protected:
 	void ConstructUI();
 
+	TWeakObjectPtr<class UUISubsystem> UISubsystem;
+
 	/*************************************************
 	*	UI & Input
 	*************************************************/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<class URootWidget> RootWidgetClass;
-
-	UPROPERTY()
-	TObjectPtr<class URootWidget> RootWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* DialogueInputMapping;
