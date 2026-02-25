@@ -7,6 +7,8 @@
 #include "Player/SimpleRPGPlayerController.h"
 #include "Player/Components/CurrencyComponent.h"
 #include "Player/Components/InventoryComponent.h"
+#include "Shared/UI/UISubsystem.h"
+#include "Shared/Item/UI/QuantityConfirmationWidget.h"
 
 DEFINE_LOG_CATEGORY(LogShop)
 
@@ -16,6 +18,11 @@ UShopComponent::UShopComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
+}
+
+void UShopComponent::SetPlayerStateRef(ASimpleRPGPlayerState* PS)
+{
+	PlayerStateRef = PS;
 }
 
 TArray<FActionInfo> UShopComponent::CreateAvailableActions(ASimpleRPGPlayerState* PS)
@@ -40,38 +47,99 @@ FActionInfo UShopComponent::CreateContextAction(FGameplayTag ActionTag, ASimpleR
 	return FActionInfo();
 }
 
-void UShopComponent::OpenShop(ASimpleRPGPlayerState* PS)
+void UShopComponent::RequestPurchaseItem(int32 SlotIndex)
 {
-	PlayerStateRef = PS;
-
-	if (ASimpleRPGPlayerController* PC = Cast<ASimpleRPGPlayerController>(PS->GetPlayerController()))
+	if (SlotIndex < 0 || SlotIndex >= ShopItemList.Num())
 	{
-		// open shop ui
-		PC->OnShopOpenRequested.ExecuteIfBound(this);
+		UE_LOG(LogShop, Warning, TEXT("RequestPurchaseItem: Given SlotIndex is not valid - SlotIndex = %i"), SlotIndex);
+		return;
+	}
+
+	FShopItem& ShopItem = ShopItemList[SlotIndex];
+	if (ShopItem.Item.ItemData->bIsStackable)
+	{
+		check(PlayerStateRef.IsValid());
+
+		// display quantity window;
+		if (UUISubsystem* UISubsystem = PlayerStateRef->GetUISubsystem())
+		{
+			UQuantityConfirmationWidget* Widget = UISubsystem->RequestCreateQuantityWidget();
+			if (Widget)
+			{
+				Widget->OnQuantityConfirmed.BindLambda([this, SlotIndex](int32 Count) {
+					EPurchaseResult Result = this->TryPurchaseItem(SlotIndex, Count);
+					ProcessPurchaseResult(Result);
+					});
+			}
+			else
+			{
+				UE_LOG(LogShop, Error, TEXT("RequestPurchaseItem: Failed to display widget"));
+			}
+		}
 	}
 	else
 	{
-		UE_LOG(LogShop, Warning, TEXT("Controller of PlayerState is not Valid"));
+		EPurchaseResult Result = TryPurchaseItem(SlotIndex, 1);
+		ProcessPurchaseResult(Result);
 	}
-
 }
 
-bool UShopComponent::TryPurchaseItem(FPrimaryAssetId ItemId, int32 Count)
+void UShopComponent::ProcessPurchaseResult(EPurchaseResult Result)
 {
-	FShopItem* ShopItem = ShopItems.Find(ItemId);
-	if (!ShopItem)
+	UUISubsystem* UISubsystem = PlayerStateRef->GetUISubsystem();
+	if (!UISubsystem)
 	{
-		UE_LOG(LogShop, Warning, TEXT("Given Item Id is not valid, ID: %s"), *ItemId.ToString());
-		return false;
+		UE_LOG(LogTemp, Warning, TEXT("ProcessPurchaseResult: Cannot get UI Subsystem"));
+		return;
 	}
-	int32 RequiredCost = ShopItem->Price * Count;
+
+	switch (Result)
+	{
+	case EPurchaseResult::Success:
+		UISubsystem->RequestDisplayMessageBox(FText::FromString(TEXT("Item purchased!")));
+		break;
+	case EPurchaseResult::Failed_NotEnoughCurrency:
+		UISubsystem->RequestDisplayMessageBox(FText::FromString(TEXT("Not enough money.")));
+		break;
+	case EPurchaseResult::Failed_NotEnoughItemAmount:
+		UISubsystem->RequestDisplayMessageBox(FText::FromString(TEXT("Not enough item amount.")));
+		break;
+	case EPurchaseResult::Failed_NotEnoughSpace:
+		UISubsystem->RequestDisplayMessageBox(FText::FromString(TEXT("Not enough space in inventory")));
+		break;
+	}
+}
+
+EPurchaseResult UShopComponent::TryPurchaseItem(int32 SlotIndex, int32 Amount)
+{
+	if (SlotIndex < 0 || SlotIndex >= ShopItemList.Num())
+	{
+		UE_LOG(LogShop, Warning, TEXT("TryPurchaseItem: Given Index is not valid, index: %i"), SlotIndex);
+		return EPurchaseResult::Failed_NotValid;
+	}
+
+	FShopItem& ShopItem = ShopItemList[SlotIndex];
+	if (!ShopItem.Item.ItemData)
+	{
+		UE_LOG(LogShop, Warning, TEXT("TryPurchaseItem: ShopItem in Given Index is not valid, index: %i"), SlotIndex);
+		return EPurchaseResult::Failed_NotValid;
+	}
+
+	if (Amount > ShopItem.Item.StackCount)
+	{
+		UE_LOG(LogShop, Warning, TEXT("TryPurchaseItem: requested Item count is not valid, item stack count: %i, requested Amount: %i"), ShopItem.Item.StackCount, Amount);
+		return EPurchaseResult::Failed_NotEnoughItemAmount;
+	}
+
+	int32 RequiredCost = ShopItem.Price * Amount;
 
 	FItemInstance ItemToBuy;
-	ItemToBuy.SetItem(ShopItem->Item.ItemData, RequiredCost);
+	ItemToBuy.SetItem(ShopItem.Item.ItemData, Amount);
 
-	if (!CanPurchaseItem(ItemToBuy, RequiredCost))
+	EPurchaseResult CanPurchaseResult = CanPurchaseItem(ItemToBuy, RequiredCost);
+	if (CanPurchaseResult != EPurchaseResult::Success)
 	{
-		return false;
+		return CanPurchaseResult;
 	}
 
 	// Add Item to player
@@ -83,11 +151,12 @@ bool UShopComponent::TryPurchaseItem(FPrimaryAssetId ItemId, int32 Count)
 	{
 		// rollback if failed to add item
 		CurrencyComponent->TryAddCurrency(ECurrencyType::Gold, RequiredCost);
-		return false;
+		return EPurchaseResult::Failed_NotEnoughSpace;
 	}
 
 	// TODO : UI Notify Success
-	return true;
+	ShopItem.Item.StackCount -= Amount;
+	return EPurchaseResult::Success;
 }
 
 bool UShopComponent::TrySellItem(FPrimaryAssetId ItemId, int32 SellingCount)
@@ -122,16 +191,16 @@ bool UShopComponent::TrySellItem(FPrimaryAssetId ItemId, int32 SellingCount)
 	return true;
 }
 
-const TMap<FPrimaryAssetId, FShopItem>& UShopComponent::GetShopItems() const
+const TArray<FShopItem>& UShopComponent::GetShopItemList() const
 {
-	return ShopItems;
+	return ShopItemList;
 }
 
 FItemDescription UShopComponent::GetItemDescription(int32 SlotIndex) const
 {
-	if (SlotIndex >= 0 && SlotIndex < InstancedShopItems.Num())
+	if (SlotIndex >= 0 && SlotIndex < ShopItemList.Num())
 	{
-		const FItemInstance& Item = InstancedShopItems[SlotIndex];
+		const FItemInstance& Item = ShopItemList[SlotIndex].Item;
 		if (Item.ItemData)
 		{
 			return Item.ItemData->BuildDescriptionData();
@@ -139,7 +208,6 @@ FItemDescription UShopComponent::GetItemDescription(int32 SlotIndex) const
 	}	
 	return FItemDescription();
 }
-
 
 // Called when the game starts
 void UShopComponent::BeginPlay()
@@ -155,7 +223,14 @@ void UShopComponent::BeginPlay()
 		ItemDBSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
 		check(ItemDBSubsystem.IsValid());
 
-		ReadShopDataTable();
+		if (ItemDBSubsystem->IsCachingCompleted())
+		{
+			ReadShopDataTable();
+		}
+		else
+		{
+			ItemDBSubsystem->OnCachingCompleted.AddUObject(this, &UShopComponent::ReadShopDataTable);
+		}
 	}
 }
 
@@ -169,14 +244,14 @@ void UShopComponent::ReadShopDataTable()
 		}
 		else
 		{
-			ShopItems.Emplace(Row.ItemId, { FItemInstance(ItemDBSubsystem->Get(Row.ItemId), Row.Stock), Row.Price });
+			ShopItemList.Emplace(FItemInstance(ItemDBSubsystem->Get(Row.ItemId), Row.Stock), Row.Price);
 		}
 		});
 
-	UE_LOG(LogShop, Log, TEXT("%s's shop items initialized with total count: %i"), *GetOwner()->GetName(), ShopItems.Num());
+	UE_LOG(LogShop, Log, TEXT("%s's shop items initialized with total count: %i"), *GetOwner()->GetName(), ShopItemList.Num());
 }
 
-bool UShopComponent::CanPurchaseItem(FItemInstance& Item, int32 Cost)
+EPurchaseResult UShopComponent::CanPurchaseItem(FItemInstance& Item, int32 Cost)
 {
 	UCurrencyComponent* CurrencyComponent = PlayerStateRef->GetComponentByClass<UCurrencyComponent>();
 	UInventoryComponent* InventoryComponent = PlayerStateRef->GetComponentByClass<UInventoryComponent>();
@@ -185,15 +260,14 @@ bool UShopComponent::CanPurchaseItem(FItemInstance& Item, int32 Cost)
 	if (!CurrencyComponent->CanSpendCurrency(ECurrencyType::Gold, Cost))
 	{
 		// TODO : UI Notify Failed - not enough gold
-		return false;
+		return EPurchaseResult::Failed_NotEnoughCurrency;
 	}
 
 	if (!InventoryComponent->CanAddItem(Item))
 	{
 		// TODO : UI Notify Failed - not enough space
-		return false;
+		return EPurchaseResult::Failed_NotEnoughSpace;
 	}
 
-	return true;
+	return EPurchaseResult::Success;
 }
-

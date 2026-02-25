@@ -7,6 +7,7 @@
 #include "Components/CurrencyComponent.h"
 #include "Components/LevelComponent.h"
 #include "Interaction/Quest/QuestManagerComponent.h"
+#include "Shared/UI/UISubsystem.h"
 
 ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 {
@@ -40,6 +41,23 @@ TWeakObjectPtr<class UInventoryComponent> ASimpleRPGPlayerState::GetInventoryCom
 TWeakObjectPtr<class UQuestManagerComponent> ASimpleRPGPlayerState::GetQuestManagerComponent()
 {
 	return QuestManagerComponent;
+}
+
+UUISubsystem* ASimpleRPGPlayerState::GetUISubsystem() const
+{
+	// Local player check
+	APlayerController* PlayerController = GetPlayerController();
+	if (PlayerController && PlayerController->IsLocalController())
+	{
+		// Controller -> LocalPlayer -> Subsystem
+		if (ULocalPlayer* LP = PlayerController->GetLocalPlayer())
+		{
+			return LP->GetSubsystem<UUISubsystem>();
+		}
+	}
+
+	return nullptr;
+	
 }
 
 void ASimpleRPGPlayerState::NotifyEnemyKilled(FGameplayTag EnemyTag)

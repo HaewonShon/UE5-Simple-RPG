@@ -10,6 +10,16 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogShop, Log, All)
 
+UENUM()
+enum class EPurchaseResult : uint8
+{
+	Success,
+	Failed_NotValid,
+	Failed_NotEnoughItemAmount,
+	Failed_NotEnoughSpace,
+	Failed_NotEnoughCurrency,
+};
+
 USTRUCT(BlueprintType)
 struct FShopItemRow : public FTableRowBase
 {
@@ -42,17 +52,19 @@ class SIMPLERPG_API UShopComponent : public UActorComponent, public IActionProvi
 public:	
 	// Sets default values for this component's properties
 	UShopComponent();
+	void SetPlayerStateRef(class ASimpleRPGPlayerState* PS);
 
 	/* Action Provider Interface */
 	virtual TArray<FActionInfo> CreateAvailableActions(class ASimpleRPGPlayerState* PS);
 	virtual FActionInfo CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS);
 
-	void OpenShop(class ASimpleRPGPlayerState* PS);
+	void RequestPurchaseItem(int32 SlotIndex);
+	void ProcessPurchaseResult(EPurchaseResult Result);
 
-	bool TryPurchaseItem(FPrimaryAssetId ItemId, int32 Count);
+	EPurchaseResult TryPurchaseItem(int32 SlotIndex, int32 Count);
 	bool TrySellItem(FPrimaryAssetId ItemId, int32 Count);
 
-	const TMap<FPrimaryAssetId, FShopItem>& GetShopItems() const;
+	const TArray<FShopItem>& GetShopItemList() const;
 
 	FItemDescription GetItemDescription(int32 SlotIndex) const;
 
@@ -61,16 +73,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	void ReadShopDataTable();
-	bool CanPurchaseItem(FItemInstance& Item, int32 SellingCount);
+	EPurchaseResult CanPurchaseItem(FItemInstance& Item, int32 SellingCount);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Shop")
 	UDataTable* ShopDataTable;
 
 	UPROPERTY()
-	TMap<FPrimaryAssetId, FShopItem> ShopItems;
-
-	UPROPERTY()
-	TArray<struct FItemInstance> InstancedShopItems;
+	TArray<FShopItem> ShopItemList;
 
 	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
 	TWeakObjectPtr<class UItemDatabaseSubsystem> ItemDBSubsystem;

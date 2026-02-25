@@ -3,16 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Shared/UI/Common/SessionWidget.h"
 #include "QuantityConfirmationWidget.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnQuantityConfirmed, int32 Quantity)
+DECLARE_DELEGATE_OneParam(FOnQuantityConfirmed, int32);
 
 /**
  *	A Widget to get a quantity of an item from player
  */
 UCLASS()
-class SIMPLERPG_API UQuantityConfirmationWidget : public UUserWidget
+class SIMPLERPG_API UQuantityConfirmationWidget : public USessionWidget
 {
 	GENERATED_BODY()
 

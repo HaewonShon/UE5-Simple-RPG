@@ -20,12 +20,12 @@ void UQuantityConfirmationWidget::DisplayMessage(FText Message)
 void UQuantityConfirmationWidget::OnConfirmClicked()
 {
 	OnQuantityConfirmed.ExecuteIfBound(GetQuantity());
-	Destruct();
+	CloseWidget();
 }
 
 void UQuantityConfirmationWidget::OnCancelClicked()
 {
-	Destruct();
+	CloseWidget();
 }
 
 void UQuantityConfirmationWidget::OnTextChanged(const FText& Text)

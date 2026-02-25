@@ -29,12 +29,6 @@ protected:
 	//void RequestSellItem();
 
 	UFUNCTION()
-	void OnSlotDragBegin(FSlotInfo SlotWidget);
-
-	UFUNCTION()
-	void OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2);
-
-	UFUNCTION()
 	void OnSlotDoubleClicked(FSlotInfo SlotWidget);
 
 	UFUNCTION()
@@ -55,9 +49,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Shop")
 	TSubclassOf<class UItemSlotWidget> SlotWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Shop")
-	TSubclassOf<class UItemSlotDragWidget> SlotVisualWidgetClass;
-
 	/************************
 	*   Bind Widgets
 	*************************/
@@ -70,8 +61,6 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<class UShopComponent> ShopComponentRef;
 
-	UPROPERTY()
-	TObjectPtr<class UItemSlotDragWidget> SlotVisualWidget;
 
 	UPROPERTY()
 	TWeakObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidgetRef;

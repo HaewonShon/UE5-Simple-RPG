@@ -25,8 +25,14 @@ UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUser
 			ChildSlot->SetHorizontalAlignment(HAlign_Fill);
 			ChildSlot->SetVerticalAlignment(VAlign_Fill);
 			ChildSlot->SetPadding(FMargin(0.f));
-			
 		}
+		else
+		{
+			ChildSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+			ChildSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+			ChildSlot->SetPadding(FMargin(0.f));
+		}
+
 		if (!bIsAliveAlways)
 		{
 			if (USessionWidget* SessionWidget = Cast<USessionWidget>(Widget))

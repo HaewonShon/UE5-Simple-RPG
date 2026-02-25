@@ -8,6 +8,7 @@
 void UItemDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+    bCachingCompleted = false;
     USimpleRPGAssetManager::Get().LoadPrimaryAssetsWithType("ItemData", {}, FStreamableDelegate::CreateUObject(this, &UItemDatabaseSubsystem::BuildCache));
 
     /*if (USimpleRPGAssetManager::Get().AreItemsLoaded())
@@ -31,11 +32,14 @@ void UItemDatabaseSubsystem::BuildCache()
     TArray<FPrimaryAssetId> ItemIds;
     USimpleRPGAssetManager::Get().GetPrimaryAssetIdList(FPrimaryAssetType("ItemData"), ItemIds);
 
-    UE_LOG(LogTemp, Warning, TEXT("UItemDatabaseSubsystem buildcache called, Item count: %i"), ItemIds.Num());
     for (const FPrimaryAssetId& Id : ItemIds)
     {
         UItemData* ItemData = USimpleRPGAssetManager::Get().GetPrimaryAssetObject<UItemData>(Id);
         ensure(ItemData != nullptr);
         ItemCache.Add(Id, ItemData);
     }
+
+    UE_LOG(LogTemp, Log, TEXT("ItemDB Cache built with item count: %i"), ItemCache.Num());
+    bCachingCompleted = true;
+    OnCachingCompleted.Broadcast();
 }

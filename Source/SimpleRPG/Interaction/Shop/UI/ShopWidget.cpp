@@ -24,8 +24,6 @@ void UShopWidget::NativeConstruct()
 				SlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
 				if (SlotWidget)
 				{
-					SlotWidget->OnDragBegin.BindUObject(this, &UShopWidget::OnSlotDragBegin);
-					SlotWidget->OnDrop.BindUObject(this, &UShopWidget::OnSlotsSwapped);
 					SlotWidget->OnDoubleClick.BindUObject(this, &UShopWidget::OnSlotDoubleClicked);
 					SlotWidget->OnHovered.BindUObject(this, &UShopWidget::OnSlotHovered);
 					SlotWidget->OnHoverEnded.BindUObject(this, &UShopWidget::OnSlotHoverEnded);
@@ -42,13 +40,6 @@ void UShopWidget::NativeConstruct()
 	else
 	{
 		UE_LOG(LogShop, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
-	}
-
-	SlotVisualWidget = CreateWidget<UItemSlotDragWidget>(GetOwningPlayer(), SlotVisualWidgetClass);
-	if (SlotVisualWidget)
-	{
-		SlotVisualWidget->SetDesiredSize(FVector2D{ SlotGridPanel->GetMinDesiredSlotWidth(), SlotGridPanel->GetMinDesiredSlotHeight() });
-		SlotVisualWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -71,11 +62,10 @@ void UShopWidget::SetDescriptionWidgetRef(UItemDescriptionWidget* DescriptionWid
 
 void UShopWidget::UpdateShopContents()
 {
-	const TMap<FPrimaryAssetId, FShopItem>& ShopItems = ShopComponentRef->GetShopItems();
-	int32 Index = 0;
-	for(const auto& Pair : ShopItems)
+	const TArray<FShopItem>& ShopItemList = ShopComponentRef->GetShopItemList();
+	for(int32 Index = 0; Index < ShopItemList.Num(); ++Index)
 	{
-		const FShopItem& ShopItem = Pair.Value;
+		const FShopItem& ShopItem = ShopItemList[Index];
 		if (ShopItem.Item.ItemData)
 		{
 			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(Index));
@@ -84,42 +74,14 @@ void UShopWidget::UpdateShopContents()
 	}
 }
 
-void UShopWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
-{
-	UItemSlotWidget* SlotWidget;
-	SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(SlotInfo.SlotIndex));
-
-	if (!SlotWidget)
-	{
-		UE_LOG(LogShop, Warning, TEXT("Failed to cast UItemSlotWidget"));
-		return;
-	}
-
-	UDragDropOperation*& DragOperation = SlotWidget->DragDropOperationRef;
-	if (DragOperation)
-	{
-		DragOperation->DefaultDragVisual = SlotVisualWidget;
-		SlotVisualWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		SlotVisualWidget->OnDragBegin(SlotWidget->GetIconTexture());
-	}
-	else
-	{
-		UE_LOG(LogShop, Warning, TEXT("DragOperation not valid"));
-	}
-}
-
-void UShopWidget::OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2)
-{
-	if (Slot1.SlotType == ESlotType::Storage && Slot2.SlotType == ESlotType::Shop)
-	{
-		// Sell request
-	}
-}
-
 void UShopWidget::OnSlotDoubleClicked(FSlotInfo SlotWidget)
 {
 	// Buy Request
-	
+	// create/push quantity confirm widget
+	// save current slot's item id for request
+	int32 Index = SlotWidget.SlotIndex;
+
+	ShopComponentRef->RequestPurchaseItem(Index);
 }
 
 void UShopWidget::OnSlotHovered(FSlotInfo SlotWidget)
@@ -132,7 +94,7 @@ void UShopWidget::OnSlotHovered(FSlotInfo SlotWidget)
 	ItemDescriptionWidgetRef->SetDescription(Description);
 
 	FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
-	ItemDescriptionWidgetRef->SetPositionInViewport(MousePos, false);
+	ItemDescriptionWidgetRef->SetPositionInScreen(MousePos);
 }
 
 void UShopWidget::OnSlotHoverEnded()

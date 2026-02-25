@@ -24,6 +24,8 @@ public:
 	TWeakObjectPtr<class UInventoryComponent> GetInventoryComponent();
 	TWeakObjectPtr<class UQuestManagerComponent> GetQuestManagerComponent();
 
+	class UUISubsystem* GetUISubsystem() const;
+
 	void NotifyEnemyKilled(FGameplayTag EnemyTag);
 protected:
 	UPROPERTY()

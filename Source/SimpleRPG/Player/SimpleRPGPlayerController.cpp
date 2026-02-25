@@ -12,6 +12,8 @@
 #include "Interaction/Dialogue/UI/DialogueWidget.h"
 #include "Interaction/Dialogue/DialogueSubsystem.h"
 #include "Interaction/Shop/UI/ShopWidget.h"
+#include "Interaction/Shop/ShopComponent.h"
+
 #include "World/NPCCharacter.h"
 #include "Shared/UI/RootWidget.h"
 #include "Shared/UI/UISubsystem.h"
@@ -154,6 +156,7 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
 		PS->GetInventoryComponent()->SetShopMode();
+		ShopComponent->SetPlayerStateRef(PS);
 	}
 }
 

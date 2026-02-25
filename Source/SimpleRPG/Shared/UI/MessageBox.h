@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Shared/UI/Common/SessionWidget.h"
 #include "MessageBox.generated.h"
 
 /**
  *	 Text box to display message
  */
 UCLASS()
-class SIMPLERPG_API UMessageBox : public UUserWidget
+class SIMPLERPG_API UMessageBox : public USessionWidget
 {
 	GENERATED_BODY()
 	
 public:
-	void SetMessage(FText Message);
+	void SetMessage(const FText& Message);
 
 	UFUNCTION()
 	void OnConfirmClicked();

@@ -16,12 +16,23 @@ class SIMPLERPG_API UUISubsystem : public ULocalPlayerSubsystem
 	GENERATED_BODY()
 	
 public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection);
+
 	void InitializeRootWidget(APlayerController* PC, TSubclassOf<class URootWidget> RootWidgetClass);
 	UUserWidget* AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<class UUserWidget> WidgetClass, bool bFillScreen = false, bool bIsAliveAlways = false);
 	
 	void ToggleInventory();
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return RootWidget->GetItemDescriptionWidget(); }
+
+	class UQuantityConfirmationWidget* RequestCreateQuantityWidget();
+	void RequestDisplayMessageBox(const FText& Message);
 private:
+	void LoadWidgetData();
+	void OnWidgetDataLoaded();
+
 	UPROPERTY()
 	TObjectPtr<class URootWidget> RootWidget;
+
+	UPROPERTY()
+	TObjectPtr<class UCommonWidgetData> CommonWidgetDataAsset;
 };

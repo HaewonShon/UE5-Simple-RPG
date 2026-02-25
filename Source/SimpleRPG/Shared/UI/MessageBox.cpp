@@ -5,14 +5,14 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
-void UMessageBox::SetMessage(FText Message)
+void UMessageBox::SetMessage(const FText& Message)
 {
 	MessageTextBlock->SetText(Message);
 }
 
 void UMessageBox::OnConfirmClicked()
 {
-	Destruct();
+	CloseWidget();
 }
 
 void UMessageBox::NativeConstruct()
