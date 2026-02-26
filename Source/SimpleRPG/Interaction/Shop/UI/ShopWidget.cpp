@@ -4,6 +4,7 @@
 #include "Interaction/Shop/UI/ShopWidget.h"
 #include "../ShopComponent.h"
 #include "Components/UniformGridPanel.h"
+#include "Components/Button.h"
 
 #include "Shared/Item/UI/ItemSlotDragWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
@@ -41,6 +42,8 @@ void UShopWidget::NativeConstruct()
 	{
 		UE_LOG(LogShop, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
 	}
+
+	CloseButton->OnClicked.AddDynamic(this, &UShopWidget::OnCloseButtonClicked);
 }
 
 void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
@@ -52,6 +55,7 @@ void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
 	}
 
 	ShopComponentRef = ShopComponent;
+	ShopComponentRef->OnShopContentChanged.BindUObject(this, &UShopWidget::UpdateShopContents);
 	UpdateShopContents();
 }
 
@@ -101,4 +105,9 @@ void UShopWidget::OnSlotHoverEnded()
 {
 	UE_LOG(LogShop, Verbose, TEXT("UShopWidget OnSlotHoverEnded Called"));
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UShopWidget::OnCloseButtonClicked()
+{
+	CloseWidget();
 }

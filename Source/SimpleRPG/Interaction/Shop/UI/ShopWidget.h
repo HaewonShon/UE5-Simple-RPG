@@ -37,6 +37,9 @@ protected:
 	UFUNCTION()
 	void OnSlotHoverEnded();
 
+	UFUNCTION()
+	void OnCloseButtonClicked();
+
 	/**************************
 	*   Widget Properties
 	***************************/
@@ -54,6 +57,9 @@ protected:
 	*************************/
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UButton> CloseButton;
 
 	/************************
 	*   Others

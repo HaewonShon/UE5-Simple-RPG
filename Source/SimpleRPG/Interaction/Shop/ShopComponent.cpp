@@ -96,7 +96,10 @@ void UShopComponent::ProcessPurchaseResult(EPurchaseResult Result)
 	switch (Result)
 	{
 	case EPurchaseResult::Success:
+	{
 		UISubsystem->RequestDisplayMessageBox(FText::FromString(TEXT("Item purchased!")));
+		OnShopContentChanged.ExecuteIfBound();
+	}
 		break;
 	case EPurchaseResult::Failed_NotEnoughCurrency:
 		UISubsystem->RequestDisplayMessageBox(FText::FromString(TEXT("Not enough money.")));
@@ -191,6 +194,15 @@ bool UShopComponent::TrySellItem(FPrimaryAssetId ItemId, int32 SellingCount)
 	return true;
 }
 
+void UShopComponent::CloseShop()
+{
+	ASimpleRPGPlayerController* PC = Cast<ASimpleRPGPlayerController>(PlayerStateRef->GetPlayerController());
+	if (PC)
+	{
+		PC->CloseShop();
+	}
+}
+
 const TArray<FShopItem>& UShopComponent::GetShopItemList() const
 {
 	return ShopItemList;
@@ -203,7 +215,9 @@ FItemDescription UShopComponent::GetItemDescription(int32 SlotIndex) const
 		const FItemInstance& Item = ShopItemList[SlotIndex].Item;
 		if (Item.ItemData)
 		{
-			return Item.ItemData->BuildDescriptionData();
+			FItemDescription Description = Item.ItemData->BuildDescriptionData();
+			Description.Price = FText::Format(FText::FromString(TEXT("Buy price: {0}G")), ShopItemList[SlotIndex].Price);
+			return Description;
 		}
 	}	
 	return FItemDescription();

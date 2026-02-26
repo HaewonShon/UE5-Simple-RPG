@@ -30,6 +30,7 @@ public:
 	void ToggleInventory();
 	void RequestRemoveWidget(EWidgetLayer Layer, UUserWidget* Widget);
 
+	class UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return ItemDescriptionWidget; }
 
 private:

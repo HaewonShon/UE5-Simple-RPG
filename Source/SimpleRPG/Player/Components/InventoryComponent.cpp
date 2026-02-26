@@ -274,7 +274,12 @@ FItemDescription UInventoryComponent::GetItemDescription(EInventoryCategory Page
 	const FInventorySlot& Slot = GetPage(PageCategory).Slots[SlotIndex];
 	if (!Slot.IsEmpty())
 	{
-		return Slot.Item.ItemData->BuildDescriptionData();
+		FItemDescription Description = Slot.Item.ItemData->BuildDescriptionData();
+		if(GetCurrentMode() == EInventoryMode::Shop)
+		{ 
+			Description.Price = FText::Format(FText::FromString(TEXT("Sell price: {0}G")), Slot.Item.ItemData->SellPrice);
+		}
+		return Description;
 	}
 	return FItemDescription();
 }

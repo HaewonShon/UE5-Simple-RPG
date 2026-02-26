@@ -83,7 +83,6 @@ FItemDescription UItemData::BuildDescriptionData() const
 	FItemDescription Description;
 	Description.Name = DisplayName;
 	Description.Icon = Icon;
-	Description.Price = SellPrice;
 
 	FItemDetail Detail;
 	Detail.DetailText = DescriptionText;

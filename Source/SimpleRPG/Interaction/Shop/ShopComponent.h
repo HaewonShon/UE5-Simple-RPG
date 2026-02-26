@@ -10,6 +10,8 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogShop, Log, All)
 
+DECLARE_DELEGATE(FOnShopContentChanged);
+
 UENUM()
 enum class EPurchaseResult : uint8
 {
@@ -64,9 +66,12 @@ public:
 	EPurchaseResult TryPurchaseItem(int32 SlotIndex, int32 Count);
 	bool TrySellItem(FPrimaryAssetId ItemId, int32 Count);
 
+	void CloseShop();
 	const TArray<FShopItem>& GetShopItemList() const;
 
 	FItemDescription GetItemDescription(int32 SlotIndex) const;
+
+	FOnShopContentChanged OnShopContentChanged;
 
 protected:
 	// Called when the game starts

@@ -22,6 +22,7 @@ public:
 	UUserWidget* AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<class UUserWidget> WidgetClass, bool bFillScreen = false, bool bIsAliveAlways = false);
 	
 	void ToggleInventory();
+	class UInventoryWidget* GetInventoryWidget() { return RootWidget->GetInventoryWidget(); }
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return RootWidget->GetItemDescriptionWidget(); }
 
 	class UQuantityConfirmationWidget* RequestCreateQuantityWidget();

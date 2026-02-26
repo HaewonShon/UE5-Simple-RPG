@@ -11,6 +11,7 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/InvalidationBox.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Misc/OutputDeviceDebug.h"
@@ -26,12 +27,6 @@ EEquipmentType ConvertSlotTypeToEquipmentType(ESlotType SlotType)
 	if (SlotType == ESlotType::Boots) return EEquipmentType::Boots;
 	if (SlotType == ESlotType::Weapon) return EEquipmentType::Weapon;
 	return EEquipmentType::Count;
-}
-
-UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
-	: UUserWidget(ObjectInitializer)
-{
-
 }
 
 void UInventoryWidget::NativeConstruct()
@@ -128,6 +123,7 @@ void UInventoryWidget::NativeConstruct()
 	}
 
 	BindItemDiscardDelegate(BackdropWidget);
+	CloseButton->OnClicked.AddDynamic(this, &UInventoryWidget::OnCloseButtonClicked);
 }
 
 void UInventoryWidget::BindItemDiscardDelegate(UBackdropWidget* Widget)
@@ -343,4 +339,14 @@ void UInventoryWidget::UpdateGoldAmount(int32 Amount)
 
 	FText FormattedText = FText::AsNumber(Amount, &Opts);
 	GoldDisplayText->SetText(FormattedText);
+}
+
+void UInventoryWidget::OnCloseButtonClicked()
+{
+	if (InventoryComponentRef->GetCurrentMode() == EInventoryMode::Shop)
+	{
+		return;
+	}
+
+	CloseWidget();
 }

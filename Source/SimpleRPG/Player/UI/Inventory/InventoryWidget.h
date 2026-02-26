@@ -3,21 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "Shared/UI/Common/SessionWidget.h"
 #include "Player/Components/InventoryComponent.h"
 #include "Shared/Item/UI/ItemSlotWidget.h"
 #include "InventoryWidget.generated.h"
+
+DECLARE_DELEGATE(FOnInventoryToggleRequest);
 
 /**
  *    Inventory Component for character, support per-page item add/use/sort, etc.
  */
 UCLASS()
-class SIMPLERPG_API UInventoryWidget : public UUserWidget
+class SIMPLERPG_API UInventoryWidget : public USessionWidget
 {
 	GENERATED_BODY()
 	
 public:
-	UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 	virtual void NativeConstruct() override;
 
 	void BindItemDiscardDelegate(class UBackdropWidget* BackdropWidget);
@@ -68,6 +69,9 @@ protected:
 	UFUNCTION()
 	void UpdateGoldAmount(int32 Amount);
 
+	UFUNCTION()
+	void OnCloseButtonClicked();
+
 
 	/**************************
 	*   Widget Properties 
@@ -117,6 +121,9 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UItemSlotWidget> WeaponSlot;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UButton> CloseButton;
 
 
 	/************************

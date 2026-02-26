@@ -31,6 +31,15 @@ void UItemDescriptionWidget::SetDescription(const FItemDescription& Description)
 		}
 		DetailedText->SetText(Builder.ToText());
 	}
+
+	if (!Description.Price.IsEmpty())
+	{
+		PriceText->SetText(Description.Price);
+	}
+	else
+	{
+		PriceText->SetText(FText::GetEmpty());
+	}
 }
 
 void UItemDescriptionWidget::SetPositionInScreen(FVector2D Pos)

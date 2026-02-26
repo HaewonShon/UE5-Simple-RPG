@@ -94,6 +94,9 @@ void URootWidget::NativeConstruct()
 	check(ItemDescriptionWidgetClass);
 	ItemDescriptionWidget = Cast<UItemDescriptionWidget>(AddWidgetToLayer(EWidgetLayer::System, ItemDescriptionWidgetClass, false, true));
 	ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UOverlaySlot* DescriptionWidgetSlot = Cast<UOverlaySlot>(ItemDescriptionWidget->Slot);
+	DescriptionWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Left);
+	DescriptionWidgetSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Top);
 
 	InventoryWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
 	// shop->SetDescriptionWidgetRef

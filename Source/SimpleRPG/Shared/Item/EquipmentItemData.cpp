@@ -10,6 +10,7 @@ FItemDescription UEquipmentItemData::BuildDescriptionData() const
 	Description.Icon = Icon;
 
 	FEquipmentDetail Detail;
+	Detail.TypeText = UEnum::GetDisplayValueAsText(EquipmentType);
 	if (Stat.AttackPower != 0) Detail.Stats.Add({ FText::FromString("AttackPower"), FText::AsNumber(Stat.AttackPower) });
 	if (Stat.Defense != 0) Detail.Stats.Add({ FText::FromString("Defense"), FText::AsNumber(Stat.Defense) });
 	if (Stat.CritChance != 0) Detail.Stats.Add({ FText::FromString("CritChance"), FText::AsNumber(Stat.CritChance) });

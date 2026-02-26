@@ -18,6 +18,7 @@
 #include "Shared/UI/RootWidget.h"
 #include "Shared/UI/UISubsystem.h"
 #include "Components/InventoryComponent.h"
+#include "UI/Inventory/InventoryWidget.h"
 
 void ASimpleRPGPlayerController::BeginPlay()
 {
@@ -149,6 +150,7 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 	{
 		ShopWidget->InitializeShop(ShopComponent);
 		ShopWidget->SetDescriptionWidgetRef(UISubsystem->GetItemDescriptionWidget());
+		ShopWidget->OnWidgetClosed.AddUObject(this, &ASimpleRPGPlayerController::CloseShop);
 	}
 
 	// open inventory widget
@@ -164,7 +166,7 @@ void ASimpleRPGPlayerController::CloseShop()
 {
 	if (ShopWidget)
 	{
-		ShopWidget->CloseWidget();
+		//ShopWidget->CloseWidget(); called by RootWidget
 		ShopWidget = nullptr;
 	}
 
@@ -172,6 +174,11 @@ void ASimpleRPGPlayerController::CloseShop()
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
 		PS->GetInventoryComponent()->SetNormalMode();
+	}
+
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->SetNextPage();
 	}
 }
 
@@ -182,6 +189,9 @@ void ASimpleRPGPlayerController::ConstructUI()
 	if (UISubsystem.IsValid())
 	{
 		UISubsystem->InitializeRootWidget(this, RootWidgetClass);
+		UInventoryWidget* InventoryWidget = UISubsystem->GetInventoryWidget();
+		InventoryWidget->OnWidgetClosed.AddUObject(this, &ASimpleRPGPlayerController::ToggleInventory);
+
 	}
 	else
 	{

@@ -30,4 +30,7 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> DetailedText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> PriceText;
 };
