@@ -6,9 +6,9 @@
 #include "Shared/Item/UI/ItemSlotWidget.h"
 #include "Shared/Item/UI/ItemSlotDragWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
+#include "Shared/Item/UI/ItemGridWidget.h"
 
 #include "Components/Border.h"
-#include "Components/UniformGridPanel.h"
 #include "Components/InvalidationBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -33,36 +33,13 @@ void UInventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Inventory Slot Setup
-	if (SlotGridPanel && SlotWidgetClass.Get())
-	{
-		for (int32 h = 0; h < PageHeight; ++h)
-		{
-			for (int32 w = 0; w < PageWidth; ++w)
-			{
-				UItemSlotWidget* SlotWidget = CreateWidget<UItemSlotWidget>(GetOwningPlayer(), SlotWidgetClass);
-				SlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
-				if (SlotWidget)
-				{
-					SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
-					SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSlotsSwapped);
-					SlotWidget->OnDoubleClick.BindUObject(this, &UInventoryWidget::OnItemUsed);
-					SlotWidget->OnHovered.BindUObject(this, &UInventoryWidget::OnSlotHovered);
-					SlotWidget->OnHoverEnded.BindUObject(this, &UInventoryWidget::OnSlotHoverEnded);
-					SlotWidget->SetIndex(h * PageWidth + w);
-					SlotWidget->SlotType = ESlotType::Storage;
-				}
-				else
-				{
-					UE_LOG(LogInventory, Warning, TEXT("Failed to bind drag function."));
-				}
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogInventory, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
-	}
+	GridWidget->SetSlotType(ESlotType::Storage);
+
+	GridWidget->OnDragBegin.AddUObject(this, &UInventoryWidget::OnSlotDragBegin);
+	GridWidget->OnDoubleClick.AddUObject(this, &UInventoryWidget::OnItemUsed);
+	GridWidget->OnHovered.AddUObject(this, &UInventoryWidget::OnSlotHovered);
+	GridWidget->OnDrop.AddUObject(this, &UInventoryWidget::OnSlotsSwapped);
+	GridWidget->OnHoverEnded.AddUObject(this, &UInventoryWidget::OnSlotHoverEnded);
 
 	// Equipment Slot Setup
 	{
@@ -114,7 +91,6 @@ void UInventoryWidget::NativeConstruct()
 	SlotVisualWidget = CreateWidget<UItemSlotDragWidget>(GetOwningPlayer(), SlotVisualWidgetClass);
 	if (SlotVisualWidget)
 	{
-		SlotVisualWidget->SetDesiredSize(FVector2D{ SlotGridPanel->GetMinDesiredSlotWidth(), SlotGridPanel->GetMinDesiredSlotHeight() });
 		SlotVisualWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 	else
@@ -167,7 +143,7 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 	UItemSlotWidget* SlotWidget;
 	if (SlotInfo.SlotType == ESlotType::Storage)
 	{
-		SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(SlotInfo.SlotIndex));
+		SlotWidget = GridWidget->GetSlotAt(SlotInfo.SlotIndex);
 	}
 	else
 	{
@@ -314,13 +290,14 @@ void UInventoryWidget::UpdateEquipmentSlotWidgets()
 
 void UInventoryWidget::UpdateCurrentPageContents()
 {
-	const FInventoryPage& Page = InventoryComponentRef->GetPage(SelectedPage);
-	for (int32 Index = 0; Index < PageWidth * PageHeight; ++Index)
+	const TArray<FInventorySlot>& InventorySlots = InventoryComponentRef->GetPage(SelectedPage).Slots;
+	TArray<UWidget*> SlotWidgets = GridWidget->GetAllSlots();
+	for (int32 Index = 0; Index < InventorySlots.Num(); ++Index)
 	{
-		UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(Index));
-		if (!Page.Slots[Index].IsEmpty())
+		UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotWidgets[Index]);
+		if (!InventorySlots[Index].IsEmpty())
 		{
-			SlotWidget->SetItem(Page.Slots[Index].Item);
+			SlotWidget->SetItem(InventorySlots[Index].Item);
 		}
 		else
 		{

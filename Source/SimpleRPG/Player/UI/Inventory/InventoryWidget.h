@@ -76,11 +76,6 @@ protected:
 	/**************************
 	*   Widget Properties 
 	***************************/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
-	int32 PageWidth;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
-	int32 PageHeight;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<class UItemSlotWidget> SlotWidgetClass;
@@ -95,7 +90,7 @@ protected:
 	*   Bind Widgets
 	*************************/
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
+	TObjectPtr<class UItemGridWidget> GridWidget;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UBackdropWidget> BackdropWidget;
