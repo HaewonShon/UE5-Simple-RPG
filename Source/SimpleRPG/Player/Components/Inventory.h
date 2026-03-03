@@ -38,7 +38,7 @@ struct FInventoryPage
 	GENERATED_BODY()
 
 	FInventoryPage();
-	FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountPerPage);
+	FInventoryPage(int32 SlotCountPerPage);
 
 	const FItemInstance& GetItemInstance(int32 SlotIndex);
 	bool IsSlotEmpty(int32 SlotIndex) const;
@@ -52,7 +52,6 @@ struct FInventoryPage
 	bool HasEmptySlot() const;
 	int32 GetFirstEmptySlotIndex() const;
 
-	EInventoryCategory Category;
 	TArray<FInventorySlot> Slots;
 
 	int32 CountMaxSlot;

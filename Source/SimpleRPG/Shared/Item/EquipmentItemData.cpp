@@ -8,6 +8,7 @@ FItemDescription UEquipmentItemData::BuildDescriptionData() const
 	FItemDescription Description;
 	Description.Name = DisplayName;
 	Description.Icon = Icon;
+	Description.Rarity = Rarity;
 
 	FEquipmentDetail Detail;
 	Detail.TypeText = UEnum::GetDisplayValueAsText(EquipmentType);

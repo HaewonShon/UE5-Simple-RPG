@@ -25,9 +25,9 @@ public:
 protected:
 	void UpdateShopContents();
 
-	//void RequestBuyItem();
-	//void RequestSellItem();
-
+	/************************
+	*	Common slot methods
+	* **********************/
 	UFUNCTION()
 	void OnSlotDoubleClicked(FSlotInfo SlotWidget);
 
@@ -52,14 +52,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Shop")
 	TSubclassOf<class UItemSlotWidget> SlotWidgetClass;
 
-	/************************
-	*   Bind Widgets
-	*************************/
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UUniformGridPanel> SlotGridPanel;
-
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> CloseButton;
+	
+	/************************
+	*   Vender-related Widgets
+	*************************/
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UItemGridWidget> VenderSlotGridPanel;
+
+
+
+	/************************
+	*   Player-related Widgets
+	*************************/
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UItemGridWidget> PlayerSlotGridPanel;
+
+	
 
 	/************************
 	*   Others
@@ -67,6 +77,8 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<class UShopComponent> ShopComponentRef;
 
+	UPROPERTY()
+	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 
 	UPROPERTY()
 	TWeakObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidgetRef;

@@ -18,6 +18,19 @@ struct FItemDetail
 	FText DetailText;
 };
 
+UENUM()
+enum class ERarity : uint8
+{
+	None,
+	Common,
+	Uncommon,
+	Rare,
+	Epic,
+	Legendary,
+	Relic,
+	Count UMETA(Hidden)
+};
+
 struct FEquipmentDetail
 {
 	FText TypeText;
@@ -34,6 +47,7 @@ struct FItemDescription
 	FText Name;
 	UTexture2D* Icon;
 	FText Price;
+	ERarity Rarity;
 	FItemDetailPayload Payload;
 };
 
@@ -79,11 +93,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	bool bIsStackable;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item", meta = (EditCondition = "bIsStackable"))
 	int32 MaxStackSize;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	FText DescriptionText;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
+	ERarity Rarity;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item Shop")
 	int32 SellPrice;

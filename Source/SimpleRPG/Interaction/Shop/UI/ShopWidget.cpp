@@ -11,18 +11,22 @@
 #include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Misc/OutputDeviceDebug.h"
+#include "Shared/Item/UI/ItemGridWidget.h"
+
 
 void UShopWidget::NativeConstruct()
 {
 	// Slot Setup
-	if (SlotGridPanel && SlotWidgetClass.Get())
+	if (VenderSlotGridPanel && SlotWidgetClass.Get())
 	{
-		for (int32 h = 0; h < PageHeight; ++h)
+		VenderSlotGridPanel->SetSlotType(ESlotType::Shop);
+
+		/*for (int32 h = 0; h < PageHeight; ++h)
 		{
 			for (int32 w = 0; w < PageWidth; ++w)
 			{
 				UItemSlotWidget* SlotWidget = CreateWidget<UItemSlotWidget>(GetOwningPlayer(), SlotWidgetClass);
-				SlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
+				VenderSlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
 				if (SlotWidget)
 				{
 					SlotWidget->OnDoubleClick.BindUObject(this, &UShopWidget::OnSlotDoubleClicked);
@@ -36,11 +40,11 @@ void UShopWidget::NativeConstruct()
 					UE_LOG(LogShop, Warning, TEXT("Failed to bind drag function."));
 				}
 			}
-		}
+		}*/
 	}
 	else
 	{
-		UE_LOG(LogShop, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
+		///UE_LOG(LogShop, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
 	}
 
 	CloseButton->OnClicked.AddDynamic(this, &UShopWidget::OnCloseButtonClicked);
@@ -72,7 +76,7 @@ void UShopWidget::UpdateShopContents()
 		const FShopItem& ShopItem = ShopItemList[Index];
 		if (ShopItem.Item.ItemData)
 		{
-			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(Index));
+			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(VenderSlotGridPanel->GetSlotAt(Index));
 			SlotWidget->SetItem(ShopItem.Item);
 		}
 	}

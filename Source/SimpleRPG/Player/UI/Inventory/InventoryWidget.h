@@ -31,9 +31,6 @@ protected:
 	UFUNCTION()
 	void OnInventoryToggled(ESlateVisibility ChangedVisibility);
 
-	UFUNCTION(BlueprintCallable)
-	void OnPageSelected(int32 PageIndex);
-
 	UFUNCTION()
 	void OnCurrentPageSort();
 
@@ -58,7 +55,7 @@ protected:
 protected:
 	/* Update Inventory manually when interface opened */
 	UFUNCTION()
-	void UpdateContents(EInventoryCategory ChangedPageCategory);
+	void UpdateContents();
 
 	UFUNCTION()
 	void UpdateEquipmentSlotWidgets();
@@ -83,8 +80,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<class UItemSlotDragWidget> SlotVisualWidgetClass;
 
-	UPROPERTY()
-	TMap<ESlotType, class UItemSlotWidget*> EquipmentSlotMap;
+	//UPROPERTY()
+	//TMap<ESlotType, class UItemSlotWidget*> EquipmentSlotMap;
 
 	/************************
 	*   Bind Widgets
@@ -101,24 +98,24 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> GoldDisplayText;
 
-	/**** Equipment Slots ****/
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemSlotWidget> HelmetSlot;
+	///**** Equipment Slots ****/
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UItemSlotWidget> HelmetSlot;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemSlotWidget> ChestSlot;
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UItemSlotWidget> ChestSlot;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemSlotWidget> PantsSlot;
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UItemSlotWidget> PantsSlot;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemSlotWidget> BootsSlot;
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UItemSlotWidget> BootsSlot;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemSlotWidget> WeaponSlot;
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UItemSlotWidget> WeaponSlot;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UButton> CloseButton;
+	//UPROPERTY(meta = (BindWidget))
+	//TObjectPtr<class UButton> CloseButton;
 
 
 	/************************
@@ -126,9 +123,6 @@ protected:
 	*************************/
 	UPROPERTY()
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
-
-	UPROPERTY()
-	EInventoryCategory SelectedPage;
 
 	UPROPERTY()
 	TMap<EInventoryCategory, bool> bIsPageContentChanged;

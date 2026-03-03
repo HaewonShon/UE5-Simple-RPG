@@ -35,20 +35,13 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InventoryMode = EInventoryMode::Normal;
-	const int32 SlotCountPerPage = 24;
-
-	// Page & Equipment slots init
-	for (EInventoryCategory Category : TEnumRange<EInventoryCategory>())
-	{
-		InventoryPages.Add({ Category, FInventoryPage(Category, SlotCountPerPage) });
-	}
+	const int32 SlotCountPerPage = 8 * 8;
+	InventoryPage = FInventoryPage(SlotCountPerPage);
 
 	for (EEquipmentType Category : TEnumRange<EEquipmentType>())
 	{
 		EquipmentSlots.Add({ Category, FEquipmentInfo() });
 	}
-
-	UE_LOG(LogInventory, Verbose, TEXT("Initialized inventory pages size: %i"), InventoryPages.Num());
 }
 
 void UInventoryComponent::SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC)
@@ -64,12 +57,7 @@ bool UInventoryComponent::CanAddItem(FItemInstance ItemInstance) const
 		return false;
 	}
 
-	EItemCategory ItemCategory = ItemInstance.ItemData->Category;
-	EInventoryCategory PageCategory = ConvertItemToInventoryCategory(ItemCategory);
-	check(PageCategory != EInventoryCategory::Count);
-
-	const FInventoryPage& TargetPage = InventoryPages[PageCategory];
-	return TargetPage.CanAddItem(ItemInstance);
+	return InventoryPage.CanAddItem(ItemInstance);
 }
 
 bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
@@ -80,14 +68,9 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 		return false;
 	}
 
-	EItemCategory ItemCategory = ItemInstance.ItemData->Category;
-	EInventoryCategory PageCategory = ConvertItemToInventoryCategory(ItemCategory);
-	check(PageCategory != EInventoryCategory::Count);
-
-	FInventoryPage& TargetPage = InventoryPages[PageCategory];
-	if (TargetPage.AddItem(ItemInstance))
+	if (InventoryPage.AddItem(ItemInstance))
 	{
-		OnInventoryContentChanged.ExecuteIfBound(PageCategory);
+		OnInventoryContentChanged.ExecuteIfBound();
 		OnItemCountChanged.ExecuteIfBound(ItemInstance.ItemID);
 		return true;
 	}
@@ -95,17 +78,16 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 	return false;
 }
 
-void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem)
+void UInventoryComponent::RemoveItem(int32 SlotIndex, bool bShouldDropItem)
 {
-	FInventoryPage& TargetPage = InventoryPages[PageCategory];
-	if (TargetPage.IsSlotEmpty(SlotIndex))
+	if (InventoryPage.IsSlotEmpty(SlotIndex))
 	{
 		return;
 	}
 
 	if (bShouldDropItem)
 	{
-		const FItemInstance& ItemInstance = TargetPage.GetItemInstance(SlotIndex);
+		const FItemInstance& ItemInstance = InventoryPage.GetItemInstance(SlotIndex);
 
 		// spawn actor
 		if (UItemSpawnSubsystem* ItemSpawnSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemSpawnSubsystem>())
@@ -118,23 +100,22 @@ void UInventoryComponent::RemoveItem(EInventoryCategory PageCategory, int32 Slot
 		}
 	}
 
-	FPrimaryAssetId RemovedItemId = TargetPage.Slots[SlotIndex].Item.ItemID;
-	TargetPage.RemoveItem(SlotIndex);
+	FPrimaryAssetId RemovedItemId = InventoryPage.Slots[SlotIndex].Item.ItemID;
+	InventoryPage.RemoveItem(SlotIndex);
 
 	UE_LOG(LogInventory, Verbose, TEXT("Item %s Removed"), *RemovedItemId.ToString());
-	OnInventoryContentChanged.ExecuteIfBound(PageCategory);
+	OnInventoryContentChanged.ExecuteIfBound();
 	OnItemCountChanged.ExecuteIfBound(RemovedItemId);	
 }
 
-void UInventoryComponent::SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2)
+void UInventoryComponent::SwapItems(int32 Index1, int32 Index2)
 {
-	FInventoryPage& CurrentPage = InventoryPages[PageCategory];
-	CurrentPage.SwapItems(Index1, Index2);
+	InventoryPage.SwapItems(Index1, Index2);
 
-	OnInventoryContentChanged.Execute(PageCategory);
+	OnInventoryContentChanged.Execute();
 }
 
-bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotIndex)
+bool UInventoryComponent::UseItem(int32 SlotIndex)
 {
 	UE_LOG(LogInventory, Verbose, TEXT("UseItem SlotIndex %i requested"), SlotIndex);
 
@@ -152,10 +133,7 @@ bool UInventoryComponent::UseItem(EInventoryCategory PageCategory, int32 SlotInd
 bool UInventoryComponent::CanAddRewardItems(const TArray<FItemReward>& RewardItems)
 {
 	bool bResult = true;
-	TMap<EInventoryCategory, int32> RequiredSlot;
-	RequiredSlot.Add({ EInventoryCategory::Equipment, 0 });
-	RequiredSlot.Add({ EInventoryCategory::Consumable , 0 });
-	RequiredSlot.Add({ EInventoryCategory::Material, 0 });
+	int32 RequiredSlot = 0;
 
 	UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
 	check(ItemDB);
@@ -163,29 +141,21 @@ bool UInventoryComponent::CanAddRewardItems(const TArray<FItemReward>& RewardIte
 	for (const FItemReward& Reward : RewardItems)
 	{
 		const UItemData* ItemData = ItemDB->Get(Reward.ItemId);
-		EInventoryCategory Category = ConvertItemToInventoryCategory(ItemData->Category);
-
 		if (ItemData->bIsStackable)
 		{
 			// TODO : consider existing slot first
-			RequiredSlot[Category] += (Reward.Amount + ItemData->MaxStackSize - 1) / ItemData->MaxStackSize;
+			RequiredSlot += (Reward.Amount + ItemData->MaxStackSize - 1) / ItemData->MaxStackSize;
 		}
 		else
 		{
-			RequiredSlot[Category] += Reward.Amount;
+			RequiredSlot += Reward.Amount;
 		}
 	}
 
-	for (auto& InventoryPagePair : InventoryPages)
+	int32 RemainingSlot = InventoryPage.CountMaxSlot - InventoryPage.CountFilledSlot;
+	if (RemainingSlot < RequiredSlot)
 	{
-		const FInventoryPage& InventoryPage = InventoryPagePair.Value;
-
-		int32 RemainingSlot = InventoryPage.CountMaxSlot - InventoryPage.CountFilledSlot;
-		if (RemainingSlot < RequiredSlot[InventoryPagePair.Key])
-		{
-			bResult = false;
-			break;
-		}
+		bResult = false;
 	}
 
 	return true;
@@ -224,23 +194,21 @@ bool UInventoryComponent::AddRewardItems(const TArray<struct FItemReward>& Rewar
 
 void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType EquipmentType)
 {
-	FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
-	const FItemInstance& EquipmentItem = EquipmentPage.GetItemInstance(SlotIndex);
+	const FItemInstance& EquipmentItem = InventoryPage.GetItemInstance(SlotIndex);
 	if (CanEquipItem(EquipmentItem, EquipmentType))
 	{
-		Swap(EquipmentSlots[EquipmentType].Slot, EquipmentPage.Slots[SlotIndex]);
+		Swap(EquipmentSlots[EquipmentType].Slot, InventoryPage.Slots[SlotIndex]);
 		UnequipCurrentItem(EquipmentType);
 		EquipCurrentItem(EquipmentType);
 
-		OnInventoryContentChanged.ExecuteIfBound(EInventoryCategory::Equipment);
+		OnInventoryContentChanged.ExecuteIfBound();
 		OnEquipmentContentChanged.ExecuteIfBound();
 	}
 }
 
 void UInventoryComponent::TryEquipItem(int32 SlotIndex)
 {
-	FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
-	const FItemInstance& EquipmentItem = EquipmentPage.GetItemInstance(SlotIndex);
+	const FItemInstance& EquipmentItem = InventoryPage.GetItemInstance(SlotIndex);
 	EEquipmentType Type = Cast<UEquipmentItemData>(EquipmentItem.ItemData)->EquipmentType;
 	TryEquipItem(SlotIndex, Type);
 }
@@ -251,17 +219,16 @@ void UInventoryComponent::TryRemoveEquipment(EEquipmentType EquipmentType)
 	{
 		UnequipCurrentItem(EquipmentType);
 
-		FInventoryPage& EquipmentPage = InventoryPages[EInventoryCategory::Equipment];
-		Swap(EquipmentSlots[EquipmentType].Slot, EquipmentPage.Slots[EquipmentPage.GetFirstEmptySlotIndex()]);
+		Swap(EquipmentSlots[EquipmentType].Slot, InventoryPage.Slots[InventoryPage.GetFirstEmptySlotIndex()]);
 
-		OnInventoryContentChanged.ExecuteIfBound(EInventoryCategory::Equipment);
+		OnInventoryContentChanged.ExecuteIfBound();
 		OnEquipmentContentChanged.ExecuteIfBound();
 	}
 }
 
-const FInventoryPage& UInventoryComponent::GetPage(EInventoryCategory PageCategory) const
+const FInventoryPage& UInventoryComponent::GetPage() const
 {
-	return InventoryPages[PageCategory];
+	return InventoryPage;
 }
 
 const FInventorySlot& UInventoryComponent::GetEquipmentSlot(EEquipmentType EquipmentType) const
@@ -269,9 +236,9 @@ const FInventorySlot& UInventoryComponent::GetEquipmentSlot(EEquipmentType Equip
 	return EquipmentSlots[EquipmentType].Slot;
 }
 
-FItemDescription UInventoryComponent::GetItemDescription(EInventoryCategory PageCategory, int32 SlotIndex)
+FItemDescription UInventoryComponent::GetItemDescription(int32 SlotIndex)
 {
-	const FInventorySlot& Slot = GetPage(PageCategory).Slots[SlotIndex];
+	const FInventorySlot& Slot = InventoryPage.Slots[SlotIndex];
 	if (!Slot.IsEmpty())
 	{
 		FItemDescription Description = Slot.Item.ItemData->BuildDescriptionData();
@@ -303,7 +270,7 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 		const UItemData* Item = ItemDB->Get(ItemId);
 		EInventoryCategory PageCategory = ConvertItemToInventoryCategory(Item->Category);
 
-		for (const FInventorySlot& Slot : InventoryPages[PageCategory].Slots)
+		for (const FInventorySlot& Slot : InventoryPage.Slots)
 		{
 			if (!Slot.IsEmpty() && Slot.Item.ItemID == ItemId)
 			{
@@ -314,7 +281,6 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 
 	return Count;
 }
-
 
 /****************************************************************************************
 *
@@ -343,7 +309,7 @@ bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType
 
 bool UInventoryComponent::CanRemoveEquipment(EEquipmentType EquipmentType)
 {
-	if (InventoryPages[EInventoryCategory::Equipment].HasEmptySlot())
+	if (InventoryPage.HasEmptySlot())
 	{
 		return true;
 	}

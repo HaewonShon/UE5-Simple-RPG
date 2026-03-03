@@ -25,15 +25,21 @@ public:
 	class UInventoryWidget* GetInventoryWidget() { return RootWidget->GetInventoryWidget(); }
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return RootWidget->GetItemDescriptionWidget(); }
 
+	class UItemRarityColorData* GetItemRarityColorData() const { return ItemRarityColorDataAsset; }
+
 	class UQuantityConfirmationWidget* RequestCreateQuantityWidget();
 	void RequestDisplayMessageBox(const FText& Message);
 private:
-	void LoadWidgetData();
+	void LoadDataAssets();
 	void OnWidgetDataLoaded();
+	void OnItemRarityColorDataLoaded();
 
 	UPROPERTY()
 	TObjectPtr<class URootWidget> RootWidget;
 
 	UPROPERTY()
 	TObjectPtr<class UCommonWidgetData> CommonWidgetDataAsset;
+
+	UPROPERTY()
+	TObjectPtr<class UItemRarityColorData> ItemRarityColorDataAsset;
 };

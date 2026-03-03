@@ -6,6 +6,9 @@
 #include "../ItemData.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/Border.h"
+#include "Shared/UI/UISubsystem.h"
+#include "../ItemRarityColorData.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 void UItemSlotWidget::SetItem(const FItemInstance& Item)
@@ -16,6 +19,7 @@ void UItemSlotWidget::SetItem(const FItemInstance& Item)
 	}
 
 	ItemImage->SetBrushFromTexture(Item.ItemData->Icon);
+	ItemImage->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
 	if (Item.StackCount > 1)
 	{
 		StackText->SetText(FText::AsNumber(Item.StackCount));
@@ -25,6 +29,11 @@ void UItemSlotWidget::SetItem(const FItemInstance& Item)
 		StackText->SetText(FText::GetEmpty());
 	}
 
+
+	UUISubsystem* UISubsystem = GetOwningLocalPlayer()->GetSubsystem<UUISubsystem>();
+	const UItemRarityColorData* ColorData = UISubsystem->GetItemRarityColorData();
+	Background->SetBrushColor(ColorData->GetColorForRarity(Item.ItemData->Rarity));
+
 	this->InvalidateLayoutAndVolatility(); // Refresh InvalidationBox cache
 	bIsSlotFilled = true;
 }
@@ -32,6 +41,7 @@ void UItemSlotWidget::SetItem(const FItemInstance& Item)
 void UItemSlotWidget::ClearItem()
 {
 	ItemImage->SetBrushFromTexture(nullptr);
+	ItemImage->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
 	StackText->SetText(FText());
 	bIsSlotFilled = false;
 }
@@ -59,6 +69,8 @@ UTexture2D* UItemSlotWidget::GetIconTexture() const
 void UItemSlotWidget::NativeConstruct()
 {
 	ClearItem();
+
+	DefaultBackgroundColor = Background->GetBrushColor();
 }
 
 FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

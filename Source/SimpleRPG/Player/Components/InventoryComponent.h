@@ -13,7 +13,7 @@
 // Define Log Inventory for Inventory-specific logs
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All)
 
-DECLARE_DELEGATE_OneParam(FInventoryContentChangedDelegate, EInventoryCategory)
+DECLARE_DELEGATE(FInventoryContentChangedDelegate)
 DECLARE_DELEGATE(FEquipmentChangedDelegate)
 DECLARE_DELEGATE_OneParam(FItemCountChangedDelegate, const FPrimaryAssetId&)
 
@@ -51,11 +51,11 @@ public:
 	bool CanAddItem(FItemInstance ItemInstance) const;
 	bool AddItem(FItemInstance& ItemInstance);
 
-	void RemoveItem(EInventoryCategory PageCategory, int32 SlotIndex, bool bShouldDropItem);
+	void RemoveItem(int32 SlotIndex, bool bShouldDropItem);
 
-	void SwapItems(EInventoryCategory PageCategory, int32 Index1, int32 Index2);
+	void SwapItems(int32 Index1, int32 Index2);
 
-	bool UseItem(EInventoryCategory PageCategory, int32 SlotIndex);
+	bool UseItem(int32 SlotIndex);
 
 	bool CanAddRewardItems(const TArray<struct FItemReward>& RewardItems);
 	bool AddRewardItems(const TArray<struct FItemReward>& RewardItems);
@@ -69,14 +69,14 @@ public:
 
 	void TryRemoveEquipment(EEquipmentType EquipmentType);
 
-	const FInventoryPage& GetPage(EInventoryCategory PageCategory) const;
+	const FInventoryPage& GetPage() const;
 
 	const FInventorySlot& GetEquipmentSlot(EEquipmentType EquipmentType) const;
 
 	/*
 	*	Request functions for UI
 	*/
-	FItemDescription GetItemDescription(EInventoryCategory PageCategory, int32 SlotIndex);
+	FItemDescription GetItemDescription(int32 SlotIndex);
 	FItemDescription GetItemDescription(EEquipmentType EquipmentType);
 	int32 RequestItemCount(const FPrimaryAssetId& ItemId);
 
@@ -95,7 +95,7 @@ protected:
 	void UnequipCurrentItem(EEquipmentType EquipmentType);
 
 	UPROPERTY()
-	TMap<EInventoryCategory, FInventoryPage> InventoryPages;
+	FInventoryPage InventoryPage;
 
 	UPROPERTY()
 	TMap<EEquipmentType, FEquipmentInfo> EquipmentSlots;

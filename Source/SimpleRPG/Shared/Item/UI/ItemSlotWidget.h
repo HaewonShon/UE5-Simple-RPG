@@ -78,8 +78,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<class UTextBlock> StackText;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<class UBorder> Background;
+
 	// Slot Information
 	int32 SlotIndex;
 
 	bool bIsSlotFilled;
+	FLinearColor DefaultBackgroundColor;
 };

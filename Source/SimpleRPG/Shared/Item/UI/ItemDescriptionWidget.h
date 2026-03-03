@@ -26,6 +26,12 @@ protected:
 	TObjectPtr<class UImage> DisplayIcon;
 
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> Rarity;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UBorder> ItemInfoBackground;
+
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> Type;
 
 	UPROPERTY(meta = (BindWidget))

@@ -6,11 +6,20 @@
 #include "Components/Image.h"
 #include "Components/OverlaySlot.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/Border.h"
+
+#include "Shared/UI/UISubsystem.h"
+#include "Shared/Item/ItemRarityColorData.h"
 
 void UItemDescriptionWidget::SetDescription(const FItemDescription& Description)
 {
 	DisplayName->SetText(Description.Name);
 	DisplayIcon->SetBrushFromTexture(Description.Icon);
+
+	UUISubsystem* UISubsystem = GetOwningLocalPlayer()->GetSubsystem<UUISubsystem>();
+	const UItemRarityColorData* ColorData = UISubsystem->GetItemRarityColorData();
+	Rarity->SetText(UEnum::GetDisplayValueAsText(Description.Rarity));
+	ItemInfoBackground->SetBrushColor(ColorData->GetColorForRarity(Description.Rarity));
 
 	if (const FItemDetail* ItemDetail = Description.Payload.TryGet<FItemDetail>())
 	{

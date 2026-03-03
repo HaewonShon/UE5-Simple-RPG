@@ -71,6 +71,11 @@ void UItemData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEve
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	AssetId = GetPrimaryAssetId();
+	
+	if (!bIsStackable)
+	{
+		MaxStackSize = 1;
+	}
 }
 
 FPrimaryAssetId UItemData::GetPrimaryAssetId() const
@@ -83,6 +88,7 @@ FItemDescription UItemData::BuildDescriptionData() const
 	FItemDescription Description;
 	Description.Name = DisplayName;
 	Description.Icon = Icon;
+	Description.Rarity = Rarity;
 
 	FItemDetail Detail;
 	Detail.DetailText = DescriptionText;

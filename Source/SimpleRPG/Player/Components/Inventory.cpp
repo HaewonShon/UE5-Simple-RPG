@@ -13,10 +13,8 @@ FInventoryPage::FInventoryPage()
 	//Slots.Add(FInventorySlot());
 }
 
-FInventoryPage::FInventoryPage(EInventoryCategory PageCategory, int32 SlotCountPerPage)
+FInventoryPage::FInventoryPage(int32 SlotCountPerPage)
 {
-	Category = PageCategory;
-
 	CountMaxSlot = SlotCountPerPage;
 	CountFilledSlot = 0;
 	
@@ -44,6 +42,8 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 		return false;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item1"));
+
 	if (ItemInstance.ItemData->bIsStackable)
 	{
 		// If stackable slot exist, place it first.
@@ -58,14 +58,15 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 				} 
 			}
 		}
+		UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item2"));
 
 		// place left items in empty slotss
 		for (FInventorySlot& Slot : Slots)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item3"));
 			if (Slot.IsEmpty())
 			{
-				Slot.Item.SetItem(ItemInstance.ItemData, 
-					FMath::Min(ItemInstance.ItemData->MaxStackSize, ItemInstance.StackCount));
+				Slot.Item.SetItem(ItemInstance.ItemData, FMath::Min(ItemInstance.ItemData->MaxStackSize, ItemInstance.StackCount));
 				++CountFilledSlot;
 
 				ItemInstance.StackCount -= Slot.Item.StackCount;
@@ -78,7 +79,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 	}
 	else
 	{
-		// place left items in empty slotss
+		// place left items in empty slots
 		for (FInventorySlot& Slot : Slots)
 		{
 			if (Slot.IsEmpty())
