@@ -1,0 +1,133 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Shared/UI/Common/SlotWidget.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Components/Border.h"
+
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "SlotDragDropOp.h"
+
+void USlotWidget::UpdateSlot(const FActionSlot& NewSlotContent)
+{
+	SlotContent = NewSlotContent;
+
+	Icon->SetBrushFromTexture(SlotContent.ContentAsset->Icon.Get());
+	Icon->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
+
+	if (SlotContent.Quantity > 1)
+	{
+		QuantityText->SetText(FText::AsNumber(SlotContent.Quantity));
+	}
+	else
+	{
+		QuantityText->SetText(FText::GetEmpty());
+	}
+
+	/* Background color setting
+	UUISubsystem* UISubsystem = GetOwningLocalPlayer()->GetSubsystem<UUISubsystem>();
+	const UItemRarityColorData* ColorData = UISubsystem->GetItemRarityColorData();
+	Background->SetBrushColor(ColorData->GetColorForRarity(Item.ItemData->Rarity)); */
+
+	this->InvalidateLayoutAndVolatility(); // Refresh InvalidationBox cache
+}
+
+void USlotWidget::ClearSlot()
+{
+	SlotContent = FActionSlot();
+	Icon->SetBrushFromTexture(nullptr);
+	Icon->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
+	QuantityText->SetText(FText());
+}
+
+bool USlotWidget::IsEmpty() const
+{
+	return SlotContent.IsEmpty();
+}
+
+void USlotWidget::SetSlotAddreess(const FSlotAddress& NewAddress)
+{
+	Address = NewAddress;
+}
+
+void USlotWidget::NativeConstruct()
+{
+	ClearSlot();
+	DefaultBackgroundColor = Background->GetBrushColor();
+}
+
+FReply USlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	FEventReply Reply;
+	Reply.NativeReply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (Reply.NativeReply.IsEventHandled() || InMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton || IsEmpty())
+	{
+		return Reply.NativeReply;
+	}
+
+	Reply.NativeReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
+	return Reply.NativeReply;
+}
+
+void USlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDragDetected Detected"));
+
+	USlotDragDropOp* DragDropOp = Cast<USlotDragDropOp>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDragDropOp::StaticClass()));
+	DragDropOp->SlotAddress = this->Address;
+	OutOperation = DragDropOp;
+
+	// Set DragDrop operation ref so Inventory Widget can set visual widget
+	DragDropOperationRef = OutOperation;
+	OnDragBegin.ExecuteIfBound(DragDropOp->SlotAddress);
+}
+
+bool USlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDrop Detected"));
+
+	DragDropOperationRef = nullptr;
+
+	FSlotAddress SlotToSwap = Cast<USlotDragDropOp>(InOperation)->SlotAddress;
+	OnDrop.ExecuteIfBound(SlotToSwap, this->Address);
+
+	return true;
+}
+
+FReply USlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDoubleClick Detected"));
+
+	FEventReply Reply;
+	Reply.NativeReply = Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
+	if (Reply.NativeReply.IsEventHandled() || IsEmpty())
+	{
+		return Reply.NativeReply;
+	}
+	OnDoubleClick.ExecuteIfBound(Address);
+	return FReply::Handled();
+}
+
+void USlotWidget::NativeOnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	Super::NativeOnMouseEnter(MyGeometry, MouseEvent);
+
+	if (IsEmpty())
+	{
+		return;
+	}
+	OnHovered.ExecuteIfBound(Address);
+}
+
+void USlotWidget::NativeOnMouseLeave(const FPointerEvent& MouseEvent)
+{
+	Super::NativeOnMouseLeave(MouseEvent);
+	if (IsEmpty())
+	{
+		return;
+	}
+	OnHoverEnded.ExecuteIfBound();
+}

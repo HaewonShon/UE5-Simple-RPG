@@ -13,7 +13,7 @@
 
 void UItemSlotWidget::SetItem(const FItemInstance& Item)
 {
-	if (!Item.ItemData)
+	/*if (!Item.ItemData)
 	{
 		return;
 	}
@@ -32,7 +32,7 @@ void UItemSlotWidget::SetItem(const FItemInstance& Item)
 
 	UUISubsystem* UISubsystem = GetOwningLocalPlayer()->GetSubsystem<UUISubsystem>();
 	const UItemRarityColorData* ColorData = UISubsystem->GetItemRarityColorData();
-	Background->SetBrushColor(ColorData->GetColorForRarity(Item.ItemData->Rarity));
+	Background->SetBrushColor(ColorData->GetColorForRarity(Item.ItemData->Rarity));*/
 
 	this->InvalidateLayoutAndVolatility(); // Refresh InvalidationBox cache
 	bIsSlotFilled = true;
@@ -69,7 +69,7 @@ UTexture2D* UItemSlotWidget::GetIconTexture() const
 void UItemSlotWidget::NativeConstruct()
 {
 	ClearItem();
-
+	
 	DefaultBackgroundColor = Background->GetBrushColor();
 }
 

@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
 #include "Misc/EnumRange.h"
+#include "Shared/Common/ActionableAsset.h"
+#include "Shared/Common/SlotTypes.h"
 #include "ItemData.generated.h"
 
 struct FStatLine
@@ -67,28 +68,22 @@ enum class EItemCategory : uint8
 ENUM_RANGE_BY_COUNT(EItemCategory, EItemCategory::Count); // Register Enum Range using Count
 
 UCLASS(BlueprintType, meta = (DisplayName = "Item Data Asset"))
-class SIMPLERPG_API UItemData : public UPrimaryDataAsset
+class SIMPLERPG_API UItemData : public UActionableAsset
 {
 	GENERATED_BODY()
 
 public:
+	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override { return true; }
+	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override { }
+
 	virtual void PostInitProperties() override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 
 	virtual FItemDescription BuildDescriptionData() const;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item", meta = (ReadOnly))
-	FPrimaryAssetId AssetId;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	FText DisplayName;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	EItemCategory Category;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
-	UTexture2D* Icon;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	bool bIsStackable;

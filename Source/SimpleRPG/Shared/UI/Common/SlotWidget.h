@@ -4,38 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ItemSlotWidget.generated.h"
+#include "Shared/Common/SlotTypes.h"
+#include "Shared/Common/ActionSlot.h"
+#include "SlotWidget.generated.h"
 
 DECLARE_DELEGATE(FOnSlotLeave);
-DECLARE_DELEGATE_OneParam(FOnSlotEvent, FSlotInfo);
-DECLARE_DELEGATE_TwoParams(FOnSlotDrop, FSlotInfo, FSlotInfo);
-
-USTRUCT()
-struct FSlotInfo
-{
-	GENERATED_BODY()
-
-	ESlotType SlotType;
-	int32 SlotIndex; // for ESlotType::Storage only
-};
+DECLARE_DELEGATE_OneParam(FOnSlotEvent, const FSlotAddress&);
+DECLARE_DELEGATE_TwoParams(FOnSlotDrop, const FSlotAddress&, const FSlotAddress&);
 
 /**
- *	 Widget for each item slot in inventory.
+ *		Common widget to display slot on screen.
  */
 UCLASS()
-class SIMPLERPG_API UItemSlotWidget : public UUserWidget
+class SIMPLERPG_API USlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public:
-	/* Setter for Item Image and stack count text */
-	void SetItem(const struct FItemInstance& Item);
-	void ClearItem();
-
-	int32 GetIndex() const;
-	void SetIndex(int32 Index);
-
-	class UTexture2D* GetIconTexture() const;
+	FActionSlot SlotContent;
 
 	FOnSlotEvent OnDragBegin;
 	FOnSlotEvent OnDoubleClick;
@@ -45,12 +31,14 @@ public:
 
 	UDragDropOperation* DragDropOperationRef;
 
-	UPROPERTY(EditDefaultsOnly)
-	ESlotType SlotType;
+	void UpdateSlot(const FActionSlot& NewSlotContent);
+	void ClearSlot();
+	bool IsEmpty() const;
+	void SetSlotAddreess(const FSlotAddress& NewAddress);
 
 protected:
+	/*** widget event overrides ***/
 	virtual void NativeConstruct() override;
-	/* drag-drop related events implementation */
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
@@ -58,18 +46,15 @@ protected:
 	virtual void NativeOnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& MouseEvent) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<class UImage> ItemImage;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> Icon;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<class UTextBlock> StackText;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> QuantityText;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UBorder> Background;
 
-	// Slot Information
-	int32 SlotIndex;
-
-	bool bIsSlotFilled;
+	FSlotAddress Address;
 	FLinearColor DefaultBackgroundColor;
 };

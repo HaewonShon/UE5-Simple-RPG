@@ -7,7 +7,7 @@ FItemDescription UEquipmentItemData::BuildDescriptionData() const
 {
 	FItemDescription Description;
 	Description.Name = DisplayName;
-	Description.Icon = Icon;
+	Description.Icon = Icon.Get();
 	Description.Rarity = Rarity;
 
 	FEquipmentDetail Detail;

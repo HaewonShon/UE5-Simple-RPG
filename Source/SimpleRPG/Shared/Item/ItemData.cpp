@@ -3,6 +3,7 @@
 
 #include "ItemData.h"
 
+
 FItemInstance::FItemInstance()
 {
 	ItemData = nullptr;
@@ -63,15 +64,11 @@ bool FItemInstance::RemoveStack(int32 Count)
 void UItemData::PostInitProperties()
 {
 	Super::PostInitProperties();
-
-	AssetId = GetPrimaryAssetId();
 }
 
 void UItemData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	AssetId = GetPrimaryAssetId();
-	
+	Super::PostEditChangeProperty(PropertyChangedEvent);	
 	if (!bIsStackable)
 	{
 		MaxStackSize = 1;
@@ -87,7 +84,7 @@ FItemDescription UItemData::BuildDescriptionData() const
 {
 	FItemDescription Description;
 	Description.Name = DisplayName;
-	Description.Icon = Icon;
+	Description.Icon = Icon.Get();
 	Description.Rarity = Rarity;
 
 	FItemDetail Detail;
