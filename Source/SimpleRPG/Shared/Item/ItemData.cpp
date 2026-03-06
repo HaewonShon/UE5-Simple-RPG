@@ -6,26 +6,26 @@
 
 FItemInstance::FItemInstance()
 {
-	ItemData = nullptr;
+	DataAsset = nullptr;
 	StackCount = 0;
 }
 
-FItemInstance::FItemInstance(const UItemData* Item, int32 Count)
+FItemInstance::FItemInstance(UItemData* Item, int32 Count)
 {
-	ItemData = Item;
-	ItemID = ItemData->GetPrimaryAssetId();
+	DataAsset = Item;
+	ItemID = DataAsset->GetPrimaryAssetId();
 	StackCount = Count;
 }
 
-bool FItemInstance::SetItem(const UItemData* Item, int32 Count)
+bool FItemInstance::SetItem(UItemData* Item, int32 Count)
 {
 	if (!Item)
 	{
 		return false;
 	}
 
-	ItemData = Item;
-	ItemID = ItemData->GetPrimaryAssetId();
+	DataAsset = Item;
+	ItemID = DataAsset->GetPrimaryAssetId();
 	StackCount = Count;
 
 	return true;
@@ -38,12 +38,12 @@ bool FItemInstance::AddStack(FItemInstance& OtherInstance)
 		return false;
 	}
 
-	if (!ItemData->bIsStackable)
+	if (!DataAsset->bIsStackable)
 	{
 		return false;
 	}
 
-	int32 RemainingStackCount = ItemData->MaxStackSize - StackCount;
+	int32 RemainingStackCount = DataAsset->MaxStackSize - StackCount;
 	StackCount += FMath::Min(OtherInstance.StackCount, RemainingStackCount);
 	OtherInstance.StackCount -= FMath::Min(OtherInstance.StackCount, RemainingStackCount);
 

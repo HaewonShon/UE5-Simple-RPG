@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/DragDropOperation.h"
-#include "ItemSlotWidget.h"
+#include "Shared/Common/SlotTypes.h"
 #include "ItemDragDropOp.generated.h"
 
 /**
@@ -16,5 +16,5 @@ class SIMPLERPG_API UItemDragDropOp : public UDragDropOperation
 	GENERATED_BODY()
 	
 public:
-	FSlotInfo DraggingSlot;
+	FSlotAddress DraggingSlot;
 };

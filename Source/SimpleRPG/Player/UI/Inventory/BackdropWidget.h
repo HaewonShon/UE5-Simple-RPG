@@ -7,7 +7,7 @@
 #include "Shared/Item/UI/ItemSlotWidget.h"
 #include "BackdropWidget.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnItemDiscard, FSlotInfo);
+DECLARE_DELEGATE_OneParam(FOnItemDiscard, const FSlotAddress& Slot);
 
 /**
  *	Invisible widget to receive drop input

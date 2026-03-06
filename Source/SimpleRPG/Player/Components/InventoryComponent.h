@@ -54,7 +54,7 @@ public:
 	void RemoveItem(int32 SlotIndex, bool bShouldDropItem);
 
 	void SwapItems(int32 Index1, int32 Index2);
-
+	
 	bool UseItem(int32 SlotIndex);
 
 	bool CanAddRewardItems(const TArray<struct FItemReward>& RewardItems);
@@ -69,7 +69,7 @@ public:
 
 	void TryRemoveEquipment(EEquipmentType EquipmentType);
 
-	const FInventoryPage& GetPage() const;
+	FInventoryPage& GetPage();
 
 	const FInventorySlot& GetEquipmentSlot(EEquipmentType EquipmentType) const;
 

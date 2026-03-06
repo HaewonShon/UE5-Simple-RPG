@@ -44,13 +44,13 @@ void AItemActor::SetItem(FItemInstance Item)
 	ItemInstance = Item;
 
 	// destroy self if invalid
-	if (!ItemInstance.ItemData)
+	if (!ItemInstance.DataAsset.IsValid())
 	{
 		Destroy();
 	}
 
 	FLinearColor VFXColor = FLinearColor::White;
-	switch (Item.ItemData->Category)
+	switch (Item.DataAsset->Category)
 	{
 	case EItemCategory::Equipment:
 		VFXColor = EquipmentColor;

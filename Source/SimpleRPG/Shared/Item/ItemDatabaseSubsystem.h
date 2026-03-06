@@ -16,13 +16,13 @@ class SIMPLERPG_API UItemDatabaseSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	const class UItemData* Get(const FPrimaryAssetId& ID) const;
+	class UItemData* Get(const FPrimaryAssetId& ID) const;
 
 	FOnCachingCompleted OnCachingCompleted;
 	bool IsCachingCompleted() const { return bCachingCompleted; }
 protected:
 	void BuildCache();
-	TMap<FPrimaryAssetId, class UItemData*> ItemCache;
+	TMap<FPrimaryAssetId, TObjectPtr<UItemData>> ItemCache;
 
 	bool bCachingCompleted;
 };

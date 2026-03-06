@@ -49,6 +49,9 @@ class SIMPLERPG_API UEquipmentItemData : public UItemData
 	GENERATED_BODY()
 
 public:
+	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override;
+	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override;
+
 	virtual FItemDescription BuildDescriptionData() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")

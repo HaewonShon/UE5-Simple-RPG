@@ -19,16 +19,6 @@
 #include "Player/SimpleRPGPlayerState.h"
 #include "Player/Components/CurrencyComponent.h"
 
-EEquipmentType ConvertSlotTypeToEquipmentType(ESlotType SlotType)
-{
-	if (SlotType == ESlotType::Helmet) return EEquipmentType::Helmet;
-	if (SlotType == ESlotType::Chest) return EEquipmentType::Chest;
-	if (SlotType == ESlotType::Pants) return EEquipmentType::Pants;
-	if (SlotType == ESlotType::Boots) return EEquipmentType::Boots;
-	if (SlotType == ESlotType::Weapon) return EEquipmentType::Weapon;
-	return EEquipmentType::Count;
-}
-
 void UInventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -127,9 +117,9 @@ void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
 	}
 }
 
-void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
+void UInventoryWidget::OnSlotDragBegin(const FSlotAddress& SlotAddress)
 {
-	UItemSlotWidget* SlotWidget = GridWidget->GetSlotAt(SlotInfo.SlotIndex);
+	UItemSlotWidget* SlotWidget = GridWidget->GetSlotAt(SlotAddress.SlotIndex);
 	if (!SlotWidget)
 	{
 		UE_LOG(LogInventory, Warning, TEXT("Failed to cast InventorySlotWidget"));
@@ -142,6 +132,8 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 		DragOperation->DefaultDragVisual = SlotVisualWidget;
 		SlotVisualWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		SlotVisualWidget->OnDragBegin(SlotWidget->GetIconTexture());
+		SlotVisualWidget->SetDesiredSize(FVector2D{64.f, 64.f});
+
 	}
 	else
 	{
@@ -149,55 +141,44 @@ void UInventoryWidget::OnSlotDragBegin(FSlotInfo SlotInfo)
 	}
 }
 
-void UInventoryWidget::OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2)
+void UInventoryWidget::OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress)
 {
 	if (InventoryComponentRef->GetCurrentMode() == EInventoryMode::Shop)
 	{
-		if (Slot1.SlotType == ESlotType::Shop)
+		if (SourceSlotAddress.ContainerType == ESlotType::Shop)
 		{
 			// Buy Request
 		}
 	}
 	else
 	{
-		// no support for swap between different equipment slots
-		if (Slot1.SlotType != ESlotType::Storage && Slot2.SlotType != ESlotType::Storage)
+		// equipment -> inventory
+		if (SourceSlotAddress.ContainerType != ESlotType::Storage)
 		{
 			return;
 		}
-
-		if (Slot1.SlotType == ESlotType::Storage && Slot2.SlotType == ESlotType::Storage)
+		else
 		{
-			InventoryComponentRef->SwapItems(Slot1.SlotIndex, Slot2.SlotIndex);
+			InventoryComponentRef->SwapItems(SourceSlotAddress.SlotIndex, TargetSlotAddress.SlotIndex);
 		}
-		// TODO : Re-write Equipment equip logic
-		//else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType == ESlotType::Storage) // Storage->Equipment
-		//{
-		//	InventoryComponentRef->TryEquipItem(Slot1.SlotIndex, ConvertSlotTypeToEquipmentType(Slot2.SlotType));
-		//	UpdateEquipmentSlotWidgets();
-		//}
-		//else if (SelectedPage == EInventoryCategory::Equipment && Slot1.SlotType != ESlotType::Storage) // Equipment->Storage
-		//{
-		//	InventoryComponentRef->TryEquipItem(Slot2.SlotIndex, ConvertSlotTypeToEquipmentType(Slot1.SlotType));
-		//	UpdateEquipmentSlotWidgets();
-		//}
+		
 		UpdateCurrentPageContents();
 	}	
 }
 
-void UInventoryWidget::OnItemDiscarded(FSlotInfo SlotWidget)
+void UInventoryWidget::OnItemDiscarded(const FSlotAddress& SlotAddress)
 {
-	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemDiscard %i"), SlotWidget.SlotIndex);
-	InventoryComponentRef->RemoveItem(SlotWidget.SlotIndex, true);
+	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemDiscard %i"), SlotAddress.SlotIndex);
+	InventoryComponentRef->RemoveItem(SlotAddress.SlotIndex, true);
 }
 
-void UInventoryWidget::OnItemUsed(FSlotInfo SlotWidget)
+void UInventoryWidget::OnItemUsed(const FSlotAddress& SlotAddress)
 {
-	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemUsed %i"), SlotWidget.SlotIndex);
+	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemUsed %i"), SlotAddress.SlotIndex);
 
-	if (SlotWidget.SlotType != ESlotType::Storage)
+	if (SlotAddress.ContainerType != ESlotType::Storage)
 	{
-		InventoryComponentRef->TryRemoveEquipment(ConvertSlotTypeToEquipmentType(SlotWidget.SlotType));
+		//InventoryComponentRef->TryRemoveEquipment(ConvertSlotTypeToEquipmentType(SlotWidget.SlotType));
 	}
 	// TODO : Re-write equipment equip logic
 	//else if (SelectedPage == EInventoryCategory::Equipment)
@@ -206,23 +187,21 @@ void UInventoryWidget::OnItemUsed(FSlotInfo SlotWidget)
 	//}
 	else
 	{
-		InventoryComponentRef->UseItem(SlotWidget.SlotIndex);
+		InventoryComponentRef->UseItem(SlotAddress.SlotIndex);
 	}
 }
 
-void UInventoryWidget::OnSlotHovered(FSlotInfo SlotWidget)
+void UInventoryWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
 {
 	UE_LOG(LogInventory, Verbose, TEXT("Inventory Widget OnSlotHovered Called"));
 
+	if (InventoryComponentRef->GetPage().IsSlotEmpty(SlotAddress.SlotIndex))
+	{
+		return;
+	}
+
 	FItemDescription Description;
-	if (SlotWidget.SlotType != ESlotType::Storage)
-	{
-		Description = InventoryComponentRef->GetItemDescription(ConvertSlotTypeToEquipmentType(SlotWidget.SlotType));
-	}
-	else
-	{
-		Description = InventoryComponentRef->GetItemDescription(SlotWidget.SlotIndex);
-	}
+	Description = InventoryComponentRef->GetItemDescription(SlotAddress.SlotIndex);
 
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::HitTestInvisible);
 	ItemDescriptionWidgetRef->SetDescription(Description);
@@ -271,14 +250,18 @@ void UInventoryWidget::UpdateEquipmentSlotWidgets()
 
 void UInventoryWidget::UpdateCurrentPageContents()
 {
-	const TArray<FInventorySlot>& InventorySlots = InventoryComponentRef->GetPage().Slots;
+	TArray<FInventorySlot>& InventorySlots = InventoryComponentRef->GetPage().Slots;
 	TArray<UWidget*> SlotWidgets = GridWidget->GetAllSlots();
 	for (int32 Index = 0; Index < InventorySlots.Num(); ++Index)
 	{
 		UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotWidgets[Index]);
-		if (!InventorySlots[Index].IsEmpty())
+		FInventorySlot& ItemSlot = InventorySlots[Index];
+
+		if (!ItemSlot.IsEmpty())
 		{
-			SlotWidget->SetItem(InventorySlots[Index].Item);
+			FSlotContent Content(ItemSlot.Item.DataAsset.Get());;
+			Content.SlotAddress = FSlotAddress{ ESlotType::Storage, Index };
+			SlotWidget->UpdateSlot(Content);
 		}
 		else
 		{

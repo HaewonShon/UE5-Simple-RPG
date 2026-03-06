@@ -74,32 +74,32 @@ void UShopWidget::UpdateShopContents()
 	for(int32 Index = 0; Index < ShopItemList.Num(); ++Index)
 	{
 		const FShopItem& ShopItem = ShopItemList[Index];
-		if (ShopItem.Item.ItemData)
+		if (ShopItem.Item.DataAsset.IsValid())
 		{
 			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(VenderSlotGridPanel->GetSlotAt(Index));
-			SlotWidget->SetItem(ShopItem.Item);
+			//SlotWidget->SetItem(ShopItem.Item);
 		}
 	}
 }
 
-void UShopWidget::OnSlotDoubleClicked(FSlotInfo SlotWidget)
+void UShopWidget::OnSlotDoubleClicked(const FSlotAddress& SlotAddress)
 {
 	// Buy Request
 	// create/push quantity confirm widget
 	// save current slot's item id for request
-	int32 Index = SlotWidget.SlotIndex;
+	//int32 Index = SlotWidget.SlotIndex;
 
-	ShopComponentRef->RequestPurchaseItem(Index);
+	ShopComponentRef->RequestPurchaseItem(SlotAddress.SlotIndex);
 }
 
-void UShopWidget::OnSlotHovered(FSlotInfo SlotWidget)
+void UShopWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
 {
 	// display item info & gold info
 	UE_LOG(LogShop, Verbose, TEXT("UShopWidget OnSlotHovered Called"));
-	FItemDescription Description = ShopComponentRef->GetItemDescription(SlotWidget.SlotIndex);
+	//FItemDescription Description = ShopComponentRef->GetItemDescription(SlotWidget.SlotIndex);
 
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::HitTestInvisible);
-	ItemDescriptionWidgetRef->SetDescription(Description);
+	//ItemDescriptionWidgetRef->SetDescription(Description);
 
 	FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 	ItemDescriptionWidgetRef->SetPositionInScreen(MousePos);

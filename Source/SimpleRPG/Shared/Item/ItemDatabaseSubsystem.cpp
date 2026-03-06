@@ -21,7 +21,7 @@ void UItemDatabaseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     }*/
 }
 
-const UItemData* UItemDatabaseSubsystem::Get(const FPrimaryAssetId& ID) const
+UItemData* UItemDatabaseSubsystem::Get(const FPrimaryAssetId& ID) const
 {
     UE_LOG(LogTemp, Verbose, TEXT("UItemDatabaseSubsystem Item request ID: %s"), *ID.ToString());
     return ItemCache.FindRef(ID);

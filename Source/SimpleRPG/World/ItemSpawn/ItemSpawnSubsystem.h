@@ -76,7 +76,7 @@ private:
 	void LoadDropActorData();
 	void OnDropActorDataLoaded();
 
-	const class UItemData* SelectRandomItem(FGameplayTag EnemyTag) const;
+	class UItemData* SelectRandomItem(FGameplayTag EnemyTag) const;
 	int32 GetRandomGoldAmount(FGameplayTag EnemyTag) const;
 
 	UPROPERTY()

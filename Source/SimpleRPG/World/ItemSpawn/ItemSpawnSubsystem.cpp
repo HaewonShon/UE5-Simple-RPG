@@ -31,7 +31,7 @@ void UItemSpawnSubsystem::SpawnDropFromEnemy(FGameplayTag EnemyTag, FVector Loca
 	}
 
 	// Drop Item
-	const UItemData* ItemData = SelectRandomItem(EnemyTag);
+	UItemData* ItemData = SelectRandomItem(EnemyTag);
 	if (ItemData)
 	{
 		FItemInstance ItemInstance;
@@ -69,7 +69,7 @@ void UItemSpawnSubsystem::SpawnDropFromEnemy(FGameplayTag EnemyTag, FVector Loca
 
 void UItemSpawnSubsystem::SpawnItem(const FItemInstance& ItemInstance, FVector Location)
 {
-	if (ItemInstance.ItemData == nullptr)
+	if (ItemInstance.DataAsset == nullptr)
 	{
 		UE_LOG(LogCombatRewardSystem, Warning, TEXT("SpawnItem: Given ItemInstance is not valid"));
 		return;
@@ -80,7 +80,7 @@ void UItemSpawnSubsystem::SpawnItem(const FItemInstance& ItemInstance, FVector L
 	{
 		ItemActorInWorld->SetItem(ItemInstance);
 		ItemActorInWorld->SetPickupDelay(ItemPickupDelay);
-		UE_LOG(LogCombatRewardSystem, Verbose, TEXT("Item Actor spawned: %s"), *(ItemInstance.ItemData->DisplayName.ToString()));
+		UE_LOG(LogCombatRewardSystem, Verbose, TEXT("Item Actor spawned: %s"), *(ItemInstance.DataAsset->DisplayName.ToString()));
 	}
 	else
 	{
@@ -118,7 +118,7 @@ void UItemSpawnSubsystem::ReadLootTable()
 	});
 }
 
-const UItemData* UItemSpawnSubsystem::SelectRandomItem(FGameplayTag EnemyTag) const
+UItemData* UItemSpawnSubsystem::SelectRandomItem(FGameplayTag EnemyTag) const
 {
 	UE_LOG(LogCombatRewardSystem, Verbose, TEXT("SelectRandomItem with enemy tag: %s"), *(EnemyTag.ToString()));
 	UItemDatabaseSubsystem* ItemDB = GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();

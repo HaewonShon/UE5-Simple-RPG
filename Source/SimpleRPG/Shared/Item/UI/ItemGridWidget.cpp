@@ -24,7 +24,6 @@ void UItemGridWidget::NativeConstruct()
 					SlotWidget->OnDoubleClick.BindUObject(this, &UItemGridWidget::OnSlotDoubleClicked);
 					SlotWidget->OnHovered.BindUObject(this, &UItemGridWidget::OnSlotHovered);
 					SlotWidget->OnHoverEnded.BindUObject(this, &UItemGridWidget::OnSlotHoverEnded);
-					SlotWidget->SetIndex(h * PageWidth + w);
 				}
 			}
 		}
@@ -55,30 +54,30 @@ void UItemGridWidget::SetSlotType(ESlotType SlotType)
 			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(h * PageWidth + w));
 			if (SlotWidget)
 			{
-				SlotWidget->SlotType = SlotType;
+				SlotWidget->SetSlotAddress(FSlotAddress{ SlotType, h * PageWidth + w });
 			}
 		}
 	}
 }
 
-void UItemGridWidget::OnSlotDragBegin(FSlotInfo SlotWidget)
+void UItemGridWidget::OnSlotDragBegin(const FSlotAddress& SlotAddress)
 {
-	OnDragBegin.Broadcast(SlotWidget);
+	OnDragBegin.Broadcast(SlotAddress);
 }
 
-void UItemGridWidget::OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2)
+void UItemGridWidget::OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress)
 {
-	OnDrop.Broadcast(Slot1, Slot2);
+	OnDrop.Broadcast(SourceSlotAddress, TargetSlotAddress);
 }
 
-void UItemGridWidget::OnSlotDoubleClicked(FSlotInfo SlotWidget)
+void UItemGridWidget::OnSlotDoubleClicked(const FSlotAddress& SlotAddress)
 {
-	OnDoubleClick.Broadcast(SlotWidget);
+	OnDoubleClick.Broadcast(SlotAddress);
 }
 
-void UItemGridWidget::OnSlotHovered(FSlotInfo SlotWidget)
+void UItemGridWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
 {
-	OnHovered.Broadcast(SlotWidget);
+	OnHovered.Broadcast(SlotAddress);
 }
 
 void UItemGridWidget::OnSlotHoverEnded()

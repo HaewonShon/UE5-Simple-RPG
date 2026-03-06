@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Shared/Common/SlotTypes.h"
-#include "Shared/Common/ActionSlot.h"
+#include "Shared/Common/SlotContent.h"
 #include "SlotWidget.generated.h"
 
 DECLARE_DELEGATE(FOnSlotLeave);
@@ -21,7 +21,7 @@ class SIMPLERPG_API USlotWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	FActionSlot SlotContent;
+	FSlotContent SlotContent;
 
 	FOnSlotEvent OnDragBegin;
 	FOnSlotEvent OnDoubleClick;
@@ -31,10 +31,12 @@ public:
 
 	UDragDropOperation* DragDropOperationRef;
 
-	void UpdateSlot(const FActionSlot& NewSlotContent);
+	virtual void UpdateSlot(const FSlotContent& NewSlotContent);
 	void ClearSlot();
 	bool IsEmpty() const;
-	void SetSlotAddreess(const FSlotAddress& NewAddress);
+	void SetSlotAddress(const FSlotAddress& NewAddress);
+
+	class UTexture2D* GetIconTexture() const;
 
 protected:
 	/*** widget event overrides ***/
@@ -49,12 +51,5 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UImage> Icon;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> QuantityText;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UBorder> Background;
-
 	FSlotAddress Address;
-	FLinearColor DefaultBackgroundColor;
 };

@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "ActionableAsset.h"
-#include "ActionSlot.generated.h"
+#include "SlotContent.generated.h"
 
 USTRUCT()
-struct FActionSlot
+struct FSlotContent
 {
 	GENERATED_BODY()
 
 public:
     UPROPERTY(EditAnywhere, Category = "Slot")
-    TObjectPtr<UActionableAsset> ContentAsset;
+    TWeakObjectPtr<UActionableAsset> ContentAsset;
 
     UPROPERTY(EditAnywhere, Category = "Slot")
     int32 Quantity;
@@ -23,7 +23,8 @@ public:
 
 public:
     /*** helper functions ***/
-    FActionSlot() : ContentAsset(nullptr), Quantity(0) {}
+    FSlotContent() : ContentAsset(nullptr), Quantity(0) {}
+    FSlotContent(UActionableAsset* Asset) : ContentAsset(Asset), Quantity(1) {}
     bool IsEmpty() const { return ContentAsset == nullptr || Quantity <= 0; }
     void Execute(AActor* Executer)
     {

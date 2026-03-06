@@ -22,6 +22,6 @@ class SIMPLERPG_API IActionableInterface
 	GENERATED_BODY()
 
 public:
-	virtual bool CanExecute(AActor* Executer, const FSlotAddress& SourceAddress) const;
-	virtual void Execute(AActor* Executer, const FSlotAddress& SourceAddress);
+	virtual bool CanExecute(AActor* Executer, const FSlotAddress& SourceAddress) const = 0;
+	virtual void Execute(AActor* Executer, const FSlotAddress& SourceAddress) = 0;
 };

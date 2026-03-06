@@ -29,10 +29,10 @@ protected:
 	*	Common slot methods
 	* **********************/
 	UFUNCTION()
-	void OnSlotDoubleClicked(FSlotInfo SlotWidget);
+	void OnSlotDoubleClicked(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
-	void OnSlotHovered(FSlotInfo SlotWidget);
+	void OnSlotHovered(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
 	void OnSlotHoverEnded();

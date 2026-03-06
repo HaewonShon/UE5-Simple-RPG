@@ -38,7 +38,12 @@ struct FEquipmentDetail
 	TArray<TPair<FText, FText>> Stats;
 };
 
-using FItemDetailPayload = TVariant<FItemDetail, FEquipmentDetail>;
+struct FConsumableDetail
+{
+	TArray<TPair<FText, FText>> Effects;
+};
+
+using FItemDetailPayload = TVariant<FItemDetail, FEquipmentDetail, FConsumableDetail>;
 
 /**
  *	structure for delivery item description info
@@ -73,7 +78,7 @@ class SIMPLERPG_API UItemData : public UActionableAsset
 	GENERATED_BODY()
 
 public:
-	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override { return true; }
+	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override { return false; }
 	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override { }
 
 	virtual void PostInitProperties() override;
@@ -111,20 +116,18 @@ struct FItemInstance
 	GENERATED_BODY()
 
 	FItemInstance();
-
-	FItemInstance(const UItemData* Item, int32 StackCount = 1);
+	FItemInstance(UItemData* Item, int32 StackCount = 1);
 
 	/* Set item data for Instance */
-	bool SetItem(const UItemData* Item, int32 StackCount = 1);
+	bool SetItem(UItemData* Item, int32 StackCount = 1);
 
 	/* Combine 2 Instances */
 	bool AddStack(FItemInstance& OtherInstance);
-
 	bool RemoveStack(int32 Count);
 
+	UPROPERTY()
+	TWeakObjectPtr<UItemData> DataAsset;
+
 	FPrimaryAssetId ItemID;
-
-	const class UItemData* ItemData;
-
 	int32 StackCount;
 };

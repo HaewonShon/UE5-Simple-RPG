@@ -3,26 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "../ItemData.h"
+#include "Shared/UI/Common/SlotDragWidget.h"
 #include "ItemSlotDragWidget.generated.h"
 
 /**
  *  Visualizer for inventory slot dragging
  */
 UCLASS()
-class SIMPLERPG_API UItemSlotDragWidget : public UUserWidget
+class SIMPLERPG_API UItemSlotDragWidget : public USlotDragWidget
 {
 	GENERATED_BODY()
 public:
-    void OnDragBegin(UTexture2D* Texture);
-    void OnDragEnd();
-    void SetDesiredSize(FVector2D Size);
-
-protected:
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<class USizeBox> SizeBox;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<class UImage> ItemIcon;
 };

@@ -56,7 +56,7 @@ void UShopComponent::RequestPurchaseItem(int32 SlotIndex)
 	}
 
 	FShopItem& ShopItem = ShopItemList[SlotIndex];
-	if (ShopItem.Item.ItemData->bIsStackable)
+	if (ShopItem.Item.DataAsset->bIsStackable)
 	{
 		check(PlayerStateRef.IsValid());
 
@@ -122,7 +122,7 @@ EPurchaseResult UShopComponent::TryPurchaseItem(int32 SlotIndex, int32 Amount)
 	}
 
 	FShopItem& ShopItem = ShopItemList[SlotIndex];
-	if (!ShopItem.Item.ItemData)
+	if (!ShopItem.Item.DataAsset.IsValid())
 	{
 		UE_LOG(LogShop, Warning, TEXT("TryPurchaseItem: ShopItem in Given Index is not valid, index: %i"), SlotIndex);
 		return EPurchaseResult::Failed_NotValid;
@@ -137,7 +137,7 @@ EPurchaseResult UShopComponent::TryPurchaseItem(int32 SlotIndex, int32 Amount)
 	int32 RequiredCost = ShopItem.Price * Amount;
 
 	FItemInstance ItemToBuy;
-	ItemToBuy.SetItem(ShopItem.Item.ItemData, Amount);
+	ItemToBuy.SetItem(ShopItem.Item.DataAsset.Get(), Amount);
 
 	EPurchaseResult CanPurchaseResult = CanPurchaseItem(ItemToBuy, RequiredCost);
 	if (CanPurchaseResult != EPurchaseResult::Success)
@@ -213,9 +213,9 @@ FItemDescription UShopComponent::GetItemDescription(int32 SlotIndex) const
 	if (SlotIndex >= 0 && SlotIndex < ShopItemList.Num())
 	{
 		const FItemInstance& Item = ShopItemList[SlotIndex].Item;
-		if (Item.ItemData)
+		if (Item.DataAsset.IsValid())
 		{
-			FItemDescription Description = Item.ItemData->BuildDescriptionData();
+			FItemDescription Description = Item.DataAsset->BuildDescriptionData();
 			Description.Price = FText::Format(FText::FromString(TEXT("Buy price: {0}G")), ShopItemList[SlotIndex].Price);
 			return Description;
 		}

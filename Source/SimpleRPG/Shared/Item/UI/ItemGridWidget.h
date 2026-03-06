@@ -8,8 +8,8 @@
 #include "ItemGridWidget.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnGridSlotLeave);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnGridSlotEvent, FSlotInfo);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGridSlotDrop, FSlotInfo, FSlotInfo);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGridSlotEvent, const FSlotAddress&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGridSlotDrop, const FSlotAddress&, const FSlotAddress&);
 
 /**
  *		A Common widget to display item grid.
@@ -35,16 +35,16 @@ public:
 protected:
 	/** Slot Events **/
 	UFUNCTION()
-	void OnSlotDragBegin(FSlotInfo SlotWidget);
+	void OnSlotDragBegin(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
-	void OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2);
+	void OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress);
 
 	UFUNCTION()
-	void OnSlotDoubleClicked(FSlotInfo SlotWidget);
+	void OnSlotDoubleClicked(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
-	void OnSlotHovered(FSlotInfo SlotWidget);
+	void OnSlotHovered(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
 	void OnSlotHoverEnded();
@@ -56,7 +56,7 @@ protected:
 	int32 PageHeight;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
-	TSubclassOf<class UItemSlotWidget> SlotWidgetClass;
+	TSubclassOf<class USlotWidget> SlotWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	TSubclassOf<class UItemSlotDragWidget> SlotVisualWidgetClass;

@@ -5,7 +5,7 @@
 
 bool FInventorySlot::IsEmpty() const
 {
-	return Item.ItemData == nullptr;
+	return !Item.DataAsset.IsValid();
 }
 
 FInventoryPage::FInventoryPage()
@@ -36,15 +36,13 @@ bool FInventoryPage::IsSlotEmpty(int32 SlotIndex) const
 
 bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 {
-	if (!ItemInstance.ItemData->bIsStackable && !HasEmptySlot())
+	if (!ItemInstance.DataAsset->bIsStackable && !HasEmptySlot())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item"));
 		return false;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item1"));
-
-	if (ItemInstance.ItemData->bIsStackable)
+	if (ItemInstance.DataAsset->bIsStackable)
 	{
 		// If stackable slot exist, place it first.
 		for (FInventorySlot& Slot : Slots)
@@ -58,15 +56,13 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 				} 
 			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item2"));
 
 		// place left items in empty slotss
 		for (FInventorySlot& Slot : Slots)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item3"));
 			if (Slot.IsEmpty())
 			{
-				Slot.Item.SetItem(ItemInstance.ItemData, FMath::Min(ItemInstance.ItemData->MaxStackSize, ItemInstance.StackCount));
+				Slot.Item.SetItem(ItemInstance.DataAsset.Get(), FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.StackCount));
 				++CountFilledSlot;
 
 				ItemInstance.StackCount -= Slot.Item.StackCount;
@@ -84,8 +80,8 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 		{
 			if (Slot.IsEmpty())
 			{
-				Slot.Item.SetItem(ItemInstance.ItemData,
-					FMath::Min(ItemInstance.ItemData->MaxStackSize, ItemInstance.StackCount));
+				Slot.Item.SetItem(ItemInstance.DataAsset.Get(),
+					FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.StackCount));
 				++CountFilledSlot;
 
 				ItemInstance.StackCount -= Slot.Item.StackCount;
@@ -101,19 +97,19 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 
 bool FInventoryPage::CanAddItem(FItemInstance Item) const
 {
-	if (!Item.ItemData->bIsStackable && !HasEmptySlot())
+	if (!Item.DataAsset->bIsStackable && !HasEmptySlot())
 	{
 		return false;
 	}
 
-	if (Item.ItemData->bIsStackable)
+	if (Item.DataAsset->bIsStackable)
 	{
 		// If stackable slot exist, allocate possible max count first.
 		for (const FInventorySlot& Slot : Slots)
 		{
 			if (!Slot.IsEmpty() && Item.ItemID == Slot.Item.ItemID)
 			{
-				Item.StackCount -= (Item.ItemData->MaxStackSize - Slot.Item.StackCount); 
+				Item.StackCount -= (Item.DataAsset->MaxStackSize - Slot.Item.StackCount);
 				if (Item.StackCount == 0)
 				{
 					return true;
@@ -126,7 +122,7 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 		{
 			if (Slot.IsEmpty())
 			{
-				Item.StackCount -= Item.ItemData->MaxStackSize;
+				Item.StackCount -= Item.DataAsset->MaxStackSize;
 				if (Item.StackCount <= 0)
 				{
 					return true;
@@ -141,7 +137,7 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 		{
 			if (Slot.IsEmpty())
 			{
-				Item.StackCount -= Item.ItemData->MaxStackSize;
+				Item.StackCount -= Item.DataAsset->MaxStackSize;
 				if (Item.StackCount <= 0)
 				{
 					return true;

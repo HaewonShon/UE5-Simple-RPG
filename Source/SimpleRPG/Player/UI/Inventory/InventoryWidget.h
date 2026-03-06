@@ -35,19 +35,19 @@ protected:
 	void OnCurrentPageSort();
 
 	UFUNCTION()
-	void OnSlotDragBegin(FSlotInfo SlotWidget);
+	void OnSlotDragBegin(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
-	void OnSlotsSwapped(FSlotInfo Slot1, FSlotInfo Slot2);
+	void OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress);
 
 	UFUNCTION()
-	void OnItemDiscarded(FSlotInfo SlotWidget);
+	void OnItemDiscarded(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
-	void OnItemUsed(FSlotInfo SlotWidget);
+	void OnItemUsed(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
-	void OnSlotHovered(FSlotInfo SlotWidget);
+	void OnSlotHovered(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
 	void OnSlotHoverEnded();

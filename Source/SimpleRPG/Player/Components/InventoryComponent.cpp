@@ -51,7 +51,7 @@ void UInventoryComponent::SetAbilitySystemComponentRef(UAbilitySystemComponent* 
 
 bool UInventoryComponent::CanAddItem(FItemInstance ItemInstance) const
 {
-	if (!ItemInstance.ItemData)
+	if (!ItemInstance.DataAsset.IsValid())
 	{
 		UE_LOG(LogInventory, Warning, TEXT("AddItem: Item is not valid"));
 		return false;
@@ -62,7 +62,7 @@ bool UInventoryComponent::CanAddItem(FItemInstance ItemInstance) const
 
 bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 {
-	if (!ItemInstance.ItemData)
+	if (!ItemInstance.DataAsset.IsValid())
 	{
 		UE_LOG(LogInventory, Warning, TEXT("AddItem: Item is not valid"));
 		return false;
@@ -168,7 +168,7 @@ bool UInventoryComponent::AddRewardItems(const TArray<struct FItemReward>& Rewar
 
 	for (const FItemReward& Reward : RewardItems)
 	{
-		const UItemData* ItemData = ItemDB->Get(Reward.ItemId);
+		UItemData* ItemData = ItemDB->Get(Reward.ItemId);
 
 		if (ItemData->bIsStackable)
 		{
@@ -209,7 +209,7 @@ void UInventoryComponent::TryEquipItem(int32 SlotIndex, EEquipmentType Equipment
 void UInventoryComponent::TryEquipItem(int32 SlotIndex)
 {
 	const FItemInstance& EquipmentItem = InventoryPage.GetItemInstance(SlotIndex);
-	EEquipmentType Type = Cast<UEquipmentItemData>(EquipmentItem.ItemData)->EquipmentType;
+	EEquipmentType Type = Cast<UEquipmentItemData>(EquipmentItem.DataAsset)->EquipmentType;
 	TryEquipItem(SlotIndex, Type);
 }
 
@@ -226,7 +226,7 @@ void UInventoryComponent::TryRemoveEquipment(EEquipmentType EquipmentType)
 	}
 }
 
-const FInventoryPage& UInventoryComponent::GetPage() const
+FInventoryPage& UInventoryComponent::GetPage()
 {
 	return InventoryPage;
 }
@@ -241,10 +241,10 @@ FItemDescription UInventoryComponent::GetItemDescription(int32 SlotIndex)
 	const FInventorySlot& Slot = InventoryPage.Slots[SlotIndex];
 	if (!Slot.IsEmpty())
 	{
-		FItemDescription Description = Slot.Item.ItemData->BuildDescriptionData();
+		FItemDescription Description = Slot.Item.DataAsset->BuildDescriptionData();
 		if(GetCurrentMode() == EInventoryMode::Shop)
 		{ 
-			Description.Price = FText::Format(FText::FromString(TEXT("Sell price: {0}G")), Slot.Item.ItemData->SellPrice);
+			Description.Price = FText::Format(FText::FromString(TEXT("Sell price: {0}G")), Slot.Item.DataAsset->SellPrice);
 		}
 		return Description;
 	}
@@ -256,7 +256,7 @@ FItemDescription UInventoryComponent::GetItemDescription(EEquipmentType Equipmen
 	const FInventorySlot& Slot = GetEquipmentSlot(EquipmentType);
 	if (!Slot.IsEmpty())
 	{
-		return Slot.Item.ItemData->BuildDescriptionData();
+		return Slot.Item.DataAsset->BuildDescriptionData();
 	}
 	return FItemDescription();
 }
@@ -290,13 +290,13 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 
 bool UInventoryComponent::CanEquipItem(const FItemInstance& Item, EEquipmentType EquipmentType)
 {
-	if (Item.ItemData == nullptr)
+	if (Item.DataAsset == nullptr)
 	{
 		return true;
 	}
 
 	// Test equipment type
-	if (const UEquipmentItemData* Equipment = Cast<UEquipmentItemData>(Item.ItemData))
+	if (const UEquipmentItemData* Equipment = Cast<UEquipmentItemData>(Item.DataAsset))
 	{
 		if (Equipment->EquipmentType == EquipmentType)
 		{
@@ -338,7 +338,7 @@ void UInventoryComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 
 	FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(EquipmentGE, 1.0f, EffectContext);
 	const FItemInstance& ItemInstance = EquipmentSlots[EquipmentType].Slot.Item;
-	const UEquipmentItemData* EquipmentData = Cast<UEquipmentItemData>(ItemInstance.ItemData);
+	const UEquipmentItemData* EquipmentData = Cast<UEquipmentItemData>(ItemInstance.DataAsset);
 	if (!SpecHandle.IsValid() || !EquipmentData)
 	{
 		UE_LOG(LogInventory, Warning, TEXT("Equipment SpecHandle is not valid"));

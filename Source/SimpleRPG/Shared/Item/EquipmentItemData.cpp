@@ -2,6 +2,30 @@
 
 
 #include "EquipmentItemData.h"
+#include "Player/Components/InventoryComponent.h"
+//#include "Player/Components/EquipmentComponent.h"
+
+bool UEquipmentItemData::CanExecute(AActor* Executer, const FSlotAddress& Address) const
+{
+	return false;
+}
+
+void UEquipmentItemData::Execute(AActor* Executer, const FSlotAddress& Address)
+{
+	// request equip from inventory
+	if (Address.ContainerType == ESlotType::Storage)
+	{
+		if (UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>())
+		{
+			//Inventory->RequestEquipment();
+		}
+	}
+	// request unequip from equipment
+	else
+	{
+
+	}
+}
 
 FItemDescription UEquipmentItemData::BuildDescriptionData() const
 {

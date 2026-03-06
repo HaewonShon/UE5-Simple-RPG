@@ -9,36 +9,22 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "SlotDragDropOp.h"
 
-void USlotWidget::UpdateSlot(const FActionSlot& NewSlotContent)
+void USlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 {
 	SlotContent = NewSlotContent;
+	SetSlotAddress(SlotContent.SlotAddress);
 
 	Icon->SetBrushFromTexture(SlotContent.ContentAsset->Icon.Get());
 	Icon->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 1.f));
-
-	if (SlotContent.Quantity > 1)
-	{
-		QuantityText->SetText(FText::AsNumber(SlotContent.Quantity));
-	}
-	else
-	{
-		QuantityText->SetText(FText::GetEmpty());
-	}
-
-	/* Background color setting
-	UUISubsystem* UISubsystem = GetOwningLocalPlayer()->GetSubsystem<UUISubsystem>();
-	const UItemRarityColorData* ColorData = UISubsystem->GetItemRarityColorData();
-	Background->SetBrushColor(ColorData->GetColorForRarity(Item.ItemData->Rarity)); */
 
 	this->InvalidateLayoutAndVolatility(); // Refresh InvalidationBox cache
 }
 
 void USlotWidget::ClearSlot()
 {
-	SlotContent = FActionSlot();
+	SlotContent = FSlotContent();
 	Icon->SetBrushFromTexture(nullptr);
 	Icon->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
-	QuantityText->SetText(FText());
 }
 
 bool USlotWidget::IsEmpty() const
@@ -46,7 +32,7 @@ bool USlotWidget::IsEmpty() const
 	return SlotContent.IsEmpty();
 }
 
-void USlotWidget::SetSlotAddreess(const FSlotAddress& NewAddress)
+void USlotWidget::SetSlotAddress(const FSlotAddress& NewAddress)
 {
 	Address = NewAddress;
 }
@@ -54,7 +40,6 @@ void USlotWidget::SetSlotAddreess(const FSlotAddress& NewAddress)
 void USlotWidget::NativeConstruct()
 {
 	ClearSlot();
-	DefaultBackgroundColor = Background->GetBrushColor();
 }
 
 FReply USlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -113,6 +98,7 @@ FReply USlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, 
 
 void USlotWidget::NativeOnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnMouseEnter Detected"));
 	Super::NativeOnMouseEnter(MyGeometry, MouseEvent);
 
 	if (IsEmpty())
@@ -130,4 +116,9 @@ void USlotWidget::NativeOnMouseLeave(const FPointerEvent& MouseEvent)
 		return;
 	}
 	OnHoverEnded.ExecuteIfBound();
+}
+
+UTexture2D* USlotWidget::GetIconTexture() const
+{
+	return Cast<UTexture2D>(Icon->GetBrush().GetResourceObject());
 }
