@@ -30,6 +30,7 @@ public:
 	void ToggleInventory();
 	void RequestRemoveWidget(EWidgetLayer Layer, UUserWidget* Widget);
 
+	class UBackdropWidget* GetBackdropWidget() { return BackdropWidget; }
 	class UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return ItemDescriptionWidget; }
 
@@ -41,6 +42,10 @@ private:
 	/************************************************
 	***    Root widget members
 	************************************************/
+
+	UPROPERTY(meta = (Bindwidget))
+	TObjectPtr<class UBackdropWidget> BackdropWidget;
+
 	UPROPERTY(meta = (Bindwidget))
 	TObjectPtr<class UOverlay> HUDLayer;
 

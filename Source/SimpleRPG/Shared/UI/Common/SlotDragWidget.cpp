@@ -21,3 +21,9 @@ void USlotDragWidget::SetDesiredSize(FVector2D Size)
 	SizeBox->SetWidthOverride(Size.X);
 	SizeBox->SetHeightOverride(Size.Y);
 }
+
+void USlotDragWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	this->SetVisibility(ESlateVisibility::HitTestInvisible);
+}

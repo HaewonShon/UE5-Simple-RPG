@@ -43,6 +43,8 @@ void UItemSlotWidget::ClearItem()
 
 void UItemSlotWidget::NativeConstruct()
 {
+	Super::NativeConstruct();
+
 	DefaultBackgroundColor = Background->GetBrushColor();
 	ClearItem();
 }

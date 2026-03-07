@@ -90,9 +90,6 @@ protected:
 	TObjectPtr<class UItemGridWidget> GridWidget;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UBackdropWidget> BackdropWidget;
-
-	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInvalidationBox> InvalidationBox;
 
 	UPROPERTY(meta = (BindWidget))

@@ -61,6 +61,11 @@ void USlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDragDetected Detected"));
 
+	if (SlotContent.IsEmpty())
+	{
+		return;
+	}
+
 	USlotDragDropOp* DragDropOp = Cast<USlotDragDropOp>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDragDropOp::StaticClass()));
 	DragDropOp->SlotAddress = this->Address;
 	OutOperation = DragDropOp;

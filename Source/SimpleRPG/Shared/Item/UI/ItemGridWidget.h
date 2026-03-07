@@ -22,7 +22,7 @@ class SIMPLERPG_API UItemGridWidget : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 
-	class UItemSlotWidget* GetSlotAt(int32 SlotIndex);
+	class USlotWidget* GetSlotAt(int32 SlotIndex);
 	TArray<UWidget*> GetAllSlots();
 	void SetSlotType(ESlotType Type);
 

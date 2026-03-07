@@ -88,7 +88,11 @@ void URootWidget::NativeConstruct()
 	AddWidgetToLayer(EWidgetLayer::HUD, HUDWidgetClass, true, true);
 
 	check(InventoryWidgetClass);
-	InventoryWidget = Cast<UInventoryWidget>(AddWidgetToLayer(EWidgetLayer::Menu, InventoryWidgetClass, true, true));
+	InventoryWidget = Cast<UInventoryWidget>(AddWidgetToLayer(EWidgetLayer::Menu, InventoryWidgetClass, false, true));
+	InventoryWidget->BindItemDiscardDelegate(BackdropWidget);
+	UOverlaySlot* InventoryWidgetSlot = Cast<UOverlaySlot>(InventoryWidget->Slot);
+	InventoryWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
+	InventoryWidgetSlot->SetPadding(FMargin(0.f, 0.f, 100.f, 0.f));
 	ToggleInventory();
 
 	check(ItemDescriptionWidgetClass);

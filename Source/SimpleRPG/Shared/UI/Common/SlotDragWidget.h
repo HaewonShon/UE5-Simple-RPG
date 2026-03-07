@@ -20,6 +20,8 @@ public:
     void SetDesiredSize(FVector2D Size);
 
 protected:
+    virtual void NativeConstruct() override;
+
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<class USizeBox> SizeBox;
 

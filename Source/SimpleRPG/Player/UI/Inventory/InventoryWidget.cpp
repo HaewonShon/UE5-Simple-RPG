@@ -82,7 +82,6 @@ void UInventoryWidget::NativeConstruct()
 		UE_LOG(LogTemp, Warning, TEXT("Failed to create SlotVisualWidget"));
 	}
 
-	BindItemDiscardDelegate(BackdropWidget);
 	//CloseButton->OnClicked.AddDynamic(this, &UInventoryWidget::OnCloseButtonClicked);
 }
 
@@ -119,7 +118,7 @@ void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
 
 void UInventoryWidget::OnSlotDragBegin(const FSlotAddress& SlotAddress)
 {
-	UItemSlotWidget* SlotWidget = GridWidget->GetSlotAt(SlotAddress.SlotIndex);
+	USlotWidget* SlotWidget = GridWidget->GetSlotAt(SlotAddress.SlotIndex);
 	if (!SlotWidget)
 	{
 		UE_LOG(LogInventory, Warning, TEXT("Failed to cast InventorySlotWidget"));
@@ -168,7 +167,7 @@ void UInventoryWidget::OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, con
 
 void UInventoryWidget::OnItemDiscarded(const FSlotAddress& SlotAddress)
 {
-	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemDiscard %i"), SlotAddress.SlotIndex);
+	UE_LOG(LogInventory, Log, TEXT("Widget OnItemDiscard %i"), SlotAddress.SlotIndex);
 	InventoryComponentRef->RemoveItem(SlotAddress.SlotIndex, true);
 }
 

@@ -15,7 +15,7 @@ void UItemGridWidget::NativeConstruct()
 		{
 			for (int32 w = 0; w < PageWidth; ++w)
 			{
-				UItemSlotWidget* SlotWidget = CreateWidget<UItemSlotWidget>(GetOwningPlayer(), SlotWidgetClass);
+				USlotWidget* SlotWidget = CreateWidget<USlotWidget>(GetOwningPlayer(), SlotWidgetClass);
 				SlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
 				if (SlotWidget)
 				{
@@ -30,14 +30,14 @@ void UItemGridWidget::NativeConstruct()
 	}
 }
 
-UItemSlotWidget* UItemGridWidget::GetSlotAt(int32 SlotIndex)
+USlotWidget* UItemGridWidget::GetSlotAt(int32 SlotIndex)
 {
 	if (SlotIndex < 0 || SlotIndex >= PageWidth * PageHeight)
 	{
 		return nullptr;
 	}
 
-	return Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(SlotIndex));
+	return Cast<USlotWidget>(SlotGridPanel->GetChildAt(SlotIndex));
 }
 
 TArray<UWidget*> UItemGridWidget::GetAllSlots()
@@ -51,7 +51,7 @@ void UItemGridWidget::SetSlotType(ESlotType SlotType)
 	{
 		for (int32 w = 0; w < PageWidth; ++w)
 		{
-			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(SlotGridPanel->GetChildAt(h * PageWidth + w));
+			USlotWidget* SlotWidget = Cast<USlotWidget>(SlotGridPanel->GetChildAt(h * PageWidth + w));
 			if (SlotWidget)
 			{
 				SlotWidget->SetSlotAddress(FSlotAddress{ SlotType, h * PageWidth + w });
