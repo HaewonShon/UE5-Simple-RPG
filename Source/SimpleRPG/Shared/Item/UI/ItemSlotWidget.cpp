@@ -35,8 +35,7 @@ void UItemSlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 
 void UItemSlotWidget::ClearItem()
 {
-	Icon->SetBrushFromTexture(nullptr);
-	Icon->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
+	this->ClearSlot();
 	QuantityText->SetText(FText());
 	Background->SetBrushColor(DefaultBackgroundColor);
 }

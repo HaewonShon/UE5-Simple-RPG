@@ -25,7 +25,7 @@ public:
     /*** helper functions ***/
     FSlotContent() : ContentAsset(nullptr), Quantity(0) {}
     FSlotContent(UActionableAsset* Asset) : ContentAsset(Asset), Quantity(1) {}
-    bool IsEmpty() const { return ContentAsset == nullptr || Quantity <= 0; }
+    inline bool IsEmpty() const { return ContentAsset == nullptr || Quantity <= 0; }
     void Execute(AActor* Executer)
     {
         if (!IsEmpty())
