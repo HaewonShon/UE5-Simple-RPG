@@ -31,6 +31,11 @@ void UUISubsystem::ToggleInventory()
 	RootWidget->ToggleInventory();
 }
 
+void UUISubsystem::ToggleCharacterInfo()
+{
+	RootWidget->ToggleCharacterInfo();
+}
+
 UQuantityConfirmationWidget* UUISubsystem::RequestCreateQuantityWidget()
 {
 	UQuantityConfirmationWidget* Widget = Cast<UQuantityConfirmationWidget>(AddWidgetToLayer(EWidgetLayer::System,

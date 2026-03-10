@@ -6,6 +6,7 @@
 #include "Components/InventoryComponent.h"
 #include "Components/CurrencyComponent.h"
 #include "Components/LevelComponent.h"
+#include "Components/EquipmentComponent.h"
 #include "Interaction/Quest/QuestManagerComponent.h"
 #include "Shared/UI/UISubsystem.h"
 
@@ -19,12 +20,13 @@ ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 	QuestManagerComponent = CreateDefaultSubobject<UQuestManagerComponent>(TEXT("QuestManagerComponent"));
 	CurrencyComponent = CreateDefaultSubobject<UCurrencyComponent>(TEXT("CurrencyComponent"));
 	LevelComponent = CreateDefaultSubobject<ULevelComponent>(TEXT("LevelComponent"));
+	EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
 }
 
 void ASimpleRPGPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
-	InventoryComponent->SetAbilitySystemComponentRef(AbilitySystemComponent);
+	EquipmentComponent->SetAbilitySystemComponentRef(AbilitySystemComponent);
 	QuestManagerComponent->SetInventoryComponentRef(InventoryComponent);
 }
 

@@ -26,7 +26,6 @@ USTRUCT(BlueprintType)
 struct FInventorySlot
 {
 	GENERATED_BODY()
-
 	bool IsEmpty() const;
 
 	FItemInstance Item;

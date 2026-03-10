@@ -4,7 +4,6 @@
 #include "InventoryWidget.h"
 #include "BackdropWidget.h"
 #include "Shared/Item/UI/ItemSlotWidget.h"
-#include "Shared/Item/UI/ItemSlotDragWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
 #include "Shared/Item/UI/ItemGridWidget.h"
 
@@ -12,7 +11,8 @@
 #include "Components/InvalidationBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
-#include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
+
+//#include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Misc/OutputDeviceDebug.h"
 
@@ -25,61 +25,29 @@ void UInventoryWidget::NativeConstruct()
 
 	GridWidget->SetSlotType(ESlotType::Storage);
 
-	GridWidget->OnDragBegin.AddUObject(this, &UInventoryWidget::OnSlotDragBegin);
-	GridWidget->OnDoubleClick.AddUObject(this, &UInventoryWidget::OnItemUsed);
+	//GridWidget->OnDragBegin.AddUObject(this, &UInventoryWidget::OnSlotDragBegin);
+	//GridWidget->OnDoubleClick.AddUObject(this, &UInventoryWidget::OnItemUsed);
 	GridWidget->OnHovered.AddUObject(this, &UInventoryWidget::OnSlotHovered);
 	GridWidget->OnDrop.AddUObject(this, &UInventoryWidget::OnSlotsSwapped);
 	GridWidget->OnHoverEnded.AddUObject(this, &UInventoryWidget::OnSlotHoverEnded);
 
-	// Equipment Slot Setup
-	/*{
-		EquipmentSlotMap.Add({ ESlotType::Helmet, HelmetSlot.Get() });
-		EquipmentSlotMap.Add({ ESlotType::Chest, ChestSlot.Get() });
-		EquipmentSlotMap.Add({ ESlotType::Pants, PantsSlot.Get() });
-		EquipmentSlotMap.Add({ ESlotType::Boots, BootsSlot.Get() });
-		EquipmentSlotMap.Add({ ESlotType::Weapon, WeaponSlot.Get() });
-
-		for(ESlotType SlotType : TEnumRange<ESlotType>())
-		{
-			if (SlotType == ESlotType::Storage || SlotType == ESlotType::Shop) continue;
-
-			UItemSlotWidget* SlotWidget = EquipmentSlotMap[SlotType];
-			SlotWidget->SlotType = SlotType;
-			SlotWidget->OnDragBegin.BindUObject(this, &UInventoryWidget::OnSlotDragBegin);
-			SlotWidget->OnDrop.BindUObject(this, &UInventoryWidget::OnSlotsSwapped);
-			SlotWidget->OnDoubleClick.BindUObject(this, &UInventoryWidget::OnItemUsed);
-			SlotWidget->OnHovered.BindUObject(this, &UInventoryWidget::OnSlotHovered);
-			SlotWidget->OnHoverEnded.BindUObject(this, &UInventoryWidget::OnSlotHoverEnded);
-		}
-	}*/
-
 	// Init component-related
 	if (ASimpleRPGPlayerState* PlayerState = GetOwningPlayerState<ASimpleRPGPlayerState>())
 	{
-		InventoryComponentRef = PlayerState->GetInventoryComponent();
+		InventoryComponentRef = PlayerState->GetComponentByClass<UInventoryComponent>();
 		check(InventoryComponentRef.IsValid());
 
-		InventoryComponentRef->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::UpdateContents);
-		InventoryComponentRef->OnEquipmentContentChanged.BindUObject(this, &UInventoryWidget::UpdateEquipmentSlotWidgets);
-		UE_LOG(LogInventory, Log, TEXT("Inventory Component bound to ui"));
-		
+		InventoryComponentRef->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::UpdateContents);		
 		OnNativeVisibilityChanged.AddUObject(this, &UInventoryWidget::OnInventoryToggled);
 
 		if (UCurrencyComponent* CurrencyComponent = PlayerState->GetComponentByClass<UCurrencyComponent>())
 		{
 			CurrencyComponent->OnGoldAmountChanged.AddUObject(this, &UInventoryWidget::UpdateGoldAmount);
 		}
-	}
-
-	// Inventory Widget Initialization
-	SlotVisualWidget = CreateWidget<UItemSlotDragWidget>(GetOwningPlayer(), SlotVisualWidgetClass);
-	if (SlotVisualWidget)
-	{
-		SlotVisualWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to create SlotVisualWidget"));
+		else
+		{
+			UE_LOG(LogInventory, Warning, TEXT("Failed to get currency component from playerstate"));
+		}
 	}
 
 	//CloseButton->OnClicked.AddDynamic(this, &UInventoryWidget::OnCloseButtonClicked);
@@ -116,30 +84,6 @@ void UInventoryWidget::OnInventoryToggled(ESlateVisibility ChangedVisibility)
 	}
 }
 
-void UInventoryWidget::OnSlotDragBegin(const FSlotAddress& SlotAddress)
-{
-	USlotWidget* SlotWidget = GridWidget->GetSlotAt(SlotAddress.SlotIndex);
-	if (!SlotWidget)
-	{
-		UE_LOG(LogInventory, Warning, TEXT("Failed to cast InventorySlotWidget"));
-		return;
-	}
-
-	UDragDropOperation*& DragOperation = SlotWidget->DragDropOperationRef;
-	if (DragOperation)
-	{
-		DragOperation->DefaultDragVisual = SlotVisualWidget;
-		SlotVisualWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		SlotVisualWidget->OnDragBegin(SlotWidget->GetIconTexture());
-		SlotVisualWidget->SetDesiredSize(FVector2D{64.f, 64.f});
-
-	}
-	else
-	{
-		UE_LOG(LogInventory, Warning, TEXT("DragOperation not valid"));
-	}
-}
-
 void UInventoryWidget::OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress)
 {
 	if (InventoryComponentRef->GetCurrentMode() == EInventoryMode::Shop)
@@ -151,16 +95,14 @@ void UInventoryWidget::OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, con
 	}
 	else
 	{
-		// equipment -> inventory
-		if (SourceSlotAddress.ContainerType != ESlotType::Storage)
-		{
-			return;
-		}
-		else
+		if (SourceSlotAddress.ContainerType == ESlotType::Storage)
 		{
 			InventoryComponentRef->SwapItems(SourceSlotAddress.SlotIndex, TargetSlotAddress.SlotIndex);
 		}
-		
+		else if (SourceSlotAddress.ContainerType == ESlotType::Equipment)
+		{
+			InventoryComponentRef->RequestRemoveEquipment(SourceSlotAddress.SlotIndex, TargetSlotAddress.SlotIndex);
+		}
 		UpdateCurrentPageContents();
 	}	
 }
@@ -169,25 +111,6 @@ void UInventoryWidget::OnItemDiscarded(const FSlotAddress& SlotAddress)
 {
 	UE_LOG(LogInventory, Log, TEXT("Widget OnItemDiscard %i"), SlotAddress.SlotIndex);
 	InventoryComponentRef->RemoveItem(SlotAddress.SlotIndex, true);
-}
-
-void UInventoryWidget::OnItemUsed(const FSlotAddress& SlotAddress)
-{
-	UE_LOG(LogInventory, Verbose, TEXT("Widget OnItemUsed %i"), SlotAddress.SlotIndex);
-
-	if (SlotAddress.ContainerType != ESlotType::Storage)
-	{
-		//InventoryComponentRef->TryRemoveEquipment(ConvertSlotTypeToEquipmentType(SlotWidget.SlotType));
-	}
-	// TODO : Re-write equipment equip logic
-	//else if (SelectedPage == EInventoryCategory::Equipment)
-	//{
-	//	InventoryComponentRef->TryEquipItem(SlotWidget.SlotIndex);
-	//}
-	else
-	{
-		InventoryComponentRef->UseItem(SlotAddress.SlotIndex);
-	}
 }
 
 void UInventoryWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
@@ -222,29 +145,6 @@ void UInventoryWidget::UpdateContents()
 	{
 		UpdateCurrentPageContents();
 	}
-}
-
-void UInventoryWidget::UpdateEquipmentSlotWidgets()
-{
-	/*EEquipmentType Types[5] = 
-		{ EEquipmentType::Helmet, EEquipmentType::Chest, EEquipmentType::Pants, EEquipmentType::Boots, EEquipmentType::Weapon };
-	ESlotType SlotTypes[5] =
-		{ ESlotType::Helmet, ESlotType::Chest, ESlotType::Pants, ESlotType::Boots, ESlotType::Weapon };
-
-	for (int32 i = 0; i < 5; ++i)
-	{
-		const FInventorySlot& ItemSlot = InventoryComponentRef->GetEquipmentSlot(Types[i]);
-		UItemSlotWidget* SlotWidget = EquipmentSlotMap[SlotTypes[i]];
-
-		if (!ItemSlot.IsEmpty())
-		{
-			SlotWidget->SetItem(ItemSlot.Item);
-		}
-		else
-		{
-			SlotWidget->ClearItem();
-		}
-	}*/
 }
 
 void UInventoryWidget::UpdateCurrentPageContents()

@@ -35,16 +35,10 @@ protected:
 	void OnCurrentPageSort();
 
 	UFUNCTION()
-	void OnSlotDragBegin(const FSlotAddress& SlotAddress);
-
-	UFUNCTION()
 	void OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress);
 
 	UFUNCTION()
 	void OnItemDiscarded(const FSlotAddress& SlotAddress);
-
-	UFUNCTION()
-	void OnItemUsed(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
 	void OnSlotHovered(const FSlotAddress& SlotAddress);
@@ -56,9 +50,6 @@ protected:
 	/* Update Inventory manually when interface opened */
 	UFUNCTION()
 	void UpdateContents();
-
-	UFUNCTION()
-	void UpdateEquipmentSlotWidgets();
 
 	UFUNCTION()
 	void UpdateCurrentPageContents();
@@ -80,9 +71,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<class UItemSlotDragWidget> SlotVisualWidgetClass;
 
-	//UPROPERTY()
-	//TMap<ESlotType, class UItemSlotWidget*> EquipmentSlotMap;
-
 	/************************
 	*   Bind Widgets
 	*************************/
@@ -95,26 +83,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UTextBlock> GoldDisplayText;
 
-	///**** Equipment Slots ****/
-	//UPROPERTY(meta = (BindWidget))
-	//TObjectPtr<class UItemSlotWidget> HelmetSlot;
-
-	//UPROPERTY(meta = (BindWidget))
-	//TObjectPtr<class UItemSlotWidget> ChestSlot;
-
-	//UPROPERTY(meta = (BindWidget))
-	//TObjectPtr<class UItemSlotWidget> PantsSlot;
-
-	//UPROPERTY(meta = (BindWidget))
-	//TObjectPtr<class UItemSlotWidget> BootsSlot;
-
-	//UPROPERTY(meta = (BindWidget))
-	//TObjectPtr<class UItemSlotWidget> WeaponSlot;
-
-	//UPROPERTY(meta = (BindWidget))
-	//TObjectPtr<class UButton> CloseButton;
-
-
 	/************************
 	*   Other members for inventory widget
 	*************************/
@@ -122,11 +90,7 @@ protected:
 	TWeakObjectPtr<class UInventoryComponent> InventoryComponentRef;
 
 	UPROPERTY()
-	TMap<EInventoryCategory, bool> bIsPageContentChanged;
-
-	UPROPERTY()
-	TObjectPtr<class UItemSlotDragWidget> SlotVisualWidget;
-
-	UPROPERTY()
 	TWeakObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidgetRef;
+
+	bool bIsContentChanged;
 };

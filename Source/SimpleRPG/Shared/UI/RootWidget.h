@@ -28,11 +28,13 @@ public:
 		bool bFillScreen = false, bool bIsAliveAlways = false);
 
 	void ToggleInventory();
+	void ToggleCharacterInfo();
 	void RequestRemoveWidget(EWidgetLayer Layer, UUserWidget* Widget);
 
 	class UBackdropWidget* GetBackdropWidget() { return BackdropWidget; }
 	class UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return ItemDescriptionWidget; }
+	class USlotDragWidget* GetSlotDragWidget() { return SlotDragWidget; }
 
 private:
 	virtual void NativeConstruct() override;
@@ -77,14 +79,28 @@ private:
 	TSubclassOf<class UInventoryWidget> InventoryWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UCharacterInformationWidget> CharacterInfoWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UItemDescriptionWidget> ItemDescriptionWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class USlotDragWidget> SlotDragWidgetClass;
+
+	/*** Widget Ptr ***/
 	UPROPERTY()
 	TObjectPtr<class UInventoryWidget> InventoryWidget;
 
 	UPROPERTY()
+	TObjectPtr<class UCharacterInformationWidget> CharacterInfoWidget;
+
+	UPROPERTY()
 	TObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidget;
 
+	UPROPERTY()
+	TObjectPtr<class USlotDragWidget> SlotDragWidget;
+
+	/*** RootWidget components ***/
 	UPROPERTY()
 	TMap<EWidgetLayer, int32> LiveWidgetCountForLayer;
 };

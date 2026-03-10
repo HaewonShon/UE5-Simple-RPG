@@ -37,12 +37,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UInventoryComponent> InventoryComponent;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UQuestManagerComponent> QuestManagerComponent;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UCurrencyComponent> CurrencyComponent;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class ULevelComponent> LevelComponent;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UEquipmentComponent> EquipmentComponent;
 };

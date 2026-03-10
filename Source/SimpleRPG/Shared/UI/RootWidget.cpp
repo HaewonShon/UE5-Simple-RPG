@@ -8,8 +8,10 @@
 
 #include "Player/UI/SimpleRPGHUDWidget.h"
 #include "Player/UI/Inventory/InventoryWidget.h"
+#include "Player/UI/CharacterInformationWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
 #include "Shared/UI/Common/SessionWidget.h"
+#include "Shared/UI/Common/SlotDragWidget.h"
 
 UUserWidget* URootWidget::AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<UUserWidget> WidgetClass, bool bFillScreen, bool bIsAliveAlways)
 {
@@ -63,6 +65,18 @@ void URootWidget::ToggleInventory()
 	}
 }
 
+void URootWidget::ToggleCharacterInfo()
+{
+	if (CharacterInfoWidget->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		CharacterInfoWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		CharacterInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void URootWidget::RequestRemoveWidget(EWidgetLayer Layer, UUserWidget* Widget)
 {
 	UE_LOG(LogTemp, Warning, TEXT("RequestRemoveWidget"));
@@ -87,23 +101,46 @@ void URootWidget::NativeConstruct()
 	check(HUDWidgetClass);
 	AddWidgetToLayer(EWidgetLayer::HUD, HUDWidgetClass, true, true);
 
-	check(InventoryWidgetClass);
-	InventoryWidget = Cast<UInventoryWidget>(AddWidgetToLayer(EWidgetLayer::Menu, InventoryWidgetClass, false, true));
-	InventoryWidget->BindItemDiscardDelegate(BackdropWidget);
-	UOverlaySlot* InventoryWidgetSlot = Cast<UOverlaySlot>(InventoryWidget->Slot);
-	InventoryWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
-	InventoryWidgetSlot->SetPadding(FMargin(0.f, 0.f, 100.f, 0.f));
-	ToggleInventory();
+	// Inventory widget init
+	{
+		check(InventoryWidgetClass);
+		InventoryWidget = Cast<UInventoryWidget>(AddWidgetToLayer(EWidgetLayer::Menu, InventoryWidgetClass, false, true));
+		InventoryWidget->BindItemDiscardDelegate(BackdropWidget);
+		UOverlaySlot* InventoryWidgetSlot = Cast<UOverlaySlot>(InventoryWidget->Slot);
+		InventoryWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
+		InventoryWidgetSlot->SetPadding(FMargin(0.f, 0.f, 100.f, 0.f));
+		ToggleInventory();
+	}
 
-	check(ItemDescriptionWidgetClass);
-	ItemDescriptionWidget = Cast<UItemDescriptionWidget>(AddWidgetToLayer(EWidgetLayer::System, ItemDescriptionWidgetClass, false, true));
-	ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
-	UOverlaySlot* DescriptionWidgetSlot = Cast<UOverlaySlot>(ItemDescriptionWidget->Slot);
-	DescriptionWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Left);
-	DescriptionWidgetSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Top);
+	// Character info widget init
+	{
+		check(CharacterInfoWidgetClass);
+		CharacterInfoWidget = Cast<UCharacterInformationWidget>(AddWidgetToLayer(EWidgetLayer::Menu, CharacterInfoWidgetClass, false, true));
+		UOverlaySlot* CharacterInfoWidgetSlot = Cast<UOverlaySlot>(CharacterInfoWidget->Slot);
+		CharacterInfoWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Left);
+		CharacterInfoWidgetSlot->SetPadding(FMargin(0.f, 0.f, 0.f, 100.f));
+		ToggleCharacterInfo();
+	}
+
+	// Description widget init
+	{
+		check(ItemDescriptionWidgetClass);
+		ItemDescriptionWidget = Cast<UItemDescriptionWidget>(AddWidgetToLayer(EWidgetLayer::System, ItemDescriptionWidgetClass, false, true));
+		ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
+		UOverlaySlot* DescriptionWidgetSlot = Cast<UOverlaySlot>(ItemDescriptionWidget->Slot);
+		DescriptionWidgetSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Top);
+		DescriptionWidgetSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Left);
+	}
 
 	InventoryWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
-	// shop->SetDescriptionWidgetRef
+	CharacterInfoWidget->SetDescriptionWidgetRef(ItemDescriptionWidget);
+
+
+	SlotDragWidget = CreateWidget<USlotDragWidget>(GetOwningPlayer(), SlotDragWidgetClass);
+	if (SlotDragWidget)
+	{
+		SlotDragWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void URootWidget::UpdateBlockingImageStatus(EWidgetLayer Layer)

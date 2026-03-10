@@ -10,11 +10,11 @@
 UENUM()
 enum class EEquipmentType : uint8
 {
-	Weapon,
-	Helmet,
-	Chest,
-	Pants,
-	Boots,
+	Weapon = 0,
+	Helmet = 1,
+	Chest = 2,
+	Pants = 3,
+	Boots = 4,
 	Count UMETA(Hidden)
 };
 ENUM_RANGE_BY_COUNT(EEquipmentType, EEquipmentType::Count);

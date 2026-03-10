@@ -36,6 +36,7 @@ void ASimpleRPGPlayerController::BeginPlay()
 	if (UEnhancedInputComponent* EIC = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
 		EIC->BindAction(InventoryToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleInventory);
+		EIC->BindAction(CharacterInfoToggleAction, ETriggerEvent::Triggered, this, &ASimpleRPGPlayerController::ToggleCharacterInfo);
 		InputSystemRef->AddMappingContext(UIMapping, 1);
 
 #if !UE_BUILD_SHIPPING
@@ -61,6 +62,7 @@ void ASimpleRPGPlayerController::BeginPlay()
 	}
 
 	bIsInvenetoryOn = false;
+	bIsCharacterInfoOn = false;
 	OnDialogueRequested.AddUObject(this, &ASimpleRPGPlayerController::BeginDialogue);
 }
 
@@ -73,7 +75,31 @@ void ASimpleRPGPlayerController::ToggleInventory()
 {
 	UISubsystem->ToggleInventory();
 	bIsInvenetoryOn = !bIsInvenetoryOn;
-	if (bIsInvenetoryOn)
+
+	if (bIsInvenetoryOn || bIsCharacterInfoOn)
+	{
+		bShowMouseCursor = true;
+
+		FInputModeGameAndUI InputMode;
+		InputMode.SetHideCursorDuringCapture(false);
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		//InputMode.SetWidgetToFocus(InventoryWidget->GetCachedWidget());
+
+		SetInputMode(InputMode);
+	}
+	else
+	{
+		bShowMouseCursor = false;
+		SetInputMode(FInputModeGameOnly());
+	}
+}
+
+void ASimpleRPGPlayerController::ToggleCharacterInfo()
+{
+	UISubsystem->ToggleCharacterInfo();
+	bIsCharacterInfoOn = !bIsCharacterInfoOn;
+
+	if (bIsInvenetoryOn || bIsCharacterInfoOn)
 	{
 		bShowMouseCursor = true;
 

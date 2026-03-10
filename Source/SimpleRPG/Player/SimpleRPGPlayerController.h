@@ -22,6 +22,7 @@ public:
 	virtual void AddPitchInput(float Val) override;
 
 	void ToggleInventory();
+	void ToggleCharacterInfo();
 
 	FOnDialogueRequested OnDialogueRequested;
 	FOnShopOpenRequest OnShopOpenRequested;
@@ -59,12 +60,16 @@ protected:
 	class UInputAction* InventoryToggleAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	class UInputAction* CharacterInfoToggleAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* CheatMapping;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TArray<class UInputAction*> CheatAction;
 
 	bool bIsInvenetoryOn;
+	bool bIsCharacterInfoOn;
 
 	TWeakObjectPtr<class UEnhancedInputLocalPlayerSubsystem> InputSystemRef;
 

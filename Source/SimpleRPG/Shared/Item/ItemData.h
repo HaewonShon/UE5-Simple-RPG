@@ -125,6 +125,8 @@ struct FItemInstance
 	bool AddStack(FItemInstance& OtherInstance);
 	bool RemoveStack(int32 Count);
 
+	bool IsValid() const { return DataAsset.IsValid(); }
+
 	UPROPERTY()
 	TWeakObjectPtr<UItemData> DataAsset;
 

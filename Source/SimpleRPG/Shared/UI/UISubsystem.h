@@ -22,11 +22,17 @@ public:
 	UUserWidget* AddWidgetToLayer(EWidgetLayer Layer, TSubclassOf<class UUserWidget> WidgetClass, bool bFillScreen = false, bool bIsAliveAlways = false);
 	
 	void ToggleInventory();
+	void ToggleCharacterInfo();
+
+	/*** Widget Getters ***/
 	class UInventoryWidget* GetInventoryWidget() { return RootWidget->GetInventoryWidget(); }
 	class UItemDescriptionWidget* GetItemDescriptionWidget() { return RootWidget->GetItemDescriptionWidget(); }
+	class USlotDragWidget* GetSlotDragWidget() { return RootWidget->GetSlotDragWidget(); }
 
+	/*** UI Data Getters ***/
 	class UItemRarityColorData* GetItemRarityColorData() const { return ItemRarityColorDataAsset; }
 
+	/*** Create widget request functions ***/
 	class UQuantityConfirmationWidget* RequestCreateQuantityWidget();
 	void RequestDisplayMessageBox(const FText& Message);
 private:
@@ -37,6 +43,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<class URootWidget> RootWidget;
 
+	/*** UI Data Assets ***/
 	UPROPERTY()
 	TObjectPtr<class UCommonWidgetData> CommonWidgetDataAsset;
 

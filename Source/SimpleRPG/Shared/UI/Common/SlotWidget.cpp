@@ -5,9 +5,12 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Border.h"
+#include "Player/SimpleRPGPlayerState.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Shared/UI/UISubsystem.h"
 #include "SlotDragDropOp.h"
+#include "SlotDragWidget.h"
 
 void USlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 {
@@ -68,6 +71,15 @@ void USlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
 
 	USlotDragDropOp* DragDropOp = Cast<USlotDragDropOp>(UWidgetBlueprintLibrary::CreateDragDropOperation(USlotDragDropOp::StaticClass()));
 	DragDropOp->SlotAddress = this->Address;
+
+	if (UUISubsystem* UISubsystem = GetOwningLocalPlayer()->GetSubsystem<UUISubsystem>())
+	{
+		USlotDragWidget* SlotVisualWidget = UISubsystem->GetSlotDragWidget();
+		SlotVisualWidget->OnDragBegin(GetIconTexture());
+		SlotVisualWidget->SetDesiredSize(FVector2D{ 64.f, 64.f });
+		DragDropOp->DefaultDragVisual = SlotVisualWidget;
+	}
+
 	OutOperation = DragDropOp;
 
 	// Set DragDrop operation ref so Inventory Widget can set visual widget
@@ -97,7 +109,13 @@ FReply USlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, 
 	{
 		return Reply.NativeReply;
 	}
-	OnDoubleClick.ExecuteIfBound(Address);
+
+	if (SlotContent.ContentAsset.IsValid() && SlotContent.ContentAsset->CanExecute(GetOwningPlayerState<ASimpleRPGPlayerState>(), Address))
+	{
+		SlotContent.ContentAsset->Execute(GetOwningPlayerState<ASimpleRPGPlayerState>(), Address);
+	}
+
+//	OnDoubleClick.ExecuteIfBound(Address);
 	return FReply::Handled();
 }
 

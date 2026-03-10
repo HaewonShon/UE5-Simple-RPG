@@ -3,11 +3,11 @@
 
 #include "EquipmentItemData.h"
 #include "Player/Components/InventoryComponent.h"
-//#include "Player/Components/EquipmentComponent.h"
+#include "Player/Components/EquipmentComponent.h"
 
 bool UEquipmentItemData::CanExecute(AActor* Executer, const FSlotAddress& Address) const
 {
-	return false;
+	return true;
 }
 
 void UEquipmentItemData::Execute(AActor* Executer, const FSlotAddress& Address)
@@ -17,13 +17,16 @@ void UEquipmentItemData::Execute(AActor* Executer, const FSlotAddress& Address)
 	{
 		if (UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>())
 		{
-			//Inventory->RequestEquipment();
+			Inventory->RequestEquipItem(Address.SlotIndex);
 		}
 	}
 	// request unequip from equipment
 	else
 	{
-
+		if (UEquipmentComponent* Equipment = Executer->GetComponentByClass<UEquipmentComponent>())
+		{
+			Equipment->RequestRemoveEquipment(Address.SlotIndex);
+		}
 	}
 }
 
