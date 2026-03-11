@@ -55,10 +55,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Grid")
 	int32 PageHeight;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	UPROPERTY(EditAnywhere, Category = "Grid")
 	TSubclassOf<class USlotWidget> SlotWidgetClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	UPROPERTY(EditAnywhere, Category = "Grid")
 	TSubclassOf<class UItemSlotDragWidget> SlotVisualWidgetClass;
 
 	UPROPERTY(meta = (BindWidget))

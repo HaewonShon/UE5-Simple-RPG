@@ -3,29 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Shared/Item/UI/ItemSlotWidget.h"
 #include "Shared/UI/Common/SlotWidget.h"
-#include "ItemSlotWidget.generated.h"
+#include "ShopSlotWidget.generated.h"
 
 /**
- *	 Widget for each item slot in inventory.
+ * 
  */
 UCLASS()
-class SIMPLERPG_API UItemSlotWidget : public USlotWidget
+class SIMPLERPG_API UShopSlotWidget : public UItemSlotWidget
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void UpdateSlot(const FSlotContent& NewSlotContent) override;
-	virtual void ClearSlot() override;
+	void SetPrice(int32 Price);
 
 protected:
 	virtual void NativeConstruct() override;
-	
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UTextBlock> QuantityText;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UBorder> Background;
+	TObjectPtr<class UImage> SoldOutDisplayImage;
 
-	FLinearColor DefaultBackgroundColor;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> NameText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> PriceText;
 };

@@ -2,7 +2,7 @@
 
 
 #include "ItemData.h"
-
+#include "Interaction/Shop/ShopComponent.h"
 
 FItemInstance::FItemInstance()
 {
@@ -59,6 +59,18 @@ bool FItemInstance::RemoveStack(int32 Count)
 
 	StackCount -= Count;
 	return true;
+}
+
+// Common item execution logic
+void UItemData::Execute(AActor* Executer, const FSlotAddress& Address)
+{
+	if (Address.ContainerType == ESlotType::Shop)
+	{
+		if(UShopComponent* Shop = Executer->GetComponentByClass<UShopComponent>())
+		{
+			Shop->RequestPurchaseItem(Address.SlotIndex);
+		}
+	}
 }
 
 void UItemData::PostInitProperties()

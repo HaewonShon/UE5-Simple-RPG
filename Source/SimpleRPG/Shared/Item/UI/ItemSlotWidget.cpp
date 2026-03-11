@@ -33,9 +33,9 @@ void UItemSlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 	this->InvalidateLayoutAndVolatility(); // Refresh InvalidationBox cache
 }
 
-void UItemSlotWidget::ClearItem()
+void UItemSlotWidget::ClearSlot()
 {
-	this->ClearSlot();
+	Super::ClearSlot();
 	QuantityText->SetText(FText());
 	Background->SetBrushColor(DefaultBackgroundColor);
 }
@@ -45,5 +45,5 @@ void UItemSlotWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	DefaultBackgroundColor = Background->GetBrushColor();
-	ClearItem();
+	ClearSlot();
 }

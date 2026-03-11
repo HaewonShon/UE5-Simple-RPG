@@ -171,7 +171,7 @@ void ASimpleRPGPlayerController::FinishDialogue()
 void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 {
 	// create shop ui widget
-	ShopWidget = Cast<UShopWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false));
+	ShopWidget = Cast<UShopWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false, false));
 	if (ShopWidget)
 	{
 		ShopWidget->InitializeShop(ShopComponent);

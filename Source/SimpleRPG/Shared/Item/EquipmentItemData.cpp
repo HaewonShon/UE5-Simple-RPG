@@ -12,6 +12,12 @@ bool UEquipmentItemData::CanExecute(AActor* Executer, const FSlotAddress& Addres
 
 void UEquipmentItemData::Execute(AActor* Executer, const FSlotAddress& Address)
 {
+	if (Address.ContainerType == ESlotType::Shop)
+	{
+		Super::Execute(Executer, Address);
+		return;
+	}
+
 	// request equip from inventory
 	if (Address.ContainerType == ESlotType::Storage)
 	{

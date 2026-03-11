@@ -164,7 +164,7 @@ void UInventoryWidget::UpdateCurrentPageContents()
 		}
 		else
 		{
-			SlotWidget->ClearItem();
+			SlotWidget->ClearSlot();
 		}
 	}
 }

@@ -118,7 +118,7 @@ void UCharacterInformationWidget::UpdateEquipmentSlots()
 		}
 		else
 		{
-			EquipmentSlots[Index]->ClearItem();
+			EquipmentSlots[Index]->ClearSlot();
 		}
 	}
 }

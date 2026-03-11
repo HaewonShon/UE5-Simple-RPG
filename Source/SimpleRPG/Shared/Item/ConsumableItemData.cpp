@@ -12,18 +12,18 @@ bool UConsumableItemData::CanExecute(AActor* Executer, const FSlotAddress& Addre
 
 void UConsumableItemData::Execute(AActor* Executer, const FSlotAddress& Address)
 {
-	// request equip from inventory
+	if (Address.ContainerType == ESlotType::Shop)
+	{
+		Super::Execute(Executer, Address);
+		return;
+	}
+
 	if (Address.ContainerType == ESlotType::Storage)
 	{
 		if (UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>())
 		{
 			//Inventory->RequestEquipment();
 		}
-	}
-	// request unequip from equipment
-	else
-	{
-
 	}
 }
 

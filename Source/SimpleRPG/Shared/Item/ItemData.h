@@ -79,7 +79,7 @@ class SIMPLERPG_API UItemData : public UActionableAsset
 
 public:
 	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override { return false; }
-	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override { }
+	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override;
 
 	virtual void PostInitProperties() override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

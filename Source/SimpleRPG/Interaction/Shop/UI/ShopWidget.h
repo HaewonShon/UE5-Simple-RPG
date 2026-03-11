@@ -29,13 +29,13 @@ protected:
 	*	Common slot methods
 	* **********************/
 	UFUNCTION()
-	void OnSlotDoubleClicked(const FSlotAddress& SlotAddress);
-
-	UFUNCTION()
 	void OnSlotHovered(const FSlotAddress& SlotAddress);
 
 	UFUNCTION()
 	void OnSlotHoverEnded();
+	
+	UFUNCTION()
+	void OnSlotDropped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress);
 
 	UFUNCTION()
 	void OnCloseButtonClicked();
@@ -48,26 +48,22 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shop")
 	int32 PageHeight;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Shop")
-	TSubclassOf<class UItemSlotWidget> SlotWidgetClass;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UButton> CloseButton;
 	
 	/************************
 	*   Vender-related Widgets
 	*************************/
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemGridWidget> VenderSlotGridPanel;
+	TObjectPtr<class UItemGridWidget> GridWidget;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Visual")
+	TSubclassOf<class UShopSlotWidget> SlotWidgetClass;
 
 
 	/************************
 	*   Player-related Widgets
 	*************************/
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UItemGridWidget> PlayerSlotGridPanel;
+	TObjectPtr<class UInventoryWidget> InventoryWidget;
 
 	
 

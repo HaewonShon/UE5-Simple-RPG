@@ -2,52 +2,37 @@
 
 
 #include "Interaction/Shop/UI/ShopWidget.h"
+#include "Interaction/Shop/UI/ShopSlotWidget.h"
 #include "../ShopComponent.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/Button.h"
 
 #include "Shared/Item/UI/ItemSlotDragWidget.h"
 #include "Shared/Item/UI/ItemDescriptionWidget.h"
+
 #include "Blueprint/WidgetBlueprintLibrary.h" // UDragDropOperation
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Misc/OutputDeviceDebug.h"
 #include "Shared/Item/UI/ItemGridWidget.h"
+#include "Player/UI/Inventory/InventoryWidget.h"
 
 
 void UShopWidget::NativeConstruct()
 {
 	// Slot Setup
-	if (VenderSlotGridPanel && SlotWidgetClass.Get())
+	if (GridWidget && SlotWidgetClass.Get())
 	{
-		VenderSlotGridPanel->SetSlotType(ESlotType::Shop);
-
-		/*for (int32 h = 0; h < PageHeight; ++h)
-		{
-			for (int32 w = 0; w < PageWidth; ++w)
-			{
-				UItemSlotWidget* SlotWidget = CreateWidget<UItemSlotWidget>(GetOwningPlayer(), SlotWidgetClass);
-				VenderSlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
-				if (SlotWidget)
-				{
-					SlotWidget->OnDoubleClick.BindUObject(this, &UShopWidget::OnSlotDoubleClicked);
-					SlotWidget->OnHovered.BindUObject(this, &UShopWidget::OnSlotHovered);
-					SlotWidget->OnHoverEnded.BindUObject(this, &UShopWidget::OnSlotHoverEnded);
-					SlotWidget->SetIndex(h * PageWidth + w);
-					SlotWidget->SlotType = ESlotType::Shop;
-				}
-				else
-				{
-					UE_LOG(LogShop, Warning, TEXT("Failed to bind drag function."));
-				}
-			}
-		}*/
+		GridWidget->SetSlotType(ESlotType::Shop);
+		GridWidget->OnHovered.AddUObject(this, &UShopWidget::OnSlotHovered);
+		GridWidget->OnDrop.AddUObject(this, &UShopWidget::OnSlotDropped);
+		GridWidget->OnHoverEnded.AddUObject(this, &UShopWidget::OnSlotHoverEnded);
 	}
 	else
 	{
 		///UE_LOG(LogShop, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
 	}
 
-	CloseButton->OnClicked.AddDynamic(this, &UShopWidget::OnCloseButtonClicked);
+	//CloseButton->OnClicked.AddDynamic(this, &UShopWidget::OnCloseButtonClicked);
 }
 
 void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
@@ -66,40 +51,43 @@ void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
 void UShopWidget::SetDescriptionWidgetRef(UItemDescriptionWidget* DescriptionWidget)
 {
 	ItemDescriptionWidgetRef = DescriptionWidget;
+	InventoryWidget->SetDescriptionWidgetRef(DescriptionWidget);
 }
 
 void UShopWidget::UpdateShopContents()
 {
+	/*
 	const TArray<FShopItem>& ShopItemList = ShopComponentRef->GetShopItemList();
 	for(int32 Index = 0; Index < ShopItemList.Num(); ++Index)
 	{
 		const FShopItem& ShopItem = ShopItemList[Index];
 		if (ShopItem.Item.DataAsset.IsValid())
 		{
-			UItemSlotWidget* SlotWidget = Cast<UItemSlotWidget>(VenderSlotGridPanel->GetSlotAt(Index));
-			//SlotWidget->SetItem(ShopItem.Item);
+			FSlotContent Content;
+			Content.ContentAsset = ShopItem.Item.DataAsset;
+			Content.Quantity = ShopItem.Item.StackCount;
+			Content.SlotAddress = FSlotAddress(ESlotType::Shop, Index);
+
+			UShopSlotWidget* SlotWidget = Cast<UShopSlotWidget>(GridWidget->GetSlotAt(Index));
+			SlotWidget->UpdateSlot(Content);
+			SlotWidget->SetPrice(ShopItem.Price);
 		}
-	}
-}
-
-void UShopWidget::OnSlotDoubleClicked(const FSlotAddress& SlotAddress)
-{
-	// Buy Request
-	// create/push quantity confirm widget
-	// save current slot's item id for request
-	//int32 Index = SlotWidget.SlotIndex;
-
-	ShopComponentRef->RequestPurchaseItem(SlotAddress.SlotIndex);
+	}*/
 }
 
 void UShopWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
 {
-	// display item info & gold info
-	UE_LOG(LogShop, Verbose, TEXT("UShopWidget OnSlotHovered Called"));
-	//FItemDescription Description = ShopComponentRef->GetItemDescription(SlotWidget.SlotIndex);
+	const TArray<FShopItem>& ShopItemList = ShopComponentRef->GetShopItemList();
+	if (!ShopItemList[SlotAddress.SlotIndex].Item.IsValid())
+	{
+		return;
+	}
+
+	FItemDescription Description;
+	Description = ShopComponentRef->GetItemDescription(SlotAddress.SlotIndex);
 
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::HitTestInvisible);
-	//ItemDescriptionWidgetRef->SetDescription(Description);
+	ItemDescriptionWidgetRef->SetDescription(Description);
 
 	FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 	ItemDescriptionWidgetRef->SetPositionInScreen(MousePos);
@@ -109,6 +97,20 @@ void UShopWidget::OnSlotHoverEnded()
 {
 	UE_LOG(LogShop, Verbose, TEXT("UShopWidget OnSlotHoverEnded Called"));
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UShopWidget::OnSlotDropped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress)
+{
+	UE_LOG(LogShop, Verbose, TEXT("UShopWidget OnSlotDropped Called"));
+	
+	if (SourceSlotAddress.ContainerType != ESlotType::Storage)
+	{
+		return;
+	}
+	
+	UE_LOG(LogShop, Verbose, TEXT("UShopWidget OnSlotDropped Called"));
+	// TODO : Shop sell
+	// ShopComponentRef->TrySellItem()
 }
 
 void UShopWidget::OnCloseButtonClicked()

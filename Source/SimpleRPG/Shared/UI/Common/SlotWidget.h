@@ -33,7 +33,7 @@ public:
 	UDragDropOperation* DragDropOperationRef;
 
 	virtual void UpdateSlot(const FSlotContent& NewSlotContent);
-	void ClearSlot();
+	virtual void ClearSlot();
 	bool IsEmpty() const;
 	void SetSlotAddress(const FSlotAddress& NewAddress);
 
