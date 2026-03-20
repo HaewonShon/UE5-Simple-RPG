@@ -10,10 +10,10 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogShop, Log, All)
 
-DECLARE_DELEGATE(FOnShopContentChanged);
+DECLARE_MULTICAST_DELEGATE(FOnShopInteracted);
 
 UENUM()
-enum class EPurchaseResult : uint8
+enum class ETransactionResult : uint8
 {
 	Success,
 	Failed_NotValid,
@@ -61,24 +61,27 @@ public:
 	virtual FActionInfo CreateContextAction(FGameplayTag ActionTag, class ASimpleRPGPlayerState* PS);
 
 	void RequestPurchaseItem(int32 SlotIndex);
-	void ProcessPurchaseResult(EPurchaseResult Result);
-
-	EPurchaseResult TryPurchaseItem(int32 SlotIndex, int32 Count);
-	bool TrySellItem(FPrimaryAssetId ItemId, int32 Count);
+	void RequestSellItem(int32 InventorySlotIndex);
 
 	void CloseShop();
 	const TArray<FShopItem>& GetShopItemList() const;
 
 	FItemDescription GetItemDescription(int32 SlotIndex) const;
 
-	FOnShopContentChanged OnShopContentChanged;
-
+	FOnShopInteracted OnShopContentChanged;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void ProcessPurchaseResult(ETransactionResult Result);
+	ETransactionResult TryPurchaseItem(int32 SlotIndex, int32 Count);
+	ETransactionResult CanPurchaseItem(FItemInstance& Item, int32 SellingCount);
+
+	void ProcessSellResult(ETransactionResult Result);
+	ETransactionResult TrySellItem(int32 InventorySlotIndex, int32 Count);
+	ETransactionResult CanSellItem(const FItemInstance& Item, int32 SellingCount);
+
 	void ReadShopDataTable();
-	EPurchaseResult CanPurchaseItem(FItemInstance& Item, int32 SellingCount);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Shop")
 	UDataTable* ShopDataTable;

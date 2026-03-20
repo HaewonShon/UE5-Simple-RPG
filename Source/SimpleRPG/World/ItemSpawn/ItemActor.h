@@ -29,5 +29,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Item")
 	FLinearColor MaterialColor;
 
+	UPROPERTY(EditAnywhere, Category = "Item")
 	FItemInstance ItemInstance;
 };

@@ -11,8 +11,8 @@
 // Define Log Inventory for Inventory-specific logs
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All)
 
-DECLARE_DELEGATE(FInventoryContentChangedDelegate)
-DECLARE_DELEGATE_OneParam(FItemCountChangedDelegate, const FPrimaryAssetId&)
+DECLARE_MULTICAST_DELEGATE(FInventoryContentChangedDelegate)
+DECLARE_MULTICAST_DELEGATE_OneParam(FItemCountChangedDelegate, const FPrimaryAssetId&)
 
 UENUM()
 enum class EInventoryMode : uint8
@@ -36,7 +36,8 @@ public:
 	bool CanAddItem(FItemInstance ItemInstance) const;
 	bool AddItem(FItemInstance& ItemInstance);
 	bool AddItem(FItemInstance& ItemInstance, int32 SlotIndex);
-	void RemoveItem(int32 SlotIndex, bool bShouldDropItem);
+	bool RemoveItem(int32 SlotIndex, bool bShouldDropItem);
+	bool RemoveItem(int32 SlotIndex, int32 Count);
 
 	void SwapItems(int32 Index1, int32 Index2);
 
@@ -52,23 +53,31 @@ public:
 	bool RequestEquipItem(int32 SourceSlotIndex, int32 TargetSlotIndex);
 	bool RequestRemoveEquipment(int32 EquipmentIndex, int32 TargetIndex);
 
+	bool RequestUseItem(int32 SlotIndex);
+	bool RequestSellItem(int32 SlotIndex);
+	bool RequestPurchaseItem(int32 ShopSlotIndex);
+
 	FItemDescription GetItemDescription(int32 SlotIndex);
 	int32 RequestItemCount(const FPrimaryAssetId& ItemId);
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
 	FItemCountChangedDelegate OnItemCountChanged;
 
-	void SetShopMode() { InventoryMode = EInventoryMode::Shop; }
-	void SetNormalMode() { InventoryMode = EInventoryMode::Normal; }
+	void SetShopMode(class UShopComponent* ShopCmopRef);
+	void SetNormalMode();
 	EInventoryMode GetCurrentMode() const { return InventoryMode; }
 protected:
 	virtual void BeginPlay() override;
+	void TryUseItem(int32 SlotIndex);
 
 	UPROPERTY()
 	FInventoryPage InventoryPage;
 
-	EInventoryMode InventoryMode;
-
 	UPROPERTY()
 	TWeakObjectPtr<class UEquipmentComponent> EquipmentComponentRef;
+
+	UPROPERTY()
+	TWeakObjectPtr<class UShopComponent> InteractingShopComponentRef;
+
+	EInventoryMode InventoryMode;
 };

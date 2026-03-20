@@ -40,7 +40,7 @@ UQuantityConfirmationWidget* UUISubsystem::RequestCreateQuantityWidget()
 {
 	UQuantityConfirmationWidget* Widget = Cast<UQuantityConfirmationWidget>(AddWidgetToLayer(EWidgetLayer::System,
 		CommonWidgetDataAsset->QuantityConfirmationWidgetClass));
-
+	UE_LOG(LogTemp, Warning, TEXT("Widget created, %i"), Widget != nullptr);
 	return Widget;
 }
 

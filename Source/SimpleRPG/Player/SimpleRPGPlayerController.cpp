@@ -180,10 +180,10 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 	}
 
 	// open inventory widget
-	ToggleInventory();
+	//ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
-		PS->GetInventoryComponent()->SetShopMode();
+		PS->GetInventoryComponent()->SetShopMode(ShopComponent);
 		ShopComponent->SetPlayerStateRef(PS);
 	}
 }

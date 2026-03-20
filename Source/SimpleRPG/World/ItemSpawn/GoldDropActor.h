@@ -25,5 +25,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Gold")
 	FLinearColor VFXColor;
 
+	UPROPERTY(EditAnywhere)
 	int32 GoldAmount;
 };

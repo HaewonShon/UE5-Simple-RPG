@@ -78,7 +78,9 @@ class SIMPLERPG_API UItemData : public UActionableAsset
 	GENERATED_BODY()
 
 public:
-	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override { return false; }
+	UItemData() { MaxStackSize = 1; }
+
+	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override;
 	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override;
 
 	virtual void PostInitProperties() override;
@@ -110,7 +112,7 @@ public:
  *    Item Instance that used in the game actually
  */
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FItemInstance
 {
 	GENERATED_BODY()
@@ -127,9 +129,11 @@ struct FItemInstance
 
 	bool IsValid() const { return DataAsset.IsValid(); }
 
-	UPROPERTY()
+	FPrimaryAssetId ItemID;
+
+	UPROPERTY(EditAnywhere)
 	TWeakObjectPtr<UItemData> DataAsset;
 
-	FPrimaryAssetId ItemID;
+	UPROPERTY(EditAnywhere)
 	int32 StackCount;
 };

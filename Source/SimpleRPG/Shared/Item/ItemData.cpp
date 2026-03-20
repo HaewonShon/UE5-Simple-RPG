@@ -2,12 +2,10 @@
 
 
 #include "ItemData.h"
-#include "Interaction/Shop/ShopComponent.h"
+#include "Player/Components/InventoryComponent.h"
 
 FItemInstance::FItemInstance()
 {
-	DataAsset = nullptr;
-	StackCount = 0;
 }
 
 FItemInstance::FItemInstance(UItemData* Item, int32 Count)
@@ -61,14 +59,40 @@ bool FItemInstance::RemoveStack(int32 Count)
 	return true;
 }
 
+bool UItemData::CanExecute(AActor* Executer, const FSlotAddress& Address) const
+{
+	if (Address.ContainerType == ESlotType::Shop)
+	{
+		return true;
+	}
+	else if (Address.ContainerType == ESlotType::Storage)
+	{
+		UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>();
+		if (Inventory && (Inventory->GetCurrentMode() == EInventoryMode::Shop))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 // Common item execution logic
 void UItemData::Execute(AActor* Executer, const FSlotAddress& Address)
 {
 	if (Address.ContainerType == ESlotType::Shop)
 	{
-		if(UShopComponent* Shop = Executer->GetComponentByClass<UShopComponent>())
+		UE_LOG(LogTemp, Warning, TEXT("UItemData::Execute from shop called"));
+		if(UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>())
 		{
-			Shop->RequestPurchaseItem(Address.SlotIndex);
+			Inventory->RequestPurchaseItem(Address.SlotIndex);
+		}
+	}
+	else if (Address.ContainerType == ESlotType::Storage)
+	{
+		UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>();
+		if (Inventory && (Inventory->GetCurrentMode() == EInventoryMode::Shop))
+		{
+			Inventory->RequestSellItem(Address.SlotIndex);
 		}
 	}
 }

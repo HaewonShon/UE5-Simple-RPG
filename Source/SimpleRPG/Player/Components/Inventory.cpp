@@ -52,6 +52,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 				Slot.Item.AddStack(ItemInstance);
 				if (ItemInstance.StackCount == 0)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("stackcount: %i"), Slot.Item.StackCount);
 					return true;
 				} 
 			}
@@ -148,10 +149,25 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 	return false;
 }
 
-void FInventoryPage::RemoveItem(int32 SlotIndex)
+bool FInventoryPage::RemoveItem(int32 SlotIndex)
 {
 	Slots[SlotIndex].Item = FItemInstance();
 	--CountFilledSlot;
+	return true;
+}
+
+bool FInventoryPage::RemoveItem(int32 SlotIndex, int32 Count)
+{
+	FItemInstance& Item = Slots[SlotIndex].Item;
+	if (Item.RemoveStack(Count))
+	{
+		if (Item.StackCount == 0)
+		{
+			RemoveItem(SlotIndex);
+		}
+		return true;
+	}
+	return false;
 }
 
 void FInventoryPage::SwapItems(int32 Index1, int32 Index2)

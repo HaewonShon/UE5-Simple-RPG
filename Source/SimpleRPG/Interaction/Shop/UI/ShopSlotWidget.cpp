@@ -17,7 +17,7 @@ void UShopSlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 	// Soldout
 	if (NewSlotContent.Quantity == 0)
 	{
-		SoldOutDisplayImage->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		SoldOutDisplayImage->SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
@@ -28,10 +28,11 @@ void UShopSlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 void UShopSlotWidget::SetPrice(int32 Price)
 {
 	PriceText->SetText(FText::Format(
-		FText::FromString(TEXT("{0} G")), FText::AsCurrency(Price)));
+		FText::FromString(TEXT("{0} G")), FText::AsNumber(Price)));
 }
 
 void UShopSlotWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	SetPrice(0);
 }

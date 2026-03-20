@@ -57,7 +57,7 @@ UUISubsystem* ASimpleRPGPlayerState::GetUISubsystem() const
 			return LP->GetSubsystem<UUISubsystem>();
 		}
 	}
-
+	UE_LOG(LogPlayerController, Error, TEXT("Failed to get local UISubsystem"));
 	return nullptr;
 	
 }

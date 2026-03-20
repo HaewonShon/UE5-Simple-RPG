@@ -32,12 +32,15 @@ void UQuantityConfirmationWidget::OnTextChanged(const FText& Text)
 {
 	if (Text.IsNumeric())
 	{
-		LatestValidText = Text;
+		FString Str = Text.ToString();
+		Str.RemoveFromStart(FString("0"));
+		LatestValidText = FText::FromString(Str);
 	}
-	else
+	else if (Text.IsEmpty())
 	{
-		QuantityText->SetText(LatestValidText);
+		LatestValidText = FText::FromString("0");
 	}
+	QuantityText->SetText(LatestValidText);
 }
 
 void UQuantityConfirmationWidget::NativeConstruct()

@@ -37,19 +37,20 @@ void UInventoryWidget::NativeConstruct()
 		InventoryComponentRef = PlayerState->GetComponentByClass<UInventoryComponent>();
 		check(InventoryComponentRef.IsValid());
 
-		InventoryComponentRef->OnInventoryContentChanged.BindUObject(this, &UInventoryWidget::UpdateContents);		
+		InventoryComponentRef->OnInventoryContentChanged.AddUObject(this, &UInventoryWidget::UpdateContents);		
 		OnNativeVisibilityChanged.AddUObject(this, &UInventoryWidget::OnInventoryToggled);
 
 		if (UCurrencyComponent* CurrencyComponent = PlayerState->GetComponentByClass<UCurrencyComponent>())
 		{
 			CurrencyComponent->OnGoldAmountChanged.AddUObject(this, &UInventoryWidget::UpdateGoldAmount);
+			UpdateGoldAmount(CurrencyComponent->GetCurrencyAmount(ECurrencyType::Gold));
 		}
 		else
 		{
 			UE_LOG(LogInventory, Warning, TEXT("Failed to get currency component from playerstate"));
 		}
 	}
-
+	UpdateCurrentPageContents();
 	//CloseButton->OnClicked.AddDynamic(this, &UInventoryWidget::OnCloseButtonClicked);
 }
 
@@ -90,7 +91,7 @@ void UInventoryWidget::OnSlotsSwapped(const FSlotAddress& SourceSlotAddress, con
 	{
 		if (SourceSlotAddress.ContainerType == ESlotType::Shop)
 		{
-			// Buy Request
+			InventoryComponentRef->RequestPurchaseItem(SourceSlotAddress.SlotIndex);
 		}
 	}
 	else
@@ -144,11 +145,17 @@ void UInventoryWidget::UpdateContents()
 	if (GetVisibility() != ESlateVisibility::Collapsed)
 	{
 		UpdateCurrentPageContents();
+		OnSlotHoverEnded(); // hide description widget if exist
 	}
 }
 
 void UInventoryWidget::UpdateCurrentPageContents()
 {
+	if (!InventoryComponentRef.IsValid())
+	{
+		return;
+	}
+
 	TArray<FInventorySlot>& InventorySlots = InventoryComponentRef->GetPage().Slots;
 	TArray<UWidget*> SlotWidgets = GridWidget->GetAllSlots();
 	for (int32 Index = 0; Index < InventorySlots.Num(); ++Index)
@@ -159,6 +166,7 @@ void UInventoryWidget::UpdateCurrentPageContents()
 		if (!ItemSlot.IsEmpty())
 		{
 			FSlotContent Content(ItemSlot.Item.DataAsset.Get());;
+			Content.Quantity = ItemSlot.Item.StackCount;
 			Content.SlotAddress = FSlotAddress{ ESlotType::Storage, Index };
 			SlotWidget->UpdateSlot(Content);
 		}

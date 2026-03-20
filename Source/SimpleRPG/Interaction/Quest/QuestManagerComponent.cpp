@@ -18,7 +18,7 @@ void UQuestManagerComponent::SetInventoryComponentRef(UInventoryComponent* Inven
 	InventoryComponentRef = InventoryComponent;
 	if (InventoryComponentRef.IsValid())
 	{
-		InventoryComponentRef->OnItemCountChanged.BindUObject(this, &UQuestManagerComponent::OnItemCountChanged);
+		InventoryComponentRef->OnItemCountChanged.AddUObject(this, &UQuestManagerComponent::OnItemCountChanged);
 	}
 	else
 	{

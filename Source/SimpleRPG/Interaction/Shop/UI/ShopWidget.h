@@ -65,6 +65,8 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UInventoryWidget> InventoryWidget;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UButton> CloseButton;
 	
 
 	/************************

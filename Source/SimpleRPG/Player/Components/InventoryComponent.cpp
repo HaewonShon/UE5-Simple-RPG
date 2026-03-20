@@ -8,12 +8,68 @@
 #include "Shared/Item/ItemDatabaseSubsystem.h"
 #include "Shared/Reward/Reward.h"
 #include "EquipmentComponent.h"
+#include "Interaction/Shop/ShopComponent.h"
+#include "Shared/Item/ConsumableItemData.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
+}
+
+bool UInventoryComponent::RequestUseItem(int32 SlotIndex)
+{
+	if (InventoryMode == EInventoryMode::Shop)
+	{
+		return RequestSellItem(SlotIndex);
+	}
+	else
+	{
+		// Try Use Item
+
+		return false;
+	}
+}
+ 
+bool UInventoryComponent::RequestSellItem(int32 SlotIndex)
+{
+	if (!InteractingShopComponentRef.IsValid())
+	{
+		return false;
+	}
+
+	InteractingShopComponentRef->RequestSellItem(SlotIndex);
+	return true;
+}
+
+bool UInventoryComponent::RequestPurchaseItem(int32 ShopSlotIndex)
+{
+	if (!InteractingShopComponentRef.IsValid())
+	{
+		return false;
+	}
+
+	InteractingShopComponentRef->RequestPurchaseItem(ShopSlotIndex);
+	return true; // TODO : purchase temp return
+}
+
+void UInventoryComponent::SetShopMode(UShopComponent* ShopCmopRef)
+{
+	InventoryMode = EInventoryMode::Shop;
+	InteractingShopComponentRef = ShopCmopRef;
+
+	if (!InteractingShopComponentRef.IsValid())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Given shop component is not valid!"));
+		SetNormalMode();
+	}
+}
+
+void UInventoryComponent::SetNormalMode()
+{
+	InventoryMode = EInventoryMode::Normal;
+	InteractingShopComponentRef = nullptr;
 }
 
 void UInventoryComponent::BeginPlay()
@@ -26,6 +82,17 @@ void UInventoryComponent::BeginPlay()
 
 	EquipmentComponentRef = Cast<ASimpleRPGPlayerState>(GetOwner())->GetComponentByClass<UEquipmentComponent>();
 	check(EquipmentComponentRef.IsValid());
+}
+
+void UInventoryComponent::TryUseItem(int32 SlotIndex)
+{
+	UConsumableItemData* Item = Cast<UConsumableItemData>(InventoryPage.Slots[SlotIndex].Item.DataAsset);
+	if (!Item)
+	{
+		return;
+	}
+
+	// TODO : Item usecase 정의하기ㄴ
 }
 
 bool UInventoryComponent::CanAddItem(FItemInstance ItemInstance) const
@@ -49,8 +116,8 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance)
 
 	if (InventoryPage.AddItem(ItemInstance))
 	{
-		OnInventoryContentChanged.ExecuteIfBound();
-		OnItemCountChanged.ExecuteIfBound(ItemInstance.ItemID);
+		OnInventoryContentChanged.Broadcast();
+		OnItemCountChanged.Broadcast(ItemInstance.ItemID);
 		return true;
 	}
 	
@@ -68,11 +135,11 @@ bool UInventoryComponent::AddItem(FItemInstance& ItemInstance, int32 SlotIndex)
 	return true;
 }
 
-void UInventoryComponent::RemoveItem(int32 SlotIndex, bool bShouldDropItem)
+bool UInventoryComponent::RemoveItem(int32 SlotIndex, bool bShouldDropItem)
 {
 	if (InventoryPage.IsSlotEmpty(SlotIndex))
 	{
-		return;
+		return false;
 	}
 
 	if (bShouldDropItem)
@@ -94,14 +161,30 @@ void UInventoryComponent::RemoveItem(int32 SlotIndex, bool bShouldDropItem)
 	InventoryPage.RemoveItem(SlotIndex);
 
 	UE_LOG(LogInventory, Verbose, TEXT("Item %s Removed"), *RemovedItemId.ToString());
-	OnInventoryContentChanged.ExecuteIfBound();
-	OnItemCountChanged.ExecuteIfBound(RemovedItemId);	
+	OnInventoryContentChanged.Broadcast();
+	OnItemCountChanged.Broadcast(RemovedItemId);
+	return true;
+}
+
+bool UInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
+{
+	if (InventoryPage.IsSlotEmpty(SlotIndex))
+	{
+		return false;
+	}
+
+	if (InventoryPage.RemoveItem(SlotIndex, Count))
+	{
+		OnInventoryContentChanged.Broadcast();
+		return true;
+	}
+	return false;
 }
 
 void UInventoryComponent::SwapItems(int32 Index1, int32 Index2)
 {
 	InventoryPage.SwapItems(Index1, Index2);
-	OnInventoryContentChanged.ExecuteIfBound();
+	OnInventoryContentChanged.Broadcast();
 }
 
 bool UInventoryComponent::CanAddRewardItems(const TArray<FItemReward>& RewardItems)
@@ -173,9 +256,14 @@ FInventoryPage& UInventoryComponent::GetPage()
 
 bool UInventoryComponent::RequestEquipItem(int32 SlotIndex)
 {
+	if(InventoryMode == EInventoryMode::Shop)
+	{
+		return RequestSellItem(SlotIndex);
+	}
+
 	if (EquipmentComponentRef->TryEquip(InventoryPage.Slots[SlotIndex].Item))
 	{
-		OnInventoryContentChanged.ExecuteIfBound();
+		OnInventoryContentChanged.Broadcast();
 		return true;
 	}
 	return false;
@@ -185,7 +273,7 @@ bool UInventoryComponent::RequestEquipItem(int32 SourceSlotIndex, int32 TargetSl
 {
 	if (EquipmentComponentRef->TryEquip(TargetSlotIndex, InventoryPage.Slots[SourceSlotIndex].Item))
 	{
-		OnInventoryContentChanged.ExecuteIfBound();		
+		OnInventoryContentChanged.Broadcast();
 		return true;
 	}
 	return false;
@@ -202,7 +290,7 @@ bool UInventoryComponent::RequestRemoveEquipment(int32 EquipmentIndex, int32 Tar
 	{
 		if (EquipmentComponentRef->TryEquip(EquipmentIndex, InventoryPage.Slots[TargetSlotIndex].Item))
 		{
-			OnInventoryContentChanged.ExecuteIfBound();
+			OnInventoryContentChanged.Broadcast();
 			return true;
 		}
 	}

@@ -26,7 +26,7 @@ void USlotWidget::UpdateSlot(const FSlotContent& NewSlotContent)
 void USlotWidget::ClearSlot()
 {
 	SlotContent = FSlotContent();
-	Icon->SetBrushFromTexture(nullptr);
+	//Icon->SetBrushFromTexture(nullptr);
 	Icon->SetColorAndOpacity(FLinearColor(1.f, 1.f, 1.f, 0.f));
 }
 
@@ -42,7 +42,6 @@ void USlotWidget::SetSlotAddress(const FSlotAddress& NewAddress)
 
 void USlotWidget::NativeConstruct()
 {
-	ClearSlot();
 }
 
 FReply USlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

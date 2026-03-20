@@ -16,6 +16,11 @@ AItemActor::AItemActor()
 void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (ItemInstance.IsValid())
+	{
+		SetItem(ItemInstance);
+	}
 }
 
 void AItemActor::NotifyActorBeginOverlap(AActor* OtherActor)

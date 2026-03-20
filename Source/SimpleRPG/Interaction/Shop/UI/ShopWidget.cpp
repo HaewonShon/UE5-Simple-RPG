@@ -32,7 +32,7 @@ void UShopWidget::NativeConstruct()
 		///UE_LOG(LogShop, Warning, TEXT("Failed to create Item Slots, %i, %i"), SlotGridPanel == nullptr, SlotWidgetClass == nullptr);
 	}
 
-	//CloseButton->OnClicked.AddDynamic(this, &UShopWidget::OnCloseButtonClicked);
+	CloseButton->OnClicked.AddDynamic(this, &UShopWidget::OnCloseButtonClicked);
 }
 
 void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
@@ -44,7 +44,7 @@ void UShopWidget::InitializeShop(UShopComponent* ShopComponent)
 	}
 
 	ShopComponentRef = ShopComponent;
-	ShopComponentRef->OnShopContentChanged.BindUObject(this, &UShopWidget::UpdateShopContents);
+	ShopComponentRef->OnShopContentChanged.AddUObject(this, &UShopWidget::UpdateShopContents);
 	UpdateShopContents();
 }
 
@@ -56,7 +56,6 @@ void UShopWidget::SetDescriptionWidgetRef(UItemDescriptionWidget* DescriptionWid
 
 void UShopWidget::UpdateShopContents()
 {
-	/*
 	const TArray<FShopItem>& ShopItemList = ShopComponentRef->GetShopItemList();
 	for(int32 Index = 0; Index < ShopItemList.Num(); ++Index)
 	{
@@ -72,13 +71,14 @@ void UShopWidget::UpdateShopContents()
 			SlotWidget->UpdateSlot(Content);
 			SlotWidget->SetPrice(ShopItem.Price);
 		}
-	}*/
+	}
 }
 
 void UShopWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
 {
 	const TArray<FShopItem>& ShopItemList = ShopComponentRef->GetShopItemList();
-	if (!ShopItemList[SlotAddress.SlotIndex].Item.IsValid())
+	FItemInstance SlotItem = ShopItemList[SlotAddress.SlotIndex].Item;
+	if (!SlotItem.IsValid())
 	{
 		return;
 	}
