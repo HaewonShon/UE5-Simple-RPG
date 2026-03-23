@@ -5,7 +5,7 @@
 #include "QuestManagerComponent.h"
 #include "QuestIconData.h"
 #include "Core/SimpleRPGAssetManager.h"
-#include "Shared/Item/ItemDatabaseSubsystem.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 #include "Player/SimpleRPGPlayerState.h"
 #include "Enemy/Enemy.h"
 #include "../Core/ActionProvider.h"

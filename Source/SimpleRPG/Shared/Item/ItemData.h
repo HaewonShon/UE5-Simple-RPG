@@ -3,63 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/EnumRange.h"
 #include "Shared/Common/ActionableAsset.h"
 #include "Shared/Common/SlotTypes.h"
+#include "Shared/Item/ItemTypes.h"
 #include "ItemData.generated.h"
 
-struct FStatLine
-{
-	FText Name;
-	FText Value;
-};
-
-struct FItemDetail
-{
-	FText DetailText;
-};
-
-UENUM()
-enum class ERarity : uint8
-{
-	None,
-	Common,
-	Uncommon,
-	Rare,
-	Epic,
-	Legendary,
-	Relic,
-	Count UMETA(Hidden)
-};
-
-struct FEquipmentDetail
-{
-	FText TypeText;
-	TArray<TPair<FText, FText>> Stats;
-};
-
-struct FConsumableDetail
-{
-	TArray<TPair<FText, FText>> Effects;
-};
-
-using FItemDetailPayload = TVariant<FItemDetail, FEquipmentDetail, FConsumableDetail>;
-
-/**
- *	structure for delivery item description info
- */
-struct FItemDescription
-{
-	FText Name;
-	UTexture2D* Icon;
-	FText Price;
-	ERarity Rarity;
-	FItemDetailPayload Payload;
-};
-
-/**
- *    Item Data
- */
 
 UENUM(BlueprintType)
 enum class EItemCategory : uint8
@@ -82,6 +30,9 @@ public:
 
 	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override;
 	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override;
+
+	virtual bool CanEnhance() const { return false; }
+	virtual FItemStat GetBaseStat() const { return FItemStat(); }
 
 	virtual void PostInitProperties() override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -108,6 +59,15 @@ public:
 	int32 SellPrice;
 };
 
+USTRUCT()
+struct FEnhancementInfo
+{
+	GENERATED_BODY()
+
+	int32 EnhancementLevel;
+	FItemStat EnhancedStat;
+};
+
 /**
  *    Item Instance that used in the game actually
  */
@@ -127,7 +87,8 @@ struct FItemInstance
 	bool AddStack(FItemInstance& OtherInstance);
 	bool RemoveStack(int32 Count);
 
-	bool IsValid() const { return DataAsset.IsValid(); }
+	bool IsValid() const { return DataAsset.IsValid(); }	
+	FItemStat GetTotalStat() const { return DataAsset->GetBaseStat() + EnhancementInfo.EnhancedStat; }
 
 	FPrimaryAssetId ItemID;
 
@@ -136,4 +97,7 @@ struct FItemInstance
 
 	UPROPERTY(EditAnywhere)
 	int32 StackCount;
+
+	UPROPERTY()
+	FEnhancementInfo EnhancementInfo;
 };

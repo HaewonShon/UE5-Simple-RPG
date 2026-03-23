@@ -16,7 +16,7 @@ enum class EActionType : uint8
 	QuestAccept,
 	QuestDecline,
 	Shop,
-	Enforcement,
+	Enhancement,
 	INVALID,
 };
 

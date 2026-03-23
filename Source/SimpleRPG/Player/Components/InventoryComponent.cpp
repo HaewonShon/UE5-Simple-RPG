@@ -5,7 +5,7 @@
 #include "Misc/EnumRange.h"
 #include "../SimpleRPGPlayerState.h"
 #include "World/ItemSpawn/ItemSpawnSubsystem.h"
-#include "Shared/Item/ItemDatabaseSubsystem.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 #include "Shared/Reward/Reward.h"
 #include "EquipmentComponent.h"
 #include "Interaction/Shop/ShopComponent.h"
@@ -192,12 +192,12 @@ bool UInventoryComponent::CanAddRewardItems(const TArray<FItemReward>& RewardIte
 	bool bResult = true;
 	int32 RequiredSlot = 0;
 
-	UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
+	UItemManagementSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>();
 	check(ItemDB);
 
 	for (const FItemReward& Reward : RewardItems)
 	{
-		const UItemData* ItemData = ItemDB->Get(Reward.ItemId);
+		const UItemData* ItemData = ItemDB->GetItemData(Reward.ItemId);
 		if (ItemData->bIsStackable)
 		{
 			// TODO : consider existing slot first
@@ -220,12 +220,12 @@ bool UInventoryComponent::CanAddRewardItems(const TArray<FItemReward>& RewardIte
 
 bool UInventoryComponent::AddRewardItems(const TArray<struct FItemReward>& RewardItems)
 {
-	UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
+	UItemManagementSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>();
 	check(ItemDB);
 
 	for (const FItemReward& Reward : RewardItems)
 	{
-		UItemData* ItemData = ItemDB->Get(Reward.ItemId);
+		UItemData* ItemData = ItemDB->GetItemData(Reward.ItemId);
 
 		if (ItemData->bIsStackable)
 		{
@@ -316,9 +316,9 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 {
 	int32 Count = 0;
 
-	if (UItemDatabaseSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>())
+	if (UItemManagementSubsystem* ItemDB = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>())
 	{
-		const UItemData* Item = ItemDB->Get(ItemId);
+		const UItemData* Item = ItemDB->GetItemData(ItemId);
 		for (const FInventorySlot& Slot : InventoryPage.Slots)
 		{
 			if (!Slot.IsEmpty() && Slot.Item.ItemID == ItemId)

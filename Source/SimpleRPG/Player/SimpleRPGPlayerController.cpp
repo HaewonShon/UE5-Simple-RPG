@@ -13,6 +13,8 @@
 #include "Interaction/Dialogue/DialogueSubsystem.h"
 #include "Interaction/Shop/UI/ShopWidget.h"
 #include "Interaction/Shop/ShopComponent.h"
+#include "Interaction/Enhancement/UI/EnhancementWidget.h"
+#include "Interaction/Enhancement/EnhancementComponent.h"
 
 #include "World/NPCCharacter.h"
 #include "Shared/UI/RootWidget.h"
@@ -133,7 +135,6 @@ void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	//InputMode.SetWidgetToFocus(HUDWidget->TakeWidget());
 
 	SetInputMode(FInputModeUIOnly());
 
@@ -170,6 +171,12 @@ void ASimpleRPGPlayerController::FinishDialogue()
 
 void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 {
+	// close inventory UI if opened
+	if (bIsInvenetoryOn)
+	{
+		ToggleInventory();
+	}
+
 	// create shop ui widget
 	ShopWidget = Cast<UShopWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false, false));
 	if (ShopWidget)
@@ -179,8 +186,6 @@ void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 		ShopWidget->OnWidgetClosed.AddUObject(this, &ASimpleRPGPlayerController::CloseShop);
 	}
 
-	// open inventory widget
-	//ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
 		PS->GetInventoryComponent()->SetShopMode(ShopComponent);
@@ -192,14 +197,46 @@ void ASimpleRPGPlayerController::CloseShop()
 {
 	if (ShopWidget)
 	{
-		//ShopWidget->CloseWidget(); called by RootWidget
 		ShopWidget = nullptr;
 	}
 
-	ToggleInventory();
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
 		PS->GetInventoryComponent()->SetNormalMode();
+	}
+
+	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
+	{
+		Subsystem->SetNextPage();
+	}
+}
+
+void ASimpleRPGPlayerController::OpenEnhancement(class UEnhancementComponent* EnhancementComponent)
+{
+	// close inventory UI if opened
+	if (bIsInvenetoryOn)
+	{
+		ToggleInventory();
+	}
+
+	// create enhancment UI
+	EnhancementWidget = Cast<UEnhancementWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, EnhancementWidgetClass, false, false));
+	if (EnhancementWidget)
+	{
+		// TODO: register widget-related if required
+	}
+
+	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
+	{
+		EnhancementComponent->SetPlayerStateRef(PS);
+	}
+}
+
+void ASimpleRPGPlayerController::CloseEnhancement()
+{
+	if (EnhancementWidget)
+	{
+		EnhancementWidget = nullptr;
 	}
 
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())

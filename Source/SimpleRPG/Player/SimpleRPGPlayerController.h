@@ -39,6 +39,12 @@ public:
 	UFUNCTION()
 	void CloseShop();
 
+	UFUNCTION()
+	void OpenEnhancement(class UEnhancementComponent* EnhancementComponent);
+
+	UFUNCTION()
+	void CloseEnhancement();
+
 protected:
 	void ConstructUI();
 
@@ -92,14 +98,19 @@ protected:
 	TObjectPtr<class UDialogueWidget> DialogueDisplayWidget;
 
 	/*************************************************
-	*	Shop UI
+	*	UI
 	*************************************************/
-	UPROPERTY(EditDefaultsOnly, Category = "Shop")
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UShopWidget> ShopWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<class UShopWidget> ShopWidget;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UEnhancementWidget> EnhancementWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<class UEnhancementWidget> EnhancementWidget;
 
 #if !UE_BUILD_SHIPPING
 	void CheatFunction1();

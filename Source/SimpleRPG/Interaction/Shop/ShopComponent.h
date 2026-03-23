@@ -90,5 +90,5 @@ protected:
 	TArray<FShopItem> ShopItemList;
 
 	TWeakObjectPtr<class ASimpleRPGPlayerState> PlayerStateRef;
-	TWeakObjectPtr<class UItemDatabaseSubsystem> ItemDBSubsystem;
+	TWeakObjectPtr<class UItemManagementSubsystem> ItemDBSubsystem;
 };

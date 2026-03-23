@@ -180,19 +180,19 @@ void UEquipmentComponent::EquipCurrentItem(EEquipmentType EquipmentType)
 
 	FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(EquipmentGE, 1.0f, EffectContext);
 	const FItemInstance& ItemInstance = EquipmentSlots[EquipmentType].Slot.Item;
-	const UEquipmentItemData* EquipmentData = Cast<UEquipmentItemData>(ItemInstance.DataAsset);
-	if (!SpecHandle.IsValid() || !EquipmentData)
+	if (!SpecHandle.IsValid() || !ItemInstance.IsValid())
 	{
 		UE_LOG(LogEquipment, Warning, TEXT("Equipment SpecHandle is not valid"));
 		return;
 	}
 
+	FItemStat EquipmentItemStat = ItemInstance.GetTotalStat();
 	// Write Equipment Stats into GameplayEffectSpec
-	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.AttackPower"), EquipmentData->Stat.AttackPower);
-	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.Defense"), EquipmentData->Stat.Defense);
-	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.CritChance"), EquipmentData->Stat.CritChance);
-	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.MaxHealth"), EquipmentData->Stat.MaxHealth);
-	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.HealthRegen"), EquipmentData->Stat.HealthRegen);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.AttackPower"), EquipmentItemStat.AttackPower);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.Defense"), EquipmentItemStat.Defense);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.CritChance"), EquipmentItemStat.CritChance);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.MaxHealth"), EquipmentItemStat.MaxHealth);
+	SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Attribute.HealthRegen"), EquipmentItemStat.HealthRegen);
 
 	SpecHandle.Data->DynamicGrantedTags.AddTag(FGameplayTag::RequestGameplayTag("Weapon.Sword"));
 

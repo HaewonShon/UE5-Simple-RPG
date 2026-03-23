@@ -5,7 +5,7 @@
 #include "ItemActor.h"
 #include "GoldDropActor.h"
 #include "DropActorData.h"
-#include "Shared/Item/ItemDatabaseSubsystem.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 #include "Core/SimpleRPGGameInstance.h"
 #include "Core/SimpleRPGAssetManager.h" // item
 
@@ -121,7 +121,7 @@ void UItemSpawnSubsystem::ReadLootTable()
 UItemData* UItemSpawnSubsystem::SelectRandomItem(FGameplayTag EnemyTag) const
 {
 	UE_LOG(LogCombatRewardSystem, Verbose, TEXT("SelectRandomItem with enemy tag: %s"), *(EnemyTag.ToString()));
-	UItemDatabaseSubsystem* ItemDB = GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
+	UItemManagementSubsystem* ItemDB = GetGameInstance()->GetSubsystem<UItemManagementSubsystem>();
 	const FLootInfo& LootInfo = EnemyLootInfoCache.FindRef(EnemyTag);
 
 	if (LootInfo.ItemCount == 0)
@@ -139,11 +139,11 @@ UItemData* UItemSpawnSubsystem::SelectRandomItem(FGameplayTag EnemyTag) const
 		Sum += Item.Weight;
 		if (Sum >= RandomValue)
 		{
-			return ItemDB->Get(Item.ItemId);
+			return ItemDB->GetItemData(Item.ItemId);
 		}
 	}
 
-	return ItemDB->Get(LootInfo.Item[LootInfo.ItemCount-1].ItemId);
+	return ItemDB->GetItemData(LootInfo.Item[LootInfo.ItemCount-1].ItemId);
 }
 
 int32 UItemSpawnSubsystem::GetRandomGoldAmount(FGameplayTag EnemyTag) const

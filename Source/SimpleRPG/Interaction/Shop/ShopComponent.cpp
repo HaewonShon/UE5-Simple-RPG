@@ -2,7 +2,7 @@
 
 
 #include "ShopComponent.h"
-#include "Shared/Item/ItemDatabaseSubsystem.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 #include "Player/SimpleRPGPlayerState.h"
 #include "Player/SimpleRPGPlayerController.h"
 #include "Player/Components/CurrencyComponent.h"
@@ -328,7 +328,7 @@ void UShopComponent::BeginPlay()
 	}
 	else
 	{
-		ItemDBSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemDatabaseSubsystem>();
+		ItemDBSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>();
 		check(ItemDBSubsystem.IsValid());
 
 		if (ItemDBSubsystem->IsCachingCompleted())
@@ -345,7 +345,7 @@ void UShopComponent::BeginPlay()
 void UShopComponent::ReadShopDataTable()
 {
 	ShopDataTable->ForeachRow<FShopItemRow>(TEXT("Reading shop data table"), [this](const FName& RowName, const FShopItemRow& Row) {
-		UItemData* Item = ItemDBSubsystem->Get(Row.ItemId);
+		UItemData* Item = ItemDBSubsystem->GetItemData(Row.ItemId);
 		if (!Item)
 		{
 			UE_LOG(LogShop, Warning, TEXT("Item ID not valid: %s"), *Row.ItemId.ToString());

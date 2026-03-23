@@ -19,27 +19,6 @@ enum class EEquipmentType : uint8
 };
 ENUM_RANGE_BY_COUNT(EEquipmentType, EEquipmentType::Count);
 
-USTRUCT(BlueprintType)
-struct FItemStat
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	float AttackPower;
-
-	UPROPERTY(EditDefaultsOnly)
-	float Defense;
-
-	UPROPERTY(EditDefaultsOnly)
-	float CritChance;
-
-	UPROPERTY(EditDefaultsOnly)
-	float MaxHealth;
-
-	UPROPERTY(EditDefaultsOnly)
-	float HealthRegen;
-};
-
 /**
  *	Data Asset for equipment
  */
@@ -52,11 +31,14 @@ public:
 	virtual bool CanExecute(AActor* Executer, const FSlotAddress& Address) const override;
 	virtual void Execute(AActor* Executer, const FSlotAddress& Address) override;
 
+	virtual bool CanEnhance() const override { return true; }
+	virtual FItemStat GetBaseStat() const override { return BaseStat; }
+
 	virtual FItemDescription BuildDescriptionData() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	EEquipmentType EquipmentType;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Equipment")
-	FItemStat Stat;
+	FItemStat BaseStat;
 };
