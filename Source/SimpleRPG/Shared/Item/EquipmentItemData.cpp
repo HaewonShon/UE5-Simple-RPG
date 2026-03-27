@@ -45,11 +45,11 @@ FItemDescription UEquipmentItemData::BuildDescriptionData() const
 
 	FEquipmentDetail Detail;
 	Detail.TypeText = UEnum::GetDisplayValueAsText(EquipmentType);
-	if (BaseStat.AttackPower != 0) Detail.Stats.Add({ FText::FromString("AttackPower"), FText::AsNumber(BaseStat.AttackPower) });
-	if (BaseStat.Defense != 0) Detail.Stats.Add({ FText::FromString("Defense"), FText::AsNumber(BaseStat.Defense) });
-	if (BaseStat.CritChance != 0) Detail.Stats.Add({ FText::FromString("CritChance"), FText::AsNumber(BaseStat.CritChance) });
-	if (BaseStat.MaxHealth != 0) Detail.Stats.Add({ FText::FromString("MaxHealth"), FText::AsNumber(BaseStat.MaxHealth) });
-	if (BaseStat.HealthRegen != 0) Detail.Stats.Add({ FText::FromString("HealthRegen"), FText::AsNumber(BaseStat.HealthRegen) });
+	if (BaseStat.AttackPower != 0) Detail.Stats.Add({ EStat::AttackPower, FText::AsNumber(BaseStat.AttackPower) });
+	if (BaseStat.Defense != 0) Detail.Stats.Add({ EStat::Defense, FText::AsNumber(BaseStat.Defense) });
+	if (BaseStat.CritChance != 0) Detail.Stats.Add({ EStat::CritChance, FText::AsNumber(BaseStat.CritChance) });
+	if (BaseStat.MaxHealth != 0) Detail.Stats.Add({ EStat::MaxHealth, FText::AsNumber(BaseStat.MaxHealth) });
+	if (BaseStat.HealthRegen != 0) Detail.Stats.Add({ EStat::HealthRegen, FText::AsNumber(BaseStat.HealthRegen) });
 
 	Description.Payload.Set<FEquipmentDetail>(Detail);
 

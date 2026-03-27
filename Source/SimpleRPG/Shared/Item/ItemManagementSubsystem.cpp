@@ -15,12 +15,12 @@ void UItemManagementSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     bCachingCompleted = false;
     USimpleRPGAssetManager::Get().LoadPrimaryAssetsWithType("ItemData", {}, FStreamableDelegate::CreateUObject(this, &UItemManagementSubsystem::BuildCache));
     
-    FString TablePath = TEXT("/Game/Data/DT_Enhance.DT_Enhance");
+    FString TablePath = TEXT("/Game/Interaction/Enhancement/DT_EnhanceData.DT_EnhanceData");
     EnhanceDataTable = Cast<UDataTable>(StaticLoadObject(UDataTable::StaticClass(), nullptr, *TablePath));
 
     if (EnhanceDataTable)
     {
-        UE_LOG(LogTemp, Log, TEXT("ItemManagementSubsystem: Enhance DataTable Loaded Successfully."));
+        UE_LOG(LogTemp, Error, TEXT("ItemManagementSubsystem: Enhance DataTable Loaded Successfully."));
     }
     else
     {
@@ -42,9 +42,15 @@ UItemData* UItemManagementSubsystem::GetItemData(const FPrimaryAssetId& ID) cons
     return ItemCache.FindRef(ID);
 }
 
-bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FItemInstance& TargetItem, FEnhanceDisplayInfo& Out)
+void UItemManagementSubsystem::SetEnhanceTargetItem(FItemInstance* Target)
 {
-    UItemData* ItemData = TargetItem.DataAsset.Get();
+    EnhanceTarget = Target;
+    OnEnhanceTargetChanged.Broadcast();
+}
+
+bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FEnhanceDisplayInfo& Out)
+{
+    UItemData* ItemData = EnhanceTarget->DataAsset.Get();
     if (!(ItemData && ItemData->CanEnhance()))
     {
         return false;
@@ -58,7 +64,7 @@ bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FItemInstance& T
         return false;
     }
     // read table
-    int32 CurrentItemLevel = TargetItem.EnhancementInfo.EnhancementLevel;
+    int32 CurrentItemLevel = EnhanceTarget->EnhancementInfo.EnhancementLevel;
     FEnhanceTableRow* EnhanceData = GetEnhanceData(CurrentItemLevel);
     if (!EnhanceData)
     {
@@ -66,58 +72,69 @@ bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FItemInstance& T
     }
 
     Out.SuccessRate = EnhanceData->SuccessRate;
-    Out.Increase = EnhanceData->Increase;
+
+    FItemInstance PreviewInstance(*EnhanceTarget);
+    PreviewInstance.EnhancementInfo.EnhancedStat += EnhanceData->Increase;
+    ++PreviewInstance.EnhancementInfo.EnhancementLevel;
+    Out.PreviewDescription = PreviewInstance.BuildDescriptionData();
+
     Out.OwningGold = CurrencyComponent->GetCurrencyAmount(ECurrencyType::Gold);
     Out.GoldCost = EnhanceData->GoldCost;
 
     // TODO : Read/fill required material quantity
 
-    return false;
+    return true;
 }
 
-EEnhanceResult UItemManagementSubsystem::RequestEnhanceItem(APlayerState* PS, FItemInstance& TargetItem)
+void UItemManagementSubsystem::RequestEnhanceCurrentItem(APlayerState* PS)
 {
     // 1. Validation
-    UItemData* ItemData = TargetItem.DataAsset.Get();
-    if (!(ItemData && ItemData->CanEnhance()))
+    if (!EnhanceTarget 
+        || !EnhanceTarget->DataAsset.Get() 
+        || !EnhanceTarget->DataAsset->CanEnhance())
     {
-        return EEnhanceResult::Fail;
+        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Validation Failed"));
+        return;
     }
 
     UCurrencyComponent* CurrencyComponent = PS->GetComponentByClass<UCurrencyComponent>();
     UInventoryComponent* InventoryComponent = PS->GetComponentByClass<UInventoryComponent>();
     if (!CurrencyComponent || !InventoryComponent)
     {
-        UE_LOG(LogTemp, Error, TEXT("RequestEnhanceItem: PS is not valid"));
-        return EEnhanceResult::Fail;
+        UE_LOG(LogTemp, Error, TEXT("RequestEnhanceItem: PS is not valid")); 
+        return;
     }
 
     // 2. Check requirements
-    int32 CurrentItemLevel = TargetItem.EnhancementInfo.EnhancementLevel;
+    int32 CurrentItemLevel = EnhanceTarget->EnhancementInfo.EnhancementLevel;
     FEnhanceTableRow* EnhanceData = GetEnhanceData(CurrentItemLevel);
     if (!EnhanceData)
     {
-        return EEnhanceResult::Fail;
+        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem EnhanceData not found"));
+        return;
     }
 
     if (!CurrencyComponent->TrySpendCurrency(ECurrencyType::Gold, EnhanceData->GoldCost))
     {
-        return EEnhanceResult::Fail;
+        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Gold spending Failed"));
+        return;
     }
 
     // 3. Attempt && Result apply
     float RandValue = FMath::FRandRange(0.f, 1.f);
     if (RandValue > EnhanceData->SuccessRate)
     {
-        return EEnhanceResult::Fail;
+        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem random success Failed"));
+        OnEnhanceCompleted.Broadcast(EEnhanceResult::Fail);
     }
     else
     {
         // apply success result to the item
-        TargetItem.EnhancementInfo.EnhancedStat += EnhanceData->Increase;
-        ++TargetItem.EnhancementInfo.EnhancementLevel;
+        EnhanceTarget->EnhancementInfo.EnhancedStat += EnhanceData->Increase;
+        ++EnhanceTarget->EnhancementInfo.EnhancementLevel;
 
-        return EEnhanceResult::Success;
+        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Success"));
+        OnEnhanceCompleted.Broadcast(EEnhanceResult::Success);
     }
 }
 

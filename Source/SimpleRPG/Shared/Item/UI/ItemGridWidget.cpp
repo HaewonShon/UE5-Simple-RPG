@@ -19,11 +19,11 @@ void UItemGridWidget::NativeConstruct()
 				SlotGridPanel->AddChildToUniformGrid(SlotWidget, h, w);
 				if (SlotWidget)
 				{
-					SlotWidget->OnDragBegin.BindUObject(this, &UItemGridWidget::OnSlotDragBegin);
-					SlotWidget->OnDrop.BindUObject(this, &UItemGridWidget::OnSlotsSwapped);
-					SlotWidget->OnDoubleClick.BindUObject(this, &UItemGridWidget::OnSlotDoubleClicked);
-					SlotWidget->OnHovered.BindUObject(this, &UItemGridWidget::OnSlotHovered);
-					SlotWidget->OnHoverEnded.BindUObject(this, &UItemGridWidget::OnSlotHoverEnded);
+					SlotWidget->OnDragBegin.AddUObject(this, &UItemGridWidget::OnSlotDragBegin);
+					SlotWidget->OnDrop.AddUObject(this, &UItemGridWidget::OnSlotsSwapped);
+					SlotWidget->OnDoubleClick.AddUObject(this, &UItemGridWidget::OnSlotDoubleClicked);
+					SlotWidget->OnHovered.AddUObject(this, &UItemGridWidget::OnSlotHovered);
+					SlotWidget->OnHoverEnded.AddUObject(this, &UItemGridWidget::OnSlotHoverEnded);
 				}
 			}
 		}

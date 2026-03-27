@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "../SimpleRPGPlayerState.h"
 #include "InventoryComponent.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment)
 
@@ -65,6 +66,24 @@ FItemDescription UEquipmentComponent::GetItemDescription(EEquipmentType Equipmen
 		return Slot.Item.DataAsset->BuildDescriptionData();
 	}
 	return FItemDescription();
+}
+
+
+bool UEquipmentComponent::RequestRegisterEnhanceTarget(int32 SlotIndex)
+{
+	FInventorySlot& Slot = GetEquipmentSlot(static_cast<EEquipmentType>(SlotIndex));
+	if (Slot.IsEmpty())
+	{
+		return false;
+	}
+
+	if (UItemManagementSubsystem* ItemManagementSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>())
+	{
+		ItemManagementSubsystem->SetEnhanceTargetItem(&Slot.Item);
+		return true;
+	}
+
+	return false;
 }
 
 bool UEquipmentComponent::RequestEquip(int32 InventorySlotIndex, int32 EquipmentSlotIndex)

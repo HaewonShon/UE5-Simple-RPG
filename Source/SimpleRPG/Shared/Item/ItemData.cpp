@@ -8,6 +8,14 @@ FItemInstance::FItemInstance()
 {
 }
 
+FItemInstance::FItemInstance(const FItemInstance& Other)
+{
+	DataAsset = Other.DataAsset;
+	ItemID = Other.ItemID;
+	StackCount = Other.StackCount;
+	EnhancementInfo = Other.EnhancementInfo;
+}
+
 FItemInstance::FItemInstance(UItemData* Item, int32 Count)
 {
 	DataAsset = Item;
@@ -57,6 +65,44 @@ bool FItemInstance::RemoveStack(int32 Count)
 
 	StackCount -= Count;
 	return true;
+}
+
+FItemDescription FItemInstance::BuildDescriptionData() const
+{
+	if (!DataAsset.IsValid())
+	{
+		return FItemDescription();
+	}
+
+	FItemDescription Description = DataAsset->BuildDescriptionData();
+	if (DataAsset->CanEnhance() && EnhancementInfo.EnhancementLevel > 0)
+	{
+		Description.Name = 
+			FText::Format(FText::FromString("{0} (+ {1})"), 
+				Description.Name, EnhancementInfo.EnhancementLevel);
+
+		FItemStat TotalStat = GetTotalStat();	
+		const FItemStat& EnhancedStat = EnhancementInfo.EnhancedStat;
+		auto& Stats = Description.Payload.Get<FEquipmentDetail>().Stats;
+
+		if (EnhancedStat.AttackPower != 0)
+			Stats.Emplace(EStat::AttackPower, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.AttackPower, EnhancementInfo.EnhancedStat.AttackPower));
+		if (EnhancedStat.Defense != 0)
+			Stats.Emplace(EStat::Defense, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.Defense, EnhancementInfo.EnhancedStat.Defense));
+		if (EnhancedStat.CritChance != 0)
+			Stats.Emplace(EStat::CritChance, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.CritChance, EnhancementInfo.EnhancedStat.CritChance));
+		if (EnhancedStat.MaxHealth != 0)
+			Stats.Emplace(EStat::MaxHealth, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.MaxHealth, EnhancementInfo.EnhancedStat.MaxHealth));
+		if (EnhancedStat.HealthRegen != 0)
+			Stats.Emplace(EStat::HealthRegen, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.HealthRegen, EnhancementInfo.EnhancedStat.HealthRegen));
+	}
+
+	return Description;
 }
 
 bool UItemData::CanExecute(AActor* Executer, const FSlotAddress& Address) const

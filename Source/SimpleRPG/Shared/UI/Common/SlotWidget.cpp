@@ -83,17 +83,17 @@ void USlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
 
 	// Set DragDrop operation ref so Inventory Widget can set visual widget
 	DragDropOperationRef = OutOperation;
-	OnDragBegin.ExecuteIfBound(DragDropOp->SlotAddress);
+	OnDragBegin.Broadcast(DragDropOp->SlotAddress);
 }
 
 bool USlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	UE_LOG(LogTemp, Verbose, TEXT("Slot NativeOnDrop Detected"));
+	UE_LOG(LogTemp, Warning, TEXT("Slot NativeOnDrop Detected"));
 
 	DragDropOperationRef = nullptr;
 
 	FSlotAddress SlotToSwap = Cast<USlotDragDropOp>(InOperation)->SlotAddress;
-	OnDrop.ExecuteIfBound(SlotToSwap, this->Address);
+	OnDrop.Broadcast(SlotToSwap, this->Address);
 
 	return true;
 }
@@ -114,7 +114,7 @@ FReply USlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, 
 		SlotContent.ContentAsset->Execute(GetOwningPlayerState<ASimpleRPGPlayerState>(), Address);
 	}
 
-//	OnDoubleClick.ExecuteIfBound(Address);
+	OnDoubleClick.Broadcast(Address);
 	return FReply::Handled();
 }
 
@@ -127,7 +127,7 @@ void USlotWidget::NativeOnMouseEnter(const FGeometry& MyGeometry, const FPointer
 	{
 		return;
 	}
-	OnHovered.ExecuteIfBound(Address);
+	OnHovered.Broadcast(Address);
 }
 
 void USlotWidget::NativeOnMouseLeave(const FPointerEvent& MouseEvent)
@@ -137,7 +137,7 @@ void USlotWidget::NativeOnMouseLeave(const FPointerEvent& MouseEvent)
 	{
 		return;
 	}
-	OnHoverEnded.ExecuteIfBound();
+	OnHoverEnded.Broadcast();
 }
 
 UTexture2D* USlotWidget::GetIconTexture() const

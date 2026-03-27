@@ -19,6 +19,17 @@ enum class ERarity : uint8
 	Count UMETA(Hidden)
 };
 
+UENUM()
+enum class EStat : uint8
+{
+	AttackPower,
+	Defense,
+	CritChance,
+	MaxHealth,
+	HealthRegen,
+	Count UMETA(Hidden)
+};
+
 struct FStatLine
 {
 	FText Name;
@@ -33,7 +44,7 @@ struct FItemDetail
 struct FEquipmentDetail
 {
 	FText TypeText;
-	TArray<TPair<FText, FText>> Stats;
+	TMap<EStat, FText> Stats;
 };
 
 struct FConsumableDetail

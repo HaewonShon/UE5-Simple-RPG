@@ -54,6 +54,22 @@ bool UInventoryComponent::RequestPurchaseItem(int32 ShopSlotIndex)
 	return true; // TODO : purchase temp return
 }
 
+bool UInventoryComponent::RequestRegisterEnhanceTarget(int32 SlotIndex)
+{
+	if (InventoryPage.Slots[SlotIndex].IsEmpty())
+	{
+		return false;
+	}
+
+	if (UItemManagementSubsystem* ItemManagementSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>())
+	{
+		ItemManagementSubsystem->SetEnhanceTargetItem(&InventoryPage.Slots[SlotIndex].Item);
+		return true;
+	}
+
+	return false;
+}
+
 void UInventoryComponent::SetShopMode(UShopComponent* ShopCmopRef)
 {
 	InventoryMode = EInventoryMode::Shop;
@@ -64,6 +80,11 @@ void UInventoryComponent::SetShopMode(UShopComponent* ShopCmopRef)
 		UE_LOG(LogInventory, Warning, TEXT("Given shop component is not valid!"));
 		SetNormalMode();
 	}
+}
+
+void UInventoryComponent::SetEnhanceMode()
+{
+	InventoryMode = EInventoryMode::Enhancement;
 }
 
 void UInventoryComponent::SetNormalMode()
@@ -259,6 +280,11 @@ bool UInventoryComponent::RequestEquipItem(int32 SlotIndex)
 	if(InventoryMode == EInventoryMode::Shop)
 	{
 		return RequestSellItem(SlotIndex);
+	}
+
+	if (InventoryMode == EInventoryMode::Enhancement)
+	{
+		return RequestRegisterEnhanceTarget(SlotIndex);
 	}
 
 	if (EquipmentComponentRef->TryEquip(InventoryPage.Slots[SlotIndex].Item))

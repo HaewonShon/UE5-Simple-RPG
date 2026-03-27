@@ -19,6 +19,7 @@ enum class EInventoryMode : uint8
 {
 	Normal,
 	Shop,
+	Enhancement,
 };
 
 UCLASS(ClassGroup = (SimpleRPG), meta = (BlueprintSpawnableComponent))
@@ -57,6 +58,8 @@ public:
 	bool RequestSellItem(int32 SlotIndex);
 	bool RequestPurchaseItem(int32 ShopSlotIndex);
 
+	bool RequestRegisterEnhanceTarget(int32 SlotIndex);
+
 	FItemDescription GetItemDescription(int32 SlotIndex);
 	int32 RequestItemCount(const FPrimaryAssetId& ItemId);
 
@@ -64,6 +67,7 @@ public:
 	FItemCountChangedDelegate OnItemCountChanged;
 
 	void SetShopMode(class UShopComponent* ShopCmopRef);
+	void SetEnhanceMode(); 
 	void SetNormalMode();
 	EInventoryMode GetCurrentMode() const { return InventoryMode; }
 protected:

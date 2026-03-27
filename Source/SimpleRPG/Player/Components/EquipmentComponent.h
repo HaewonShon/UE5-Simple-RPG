@@ -51,6 +51,8 @@ public:
 
 	FEquipmentChangedDelegate OnEquipmentContentChanged;
 
+	bool RequestRegisterEnhanceTarget(int32 SlotIndex);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

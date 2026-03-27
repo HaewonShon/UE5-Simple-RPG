@@ -64,6 +64,8 @@ struct FEnhancementInfo
 {
 	GENERATED_BODY()
 
+	FEnhancementInfo() : EnhancementLevel(0) {}
+
 	int32 EnhancementLevel;
 	FItemStat EnhancedStat;
 };
@@ -78,6 +80,7 @@ struct FItemInstance
 	GENERATED_BODY()
 
 	FItemInstance();
+	FItemInstance(const FItemInstance& Other);
 	FItemInstance(UItemData* Item, int32 StackCount = 1);
 
 	/* Set item data for Instance */
@@ -89,6 +92,7 @@ struct FItemInstance
 
 	bool IsValid() const { return DataAsset.IsValid(); }	
 	FItemStat GetTotalStat() const { return DataAsset->GetBaseStat() + EnhancementInfo.EnhancedStat; }
+	FItemDescription BuildDescriptionData() const;
 
 	FPrimaryAssetId ItemID;
 

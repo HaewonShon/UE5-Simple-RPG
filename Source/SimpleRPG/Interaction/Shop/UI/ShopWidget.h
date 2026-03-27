@@ -16,13 +16,12 @@ class SIMPLERPG_API UShopWidget : public USessionWidget
 	GENERATED_BODY()
 	
 public:
-	virtual void NativeConstruct() override;
-
 	void InitializeShop(class UShopComponent* ShopComponent);
 
 	void SetDescriptionWidgetRef(class UItemDescriptionWidget* DescriptionWidget);
 
 protected:
+	virtual void NativeConstruct() override;
 	void UpdateShopContents();
 
 	/************************
