@@ -134,13 +134,38 @@ void UItemManagementSubsystem::RequestEnhanceCurrentItem(APlayerState* PS)
     }
 
     /*** 2. Requirement check ***/
-    if (!CurrencyComponent->TrySpendCurrency(ECurrencyType::Gold, EnhanceData->GoldCost))
+    if (!CurrencyComponent->CanSpendCurrency(ECurrencyType::Gold, EnhanceData->GoldCost))
     {
-        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Gold spending Failed"));
+        UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Gold not enough"));
         return;
     }
 
-    // 3. Attempt && Result apply
+    for (const FEnhancementMaterial& RequiredMaterial : EnhanceData->RequiredMaterials)
+    {
+        if (InventoryComponent->RequestItemCount(RequiredMaterial.ItemId) < RequiredMaterial.Quantity)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Gold spending Failed"));
+            return;
+        }
+    }
+
+    /*** 3. Consume requirements ***/
+    if (!CurrencyComponent->TrySpendCurrency(ECurrencyType::Gold, EnhanceData->GoldCost))
+    {
+        UE_LOG(LogTemp, Error, TEXT("UItemManagementSubsystem spending gold failed with precheck"));
+        return;
+    }
+
+    for (const FEnhancementMaterial& RequiredMaterial : EnhanceData->RequiredMaterials)
+    {
+        if (!InventoryComponent->TryRemoveItem(RequiredMaterial.ItemId, RequiredMaterial.Quantity))
+        {
+            UE_LOG(LogTemp, Error, TEXT("UItemManagementSubsystem spending material: %s failed with precheck"), *RequiredMaterial.ItemId.ToString());
+            return;
+        }
+    }
+
+    // 4. Attempt && Result apply
     float RandValue = FMath::FRandRange(0.f, 1.f);
     if (RandValue > EnhanceData->SuccessRate)
     {

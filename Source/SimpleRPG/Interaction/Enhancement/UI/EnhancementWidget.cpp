@@ -41,7 +41,6 @@ void UEnhancementWidget::ResetState()
 
 void UEnhancementWidget::SetStateProcessing()
 {
-	UE_LOG(LogTemp, Warning, TEXT("UEnhancementWidget::SetStateProcessing"));
 	State = EEnhanceState::Processing;
 	if (bHasResponsee)
 	{
@@ -73,7 +72,6 @@ void UEnhancementWidget::OnSlotHoverEnded()
 
 void UEnhancementWidget::OnSlotDropped(const FSlotAddress& SourceSlotAddress, const FSlotAddress& TargetSlotAddress)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UEnhancementWidget::OnSlotDropped"));
 	if (SourceSlotAddress.ContainerType == ESlotType::Storage)
 	{
 		if (UInventoryComponent* Inventory = GetOwningPlayerState()->GetComponentByClass<UInventoryComponent>())
@@ -128,6 +126,7 @@ void UEnhancementWidget::NativeConstruct()
 	
 void UEnhancementWidget::UpdateContent()
 {
+	ClearRequirementsDisplay();
 	FItemInstance* Target = ItemManagementSubsystemRef->GetEnhanceTargetItem();
 
 	if (!Target || !Target->IsValid())
@@ -138,6 +137,7 @@ void UEnhancementWidget::UpdateContent()
 		EnhanceButton->SetIsEnabled(false);
 		return;
 	}
+
 	// set slot image
 	FSlotContent TargetContent(Target->DataAsset.Get());
 	TargetContent.SlotAddress = FSlotAddress{ ESlotType::Enhancement, 0 };
@@ -189,8 +189,6 @@ void UEnhancementWidget::OnEnhanceButtonClicked()
 	PlayEffect(State);
 
 	EnhanceButton->SetIsEnabled(false);
-
-	UE_LOG(LogTemp, Warning, TEXT("OnEnhanceButtonClicked"));
 	ItemManagementSubsystemRef->RequestEnhanceCurrentItem(GetOwningPlayerState());
 }
 
@@ -205,14 +203,12 @@ void UEnhancementWidget::ProcessEnhanceResult(EEnhanceResult Result)
 
 	if (Result == EEnhanceResult::Success)
 	{
-		// TODO : Success Animation
 		State = EEnhanceState::Success;
 		PlayEffect(State);
 
 	}
 	else if (Result == EEnhanceResult::Fail)
 	{
-		// TODO : Fail Aniimation
 		State = EEnhanceState::Fail;
 		PlayEffect(State);
 	}

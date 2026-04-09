@@ -204,6 +204,11 @@ bool UInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 
 void UInventoryComponent::SwapItems(int32 Index1, int32 Index2)
 {
+	if (InventoryMode != EInventoryMode::Normal)
+	{
+		return;
+	}
+
 	InventoryPage.SwapItems(Index1, Index2);
 	OnInventoryContentChanged.Broadcast();
 }
