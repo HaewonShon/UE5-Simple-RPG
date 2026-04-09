@@ -12,6 +12,7 @@ enum class ESlotType : uint8
     Skill = 1 << 3,
     QuickSlot = 1 << 4,
     Enhancement = 1 << 5,
+    Material = 1 << 6,
 };
 
 USTRUCT()

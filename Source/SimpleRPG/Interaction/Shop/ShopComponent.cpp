@@ -179,9 +179,9 @@ ETransactionResult UShopComponent::TryPurchaseItem(int32 SlotIndex, int32 Amount
 		return ETransactionResult::Failed_NotValid;
 	}
 
-	if (Amount > ShopItem.Item.StackCount)
+	if (Amount > ShopItem.Item.Amount)
 	{
-		UE_LOG(LogShop, Warning, TEXT("TryPurchaseItem: requested Item count is not valid, item stack count: %i, requested Amount: %i"), ShopItem.Item.StackCount, Amount);
+		UE_LOG(LogShop, Warning, TEXT("TryPurchaseItem: requested Item count is not valid, item stack count: %i, requested Amount: %i"), ShopItem.Item.Amount, Amount);
 		return ETransactionResult::Failed_NotEnoughItemAmount;
 	}
 
@@ -209,7 +209,7 @@ ETransactionResult UShopComponent::TryPurchaseItem(int32 SlotIndex, int32 Amount
 	}
 
 	// TODO : UI Notify Success
-	ShopItem.Item.StackCount -= Amount;
+	ShopItem.Item.Amount -= Amount;
 	return ETransactionResult::Success;
 }
 
@@ -275,12 +275,12 @@ ETransactionResult UShopComponent::TrySellItem(int32 InventorySlotIndex, int32 C
 
 ETransactionResult UShopComponent::CanSellItem(const FItemInstance& Item, int32 SellingCount)
 {
-	if (Item.StackCount == 0)
+	if (Item.Amount == 0)
 	{
 		return ETransactionResult::Failed_NotValid;
 	}
 
-	if (Item.StackCount < SellingCount)
+	if (Item.Amount < SellingCount)
 	{
 		return ETransactionResult::Failed_NotEnoughItemAmount;
 	}

@@ -43,10 +43,21 @@ struct FEnhanceTableRow : public FTableRowBase
 	FItemStat Increase;
 
 	UPROPERTY(EditDefaultsOnly)
-	FEnhancementMaterial RequiredMaterials;
+	TArray<FEnhancementMaterial> RequiredMaterials;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 GoldCost;
+};
+
+USTRUCT()
+struct FEnhancementRequirementDisplay
+{
+	GENERATED_BODY()
+
+	FPrimaryAssetId ItemId;
+	int32 RequiredAmount;
+	int32 OwningAmount;
+	bool bHasEnoughAmount;
 };
 
 USTRUCT()
@@ -55,12 +66,14 @@ struct FEnhanceDisplayInfo
 	GENERATED_BODY()
 
 	float SuccessRate;
-
 	FItemDescription PreviewDescription;
+	bool bCanEnhanceNow;
 
-	// materials
+	// Requirements
+	TArray<FEnhancementRequirementDisplay> RequiredMaterials;
 	int32 OwningGold;
 	int32 GoldCost;
+	bool bHasEnoughGold;
 };
 
 /**
@@ -95,9 +108,8 @@ protected:
 
 	bool bCachingCompleted;
 
-	// enhancement info table
 	TSoftObjectPtr<UDataTable> EnhanceDataTable;
-
+	/*** Returns Enhance Info based on equipment's level ***/
 	FEnhanceTableRow* GetEnhanceData(int32 Level);
 
 	FItemInstance* EnhanceTarget;

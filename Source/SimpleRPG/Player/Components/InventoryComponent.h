@@ -47,6 +47,9 @@ public:
 
 	FInventoryPage& GetPage();
 
+	int32 RequestItemCount(const FPrimaryAssetId& ItemId);
+	bool TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Count);
+
 	/*
 	*	Request functions for UI
 	*/
@@ -59,13 +62,14 @@ public:
 	bool RequestPurchaseItem(int32 ShopSlotIndex);
 
 	bool RequestRegisterEnhanceTarget(int32 SlotIndex);
-
 	FItemDescription GetItemDescription(int32 SlotIndex);
-	int32 RequestItemCount(const FPrimaryAssetId& ItemId);
 
 	FInventoryContentChangedDelegate OnInventoryContentChanged;
 	FItemCountChangedDelegate OnItemCountChanged;
 
+	/*
+	*	UI Mode
+	*/
 	void SetShopMode(class UShopComponent* ShopCmopRef);
 	void SetEnhanceMode(); 
 	void SetNormalMode();

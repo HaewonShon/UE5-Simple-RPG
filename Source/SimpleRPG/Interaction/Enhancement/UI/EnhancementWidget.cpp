@@ -2,8 +2,10 @@
 
 
 #include "Interaction/Enhancement/UI/EnhancementWidget.h"
+#include "EnhanceRequirementSlotWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/HorizontalBox.h"
 
 #include "Player/SimpleRPGPlayerState.h"
 #include "Player/Components/EquipmentComponent.h"
@@ -23,9 +25,10 @@ void UEnhancementWidget::ClearItemSlot(const FSlotAddress& SlotAddress)
 {
 	ItemManagementSubsystemRef->SetEnhanceTargetItem(nullptr);
 
-	SetEnhanceButtonStatus(false);
+	SetEnhanceDisplayStatus(false);
 	ClearCurrentItemDisplay();
-	ClearPreviewItemDisplay();
+	ClearPreviewItemDisplay(); 
+	ClearRequirementsDisplay();
 }
 
 void UEnhancementWidget::ResetState()
@@ -126,37 +129,57 @@ void UEnhancementWidget::NativeConstruct()
 void UEnhancementWidget::UpdateContent()
 {
 	FItemInstance* Target = ItemManagementSubsystemRef->GetEnhanceTargetItem();
+
 	if (!Target || !Target->IsValid())
 	{
 		ItemSlot->ClearSlot();
 
 		ArrowImageButton->SetIsEnabled(false);
 		EnhanceButton->SetIsEnabled(false);
+		return;
 	}
-	else
+	// set slot image
+	FSlotContent TargetContent(Target->DataAsset.Get());
+	TargetContent.SlotAddress = FSlotAddress{ ESlotType::Enhancement, 0 };
+	ItemSlot->UpdateSlot(TargetContent);
+
+	SetCurrentItemDisplay(Target->BuildDescriptionData());
+
+	FEnhanceDisplayInfo DisplayInfo;
+	if (ItemManagementSubsystemRef->GetEnhanceData(GetOwningPlayerState(), DisplayInfo))
 	{
-		// set slot image
-		FSlotContent Content(Target->DataAsset.Get());
-		Content.SlotAddress = FSlotAddress{ ESlotType::Enhancement, 0 };
-		ItemSlot->UpdateSlot(Content);
+		// Update UI with received display information
+		SetEnhanceDisplayStatus(DisplayInfo.bCanEnhanceNow);
 
-		SetCurrentItemDisplay(Target->BuildDescriptionData());
+		ChanceText->SetText(FText::AsPercent(DisplayInfo.SuccessRate));
+		SetPreviewItemDisplay(DisplayInfo.PreviewDescription);
 
-		FEnhanceDisplayInfo DisplayInfo;
-		if (ItemManagementSubsystemRef->GetEnhanceData(GetOwningPlayerState(), DisplayInfo))
+		// set required material info
+		for (const FEnhancementRequirementDisplay& Material : DisplayInfo.RequiredMaterials)
 		{
-			SetEnhanceButtonStatus(true);
+			FSlotContent MaterialContent(ItemManagementSubsystemRef->GetItemData(Material.ItemId));
+			MaterialContent.SlotAddress = { ESlotType::Material };
 
-			ChanceText->SetText(FText::AsPercent(DisplayInfo.SuccessRate));
-			SetPreviewItemDisplay(DisplayInfo.PreviewDescription);
+			UEnhanceRequirementSlotWidget* RequirementWidget = CreateWidget<UEnhanceRequirementSlotWidget>(this, RequirementWidgetClass);
+			RequirementWidget->UpdateSlot(MaterialContent);
+			RequirementWidget->SetAmount(Material.OwningAmount, Material.RequiredAmount, Material.bHasEnoughAmount);
 
-			//FText Gold = FText::Format(FText::FromString("{0} // {1}"), DisplayInfo.OwningGold, DisplayInfo.GoldCost);
-
+			RequirementSlot->AddChild(RequirementWidget);
 		}
-		else // enhancement not available
+
+		// set required gold info
+		if (DisplayInfo.GoldCost > 0)
 		{
-			SetEnhanceButtonStatus(false);
+			FSlotContent GoldContent(GoldDisplayAsset);
+			GoldContent.SlotAddress = { ESlotType::Material };
+			GoldRequirementWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			GoldRequirementWidget->UpdateSlot(GoldContent);
+			GoldRequirementWidget->SetAmount(DisplayInfo.OwningGold, DisplayInfo.GoldCost, DisplayInfo.bHasEnoughGold);
 		}
+	}
+	else // enhancement not available
+	{
+		SetEnhanceDisplayStatus(false);
 	}
 }
 
@@ -164,6 +187,8 @@ void UEnhancementWidget::OnEnhanceButtonClicked()
 {
 	State = EEnhanceState::Pending;
 	PlayEffect(State);
+
+	EnhanceButton->SetIsEnabled(false);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnEnhanceButtonClicked"));
 	ItemManagementSubsystemRef->RequestEnhanceCurrentItem(GetOwningPlayerState());
@@ -197,7 +222,7 @@ void UEnhancementWidget::ProcessEnhanceResult(EEnhanceResult Result)
 	}
 }
 
-void UEnhancementWidget::SetEnhanceButtonStatus(bool bIsEnable)
+void UEnhancementWidget::SetEnhanceDisplayStatus(bool bIsEnable)
 {
 	if (bIsEnable)
 	{
@@ -265,6 +290,12 @@ void UEnhancementWidget::ClearPreviewItemDisplay()
 {
 	PreviewItemTitle->SetVisibility(ESlateVisibility::Collapsed);
 	PreviewItemStat->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UEnhancementWidget::ClearRequirementsDisplay()
+{
+	RequirementSlot->ClearChildren();
+	GoldRequirementWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UEnhancementWidget::PlayEffect(EEnhanceState NewState)

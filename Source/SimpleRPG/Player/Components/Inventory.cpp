@@ -17,7 +17,7 @@ FInventoryPage::FInventoryPage(int32 SlotCountPerPage)
 {
 	CountMaxSlot = SlotCountPerPage;
 	CountFilledSlot = 0;
-	
+
 	for (int32 i = 0; i < CountMaxSlot; ++i)
 	{
 		Slots.Add(FInventorySlot());
@@ -32,6 +32,20 @@ const FItemInstance& FInventoryPage::GetItemInstance(int32 SlotIndex)
 bool FInventoryPage::IsSlotEmpty(int32 SlotIndex) const
 {
 	return Slots[SlotIndex].IsEmpty();
+}
+
+int32 FInventoryPage::GetItemAmountById(const FPrimaryAssetId& ItemId) const
+{
+	int32 Amount = 0;
+	for (const FInventorySlot& Slot : Slots)
+	{
+		if (!Slot.IsEmpty() && Slot.Item.ItemID == ItemId)
+		{
+			Amount += Slot.Item.Amount;
+		}
+	}
+
+	return Amount;
 }
 
 bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
@@ -50,11 +64,11 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 			if (!Slot.IsEmpty() && ItemInstance.ItemID == Slot.Item.ItemID)
 			{
 				Slot.Item.AddStack(ItemInstance);
-				if (ItemInstance.StackCount == 0)
+				if (ItemInstance.Amount == 0)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("stackcount: %i"), Slot.Item.StackCount);
+					UE_LOG(LogTemp, Warning, TEXT("stackcount: %i"), Slot.Item.Amount);
 					return true;
-				} 
+				}
 			}
 		}
 
@@ -63,11 +77,11 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 		{
 			if (Slot.IsEmpty())
 			{
-				Slot.Item.SetItem(ItemInstance.DataAsset.Get(), FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.StackCount));
+				Slot.Item.SetItem(ItemInstance.DataAsset.Get(), FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.Amount));
 				++CountFilledSlot;
 
-				ItemInstance.StackCount -= Slot.Item.StackCount;
-				if (ItemInstance.StackCount == 0)
+				ItemInstance.Amount -= Slot.Item.Amount;
+				if (ItemInstance.Amount == 0)
 				{
 					return true;
 				}
@@ -82,11 +96,11 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 			if (Slot.IsEmpty())
 			{
 				Slot.Item.SetItem(ItemInstance.DataAsset.Get(),
-					FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.StackCount));
+					FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.Amount));
 				++CountFilledSlot;
 
-				ItemInstance.StackCount -= Slot.Item.StackCount;
-				if (ItemInstance.StackCount == 0)
+				ItemInstance.Amount -= Slot.Item.Amount;
+				if (ItemInstance.Amount == 0)
 				{
 					return true;
 				}
@@ -110,8 +124,8 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 		{
 			if (!Slot.IsEmpty() && Item.ItemID == Slot.Item.ItemID)
 			{
-				Item.StackCount -= (Item.DataAsset->MaxStackSize - Slot.Item.StackCount);
-				if (Item.StackCount == 0)
+				Item.Amount -= (Item.DataAsset->MaxStackSize - Slot.Item.Amount);
+				if (Item.Amount == 0)
 				{
 					return true;
 				}
@@ -123,8 +137,8 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 		{
 			if (Slot.IsEmpty())
 			{
-				Item.StackCount -= Item.DataAsset->MaxStackSize;
-				if (Item.StackCount <= 0)
+				Item.Amount -= Item.DataAsset->MaxStackSize;
+				if (Item.Amount <= 0)
 				{
 					return true;
 				}
@@ -138,8 +152,8 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 		{
 			if (Slot.IsEmpty())
 			{
-				Item.StackCount -= Item.DataAsset->MaxStackSize;
-				if (Item.StackCount <= 0)
+				Item.Amount -= Item.DataAsset->MaxStackSize;
+				if (Item.Amount <= 0)
 				{
 					return true;
 				}
@@ -149,25 +163,61 @@ bool FInventoryPage::CanAddItem(FItemInstance Item) const
 	return false;
 }
 
-bool FInventoryPage::RemoveItem(int32 SlotIndex)
+
+bool FInventoryPage::CanRemoveItem(const FPrimaryAssetId& ItemId, int32 Amount) const
 {
-	Slots[SlotIndex].Item = FItemInstance();
-	--CountFilledSlot;
+	if (GetItemAmountById(ItemId) < Amount)
+	{
+		return false;
+	}
 	return true;
 }
 
-bool FInventoryPage::RemoveItem(int32 SlotIndex, int32 Count)
+bool FInventoryPage::RemoveItem(int32 SlotIndex, int32 Amount)
 {
 	FItemInstance& Item = Slots[SlotIndex].Item;
-	if (Item.RemoveStack(Count))
+	if (Item.RemoveStack(Amount))
 	{
-		if (Item.StackCount == 0)
+		if (Item.Amount == 0)
 		{
-			RemoveItem(SlotIndex);
+			Slots[SlotIndex].Item = FItemInstance();
+			--CountFilledSlot;
 		}
 		return true;
 	}
 	return false;
+}
+
+bool FInventoryPage::RemoveItem(const FPrimaryAssetId& TargetId, int32 Amount)
+{
+	if (!CanRemoveItem(TargetId, Amount))
+	{
+		return false;
+	}
+
+	for (FInventorySlot& Slot : Slots)
+	{
+		if (!Slot.IsEmpty() && Slot.Item.ItemID == TargetId)
+		{
+			const int32 RemoveAmount = FMath::Min(Slot.Item.Amount, Amount);
+			Slot.Item.Amount -= RemoveAmount;
+			Amount -= RemoveAmount;
+
+			if (Slot.Item.Amount <= 0)
+			{
+				Slot.Item = FItemInstance();
+				--CountFilledSlot;
+			}
+
+			if (Amount == 0)
+			{
+				break;
+			}
+		}
+	}
+
+	ensure(Amount == 0);
+	return true;
 }
 
 void FInventoryPage::SwapItems(int32 Index1, int32 Index2)

@@ -12,7 +12,7 @@ FItemInstance::FItemInstance(const FItemInstance& Other)
 {
 	DataAsset = Other.DataAsset;
 	ItemID = Other.ItemID;
-	StackCount = Other.StackCount;
+	Amount = Other.Amount;
 	EnhancementInfo = Other.EnhancementInfo;
 }
 
@@ -20,7 +20,7 @@ FItemInstance::FItemInstance(UItemData* Item, int32 Count)
 {
 	DataAsset = Item;
 	ItemID = DataAsset->GetPrimaryAssetId();
-	StackCount = Count;
+	Amount = Count;
 }
 
 bool FItemInstance::SetItem(UItemData* Item, int32 Count)
@@ -32,7 +32,7 @@ bool FItemInstance::SetItem(UItemData* Item, int32 Count)
 
 	DataAsset = Item;
 	ItemID = DataAsset->GetPrimaryAssetId();
-	StackCount = Count;
+	Amount = Count;
 
 	return true;
 }
@@ -49,21 +49,29 @@ bool FItemInstance::AddStack(FItemInstance& OtherInstance)
 		return false;
 	}
 
-	int32 RemainingStackCount = DataAsset->MaxStackSize - StackCount;
-	StackCount += FMath::Min(OtherInstance.StackCount, RemainingStackCount);
-	OtherInstance.StackCount -= FMath::Min(OtherInstance.StackCount, RemainingStackCount);
+	int32 RemainingStackCount = DataAsset->MaxStackSize - Amount;
+	Amount += FMath::Min(OtherInstance.Amount, RemainingStackCount);
+	OtherInstance.Amount -= FMath::Min(OtherInstance.Amount, RemainingStackCount);
 
 	return true;
 }
 
 bool FItemInstance::RemoveStack(int32 Count)
 {
-	if (StackCount < Count)
+	// remove all
+	if ((Count == -1))
+	{
+		Amount = 0;
+		return true;
+	}
+
+	// remove partial
+	if (Amount < Count)
 	{
 		return false;
 	}
 
-	StackCount -= Count;
+	Amount -= Count;
 	return true;
 }
 

@@ -349,10 +349,21 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 		{
 			if (!Slot.IsEmpty() && Slot.Item.ItemID == ItemId)
 			{
-				Count += Slot.Item.StackCount;
+				Count += Slot.Item.Amount;
 			}
 		}
 	}
 
 	return Count;
+}
+
+bool UInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Amount)
+{
+	int32 OwningAmount = RequestItemCount(ItemId);
+	if (OwningAmount < Amount)
+	{
+		return false;
+	}
+
+	return TryRemoveItem(ItemId, Amount);
 }

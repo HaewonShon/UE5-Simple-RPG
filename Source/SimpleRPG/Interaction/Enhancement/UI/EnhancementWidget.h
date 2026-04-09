@@ -50,11 +50,12 @@ protected:
 	UFUNCTION()
 	void ProcessEnhanceResult(EEnhanceResult Result);
 
-	void SetEnhanceButtonStatus(bool bIsEnable);
+	void SetEnhanceDisplayStatus(bool bIsEnable);
 	void SetCurrentItemDisplay(const FItemDescription& Description);
 	void SetPreviewItemDisplay(const FItemDescription& Description);
 	void ClearCurrentItemDisplay();
 	void ClearPreviewItemDisplay();
+	void ClearRequirementsDisplay();
 
 	UFUNCTION()
 	void OnSlotHovered(const FSlotAddress& SlotAddress);
@@ -95,6 +96,14 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> ArrowImageButton;
 
+	/*** Enhance requirement display ***/
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UHorizontalBox> RequirementSlot;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UEnhanceRequirementSlotWidget> GoldRequirementWidget;
+
+	/*** Button widgets ***/
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> EnhanceButton;
 
@@ -120,6 +129,12 @@ protected:
 	/************************
 	*   Others
 	*************************/
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UEnhanceRequirementSlotWidget> RequirementWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<class UActionableAsset> GoldDisplayAsset;
+
 	UPROPERTY()
 	TWeakObjectPtr<class UItemDescriptionWidget> ItemDescriptionWidgetRef;
 

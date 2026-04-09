@@ -100,7 +100,7 @@ struct FItemInstance
 	TWeakObjectPtr<UItemData> DataAsset;
 
 	UPROPERTY(EditAnywhere)
-	int32 StackCount;
+	int32 Amount;
 
 	UPROPERTY()
 	FEnhancementInfo EnhancementInfo;

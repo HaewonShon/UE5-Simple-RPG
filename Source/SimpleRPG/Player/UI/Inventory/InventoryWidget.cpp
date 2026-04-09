@@ -166,7 +166,7 @@ void UInventoryWidget::UpdateCurrentPageContents()
 		if (!ItemSlot.IsEmpty())
 		{
 			FSlotContent Content(ItemSlot.Item.DataAsset.Get());;
-			Content.Quantity = ItemSlot.Item.StackCount;
+			Content.Quantity = ItemSlot.Item.Amount;
 			Content.SlotAddress = FSlotAddress{ ESlotType::Storage, Index };
 			SlotWidget->UpdateSlot(Content);
 		}

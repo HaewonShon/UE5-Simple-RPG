@@ -50,6 +50,12 @@ void UItemManagementSubsystem::SetEnhanceTargetItem(FItemInstance* Target)
 
 bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FEnhanceDisplayInfo& Out)
 {
+    /*** Validation ***/
+    if (!EnhanceTarget)
+    {
+        return false;
+    }
+
     UItemData* ItemData = EnhanceTarget->DataAsset.Get();
     if (!(ItemData && ItemData->CanEnhance()))
     {
@@ -63,7 +69,8 @@ bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FEnhanceDisplayI
         UE_LOG(LogTemp, Error, TEXT("GetEnhanceData: PS is not valid"));
         return false;
     }
-    // read table
+
+    /*** Fill display info ***/
     int32 CurrentItemLevel = EnhanceTarget->EnhancementInfo.EnhancementLevel;
     FEnhanceTableRow* EnhanceData = GetEnhanceData(CurrentItemLevel);
     if (!EnhanceData)
@@ -78,17 +85,29 @@ bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FEnhanceDisplayI
     ++PreviewInstance.EnhancementInfo.EnhancementLevel;
     Out.PreviewDescription = PreviewInstance.BuildDescriptionData();
 
+    Out.bCanEnhanceNow = true;
+    
     Out.OwningGold = CurrencyComponent->GetCurrencyAmount(ECurrencyType::Gold);
     Out.GoldCost = EnhanceData->GoldCost;
+    Out.bHasEnoughGold = (Out.OwningGold >= Out.GoldCost);
+    Out.bCanEnhanceNow &= Out.bHasEnoughGold;
 
-    // TODO : Read/fill required material quantity
+    for (const FEnhancementMaterial& RequiredMaterial : EnhanceData->RequiredMaterials)
+    {
+        FEnhancementRequirementDisplay DisplayInfo;
+        DisplayInfo.ItemId = RequiredMaterial.ItemId;
+        DisplayInfo.RequiredAmount = RequiredMaterial.Quantity;
+        DisplayInfo.OwningAmount = InventoryComponent->RequestItemCount(DisplayInfo.ItemId);
+        DisplayInfo.bHasEnoughAmount = (DisplayInfo.RequiredAmount <= DisplayInfo.OwningAmount);
+        Out.bCanEnhanceNow &= DisplayInfo.bHasEnoughAmount;
+    }
 
     return true;
 }
 
 void UItemManagementSubsystem::RequestEnhanceCurrentItem(APlayerState* PS)
 {
-    // 1. Validation
+    /*** 1. Validation ***/
     if (!EnhanceTarget 
         || !EnhanceTarget->DataAsset.Get() 
         || !EnhanceTarget->DataAsset->CanEnhance())
@@ -105,7 +124,6 @@ void UItemManagementSubsystem::RequestEnhanceCurrentItem(APlayerState* PS)
         return;
     }
 
-    // 2. Check requirements
     int32 CurrentItemLevel = EnhanceTarget->EnhancementInfo.EnhancementLevel;
     FEnhanceTableRow* EnhanceData = GetEnhanceData(CurrentItemLevel);
     if (!EnhanceData)
@@ -114,6 +132,7 @@ void UItemManagementSubsystem::RequestEnhanceCurrentItem(APlayerState* PS)
         return;
     }
 
+    /*** 2. Requirement check ***/
     if (!CurrencyComponent->TrySpendCurrency(ECurrencyType::Gold, EnhanceData->GoldCost))
     {
         UE_LOG(LogTemp, Warning, TEXT("UItemManagementSubsystem Gold spending Failed"));
@@ -162,9 +181,6 @@ FEnhanceTableRow* UItemManagementSubsystem::GetEnhanceData(int32 Level)
         return nullptr;
     }
 
-    // 레벨 번호를 RowName으로 사용 (예: "1", "2"...)
     FName RowName = FName(*FString::FromInt(Level));
-
-    // 테이블에서 행 찾기
     return EnhanceDataTable->FindRow<FEnhanceTableRow>(RowName, TEXT("Context_EnhanceLookup"));
 }
