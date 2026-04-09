@@ -99,6 +99,7 @@ bool UItemManagementSubsystem::GetEnhanceData(APlayerState* PS, FEnhanceDisplayI
         DisplayInfo.RequiredAmount = RequiredMaterial.Quantity;
         DisplayInfo.OwningAmount = InventoryComponent->RequestItemCount(DisplayInfo.ItemId);
         DisplayInfo.bHasEnoughAmount = (DisplayInfo.RequiredAmount <= DisplayInfo.OwningAmount);
+        Out.RequiredMaterials.Add(DisplayInfo);
         Out.bCanEnhanceNow &= DisplayInfo.bHasEnoughAmount;
     }
 

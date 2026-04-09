@@ -365,5 +365,5 @@ bool UInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Amo
 		return false;
 	}
 
-	return TryRemoveItem(ItemId, Amount);
+	return InventoryPage.RemoveItem(ItemId, Amount);
 }
