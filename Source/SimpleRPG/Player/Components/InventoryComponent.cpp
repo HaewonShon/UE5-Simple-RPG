@@ -370,5 +370,10 @@ bool UInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Amo
 		return false;
 	}
 
-	return InventoryPage.RemoveItem(ItemId, Amount);
+	if (InventoryPage.RemoveItem(ItemId, Amount))
+	{
+		OnInventoryContentChanged.Broadcast();
+		return true;
+	}
+	return false;
 }

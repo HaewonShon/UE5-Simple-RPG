@@ -37,6 +37,21 @@ bool FItemInstance::SetItem(UItemData* Item, int32 Count)
 	return true;
 }
 
+bool FItemInstance::SplitFrom(FItemInstance& Other, int32 Count) // split
+{
+	if (!Other.IsValid() || Other.Amount < Count)
+	{
+		return false;
+	}
+
+	DataAsset = Other.DataAsset;
+	ItemID = Other.ItemID;
+	EnhancementInfo = Other.EnhancementInfo;
+	Amount = Count;
+	Other.Amount -= Count;
+	return true;
+}
+
 bool FItemInstance::AddStack(FItemInstance& OtherInstance)
 {
 	if (ItemID != OtherInstance.ItemID)

@@ -65,23 +65,20 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 			{
 				Slot.Item.AddStack(ItemInstance);
 				if (ItemInstance.Amount == 0)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("stackcount: %i"), Slot.Item.Amount);
+
 					return true;
-				}
 			}
 		}
+
 
 		// place left items in empty slotss
 		for (FInventorySlot& Slot : Slots)
 		{
 			if (Slot.IsEmpty())
 			{
-				Slot.Item.SetItem(ItemInstance.DataAsset.Get(), FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.Amount));
+				Slot.Item.SplitFrom(ItemInstance, FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.Amount));
 				++CountFilledSlot;
-
-				ItemInstance.Amount -= Slot.Item.Amount;
-				if (ItemInstance.Amount == 0)
+				if (ItemInstance.Amount <= 0)
 				{
 					return true;
 				}
@@ -90,17 +87,16 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 	}
 	else
 	{
+		check(ItemInstance.IsValid());
+
 		// place left items in empty slots
 		for (FInventorySlot& Slot : Slots)
 		{
 			if (Slot.IsEmpty())
 			{
-				Slot.Item.SetItem(ItemInstance.DataAsset.Get(),
-					FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.Amount));
+				Slot.Item.SplitFrom(ItemInstance, FMath::Min(ItemInstance.DataAsset->MaxStackSize, ItemInstance.Amount));
 				++CountFilledSlot;
-
-				ItemInstance.Amount -= Slot.Item.Amount;
-				if (ItemInstance.Amount == 0)
+				if (ItemInstance.Amount <= 0)
 				{
 					return true;
 				}

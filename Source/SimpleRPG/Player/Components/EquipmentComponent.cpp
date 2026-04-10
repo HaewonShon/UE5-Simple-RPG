@@ -80,6 +80,7 @@ bool UEquipmentComponent::RequestRegisterEnhanceTarget(int32 SlotIndex)
 	if (UItemManagementSubsystem* ItemManagementSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>())
 	{
 		ItemManagementSubsystem->SetEnhanceTargetItem(&Slot.Item);
+		ItemManagementSubsystem->OnEnhanceCompleted.AddUObject(this, &UEquipmentComponent::ReequipCurrentItem, static_cast<EEquipmentType>(SlotIndex));
 		return true;
 	}
 
@@ -99,12 +100,9 @@ bool UEquipmentComponent::TryEquip(FItemInstance& Item)
 		Swap(Item, EquipmentSlots[EquipmentData->EquipmentType].Slot.Item);
 		EquipCurrentItem(EquipmentData->EquipmentType);
 		OnEquipmentContentChanged.ExecuteIfBound();
-	}
+	} 
 	
-	//if (CanRemoveEquipment(EquipmentData->EquipmentType))
 	return true;
-
-	//return false;
 }
 
 bool UEquipmentComponent::TryEquip(int32 TargetIndex, FItemInstance& Item)
@@ -241,5 +239,14 @@ void UEquipmentComponent::UnequipCurrentItem(EEquipmentType EquipmentType)
 		{
 			UE_LOG(LogEquipment, Warning, TEXT("Failed to remove equipment GE from character"));
 		}
+	}
+}
+
+void UEquipmentComponent::ReequipCurrentItem(EEnhanceResult EnhanceResult, EEquipmentType EquipmentType)
+{
+	if (EnhanceResult == EEnhanceResult::Success)
+	{
+		UnequipCurrentItem(EquipmentType);
+		EquipCurrentItem(EquipmentType);
 	}
 }
