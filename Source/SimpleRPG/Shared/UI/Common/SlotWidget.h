@@ -8,9 +8,9 @@
 #include "Shared/Common/SlotContent.h"
 #include "SlotWidget.generated.h"
 
-DECLARE_DELEGATE(FOnSlotLeave);
-DECLARE_DELEGATE_OneParam(FOnSlotEvent, const FSlotAddress&);
-DECLARE_DELEGATE_TwoParams(FOnSlotDrop, const FSlotAddress&, const FSlotAddress&);
+DECLARE_MULTICAST_DELEGATE(FOnSlotLeave);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSlotEvent, const FSlotAddress&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSlotDrop, const FSlotAddress&, const FSlotAddress&);
 
 /**
  *		Common widget to display slot on screen.

@@ -8,11 +8,19 @@ FItemInstance::FItemInstance()
 {
 }
 
+FItemInstance::FItemInstance(const FItemInstance& Other)
+{
+	DataAsset = Other.DataAsset;
+	ItemID = Other.ItemID;
+	Amount = Other.Amount;
+	EnhancementInfo = Other.EnhancementInfo;
+}
+
 FItemInstance::FItemInstance(UItemData* Item, int32 Count)
 {
 	DataAsset = Item;
 	ItemID = DataAsset->GetPrimaryAssetId();
-	StackCount = Count;
+	Amount = Count;
 }
 
 bool FItemInstance::SetItem(UItemData* Item, int32 Count)
@@ -24,8 +32,23 @@ bool FItemInstance::SetItem(UItemData* Item, int32 Count)
 
 	DataAsset = Item;
 	ItemID = DataAsset->GetPrimaryAssetId();
-	StackCount = Count;
+	Amount = Count;
 
+	return true;
+}
+
+bool FItemInstance::SplitFrom(FItemInstance& Other, int32 Count) // split
+{
+	if (!Other.IsValid() || Other.Amount < Count)
+	{
+		return false;
+	}
+
+	DataAsset = Other.DataAsset;
+	ItemID = Other.ItemID;
+	EnhancementInfo = Other.EnhancementInfo;
+	Amount = Count;
+	Other.Amount -= Count;
 	return true;
 }
 
@@ -41,22 +64,68 @@ bool FItemInstance::AddStack(FItemInstance& OtherInstance)
 		return false;
 	}
 
-	int32 RemainingStackCount = DataAsset->MaxStackSize - StackCount;
-	StackCount += FMath::Min(OtherInstance.StackCount, RemainingStackCount);
-	OtherInstance.StackCount -= FMath::Min(OtherInstance.StackCount, RemainingStackCount);
+	int32 RemainingStackCount = DataAsset->MaxStackSize - Amount;
+	Amount += FMath::Min(OtherInstance.Amount, RemainingStackCount);
+	OtherInstance.Amount -= FMath::Min(OtherInstance.Amount, RemainingStackCount);
 
 	return true;
 }
 
 bool FItemInstance::RemoveStack(int32 Count)
 {
-	if (StackCount < Count)
+	// remove all
+	if ((Count == -1))
+	{
+		Amount = 0;
+		return true;
+	}
+
+	// remove partial
+	if (Amount < Count)
 	{
 		return false;
 	}
 
-	StackCount -= Count;
+	Amount -= Count;
 	return true;
+}
+
+FItemDescription FItemInstance::BuildDescriptionData() const
+{
+	if (!DataAsset.IsValid())
+	{
+		return FItemDescription();
+	}
+
+	FItemDescription Description = DataAsset->BuildDescriptionData();
+	if (DataAsset->CanEnhance() && EnhancementInfo.EnhancementLevel > 0)
+	{
+		Description.Name = 
+			FText::Format(FText::FromString("{0} (+ {1})"), 
+				Description.Name, EnhancementInfo.EnhancementLevel);
+
+		FItemStat TotalStat = GetTotalStat();	
+		const FItemStat& EnhancedStat = EnhancementInfo.EnhancedStat;
+		auto& Stats = Description.Payload.Get<FEquipmentDetail>().Stats;
+
+		if (EnhancedStat.AttackPower != 0)
+			Stats.Emplace(EStat::AttackPower, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.AttackPower, EnhancementInfo.EnhancedStat.AttackPower));
+		if (EnhancedStat.Defense != 0)
+			Stats.Emplace(EStat::Defense, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.Defense, EnhancementInfo.EnhancedStat.Defense));
+		if (EnhancedStat.CritChance != 0)
+			Stats.Emplace(EStat::CritChance, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.CritChance, EnhancementInfo.EnhancedStat.CritChance));
+		if (EnhancedStat.MaxHealth != 0)
+			Stats.Emplace(EStat::MaxHealth, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.MaxHealth, EnhancementInfo.EnhancedStat.MaxHealth));
+		if (EnhancedStat.HealthRegen != 0)
+			Stats.Emplace(EStat::HealthRegen, FText::Format(FText::FromString("{0} (+ {1})"),
+				TotalStat.HealthRegen, EnhancementInfo.EnhancedStat.HealthRegen));
+	}
+
+	return Description;
 }
 
 bool UItemData::CanExecute(AActor* Executer, const FSlotAddress& Address) const

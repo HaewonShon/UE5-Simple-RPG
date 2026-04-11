@@ -19,6 +19,17 @@ enum class ERarity : uint8
 	Count UMETA(Hidden)
 };
 
+UENUM()
+enum class EStat : uint8
+{
+	AttackPower,
+	Defense,
+	CritChance,
+	MaxHealth,
+	HealthRegen,
+	Count UMETA(Hidden)
+};
+
 struct FStatLine
 {
 	FText Name;
@@ -33,7 +44,7 @@ struct FItemDetail
 struct FEquipmentDetail
 {
 	FText TypeText;
-	TArray<TPair<FText, FText>> Stats;
+	TMap<EStat, FText> Stats;
 };
 
 struct FConsumableDetail
@@ -59,6 +70,8 @@ USTRUCT(BlueprintType)
 struct FItemStat
 {
 	GENERATED_BODY()
+
+	FItemStat() : AttackPower(0.f), Defense(0.f), CritChance(0.f), MaxHealth(0.f), HealthRegen(0.f) {}
 
 	FItemStat operator+(const FItemStat& OtherStat) const
 	{

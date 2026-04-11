@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "../SimpleRPGPlayerState.h"
 #include "InventoryComponent.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment)
 
@@ -62,9 +63,27 @@ FItemDescription UEquipmentComponent::GetItemDescription(EEquipmentType Equipmen
 	const FInventorySlot& Slot = GetEquipmentSlot(EquipmentType);
 	if (!Slot.IsEmpty())
 	{
-		return Slot.Item.DataAsset->BuildDescriptionData();
+		return Slot.Item.BuildDescriptionData();
 	}
 	return FItemDescription();
+}
+
+bool UEquipmentComponent::RequestRegisterEnhanceTarget(int32 SlotIndex)
+{
+	FInventorySlot& Slot = GetEquipmentSlot(static_cast<EEquipmentType>(SlotIndex));
+	if (Slot.IsEmpty())
+	{
+		return false;
+	}
+
+	if (UItemManagementSubsystem* ItemManagementSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>())
+	{
+		ItemManagementSubsystem->SetEnhanceTargetItem(&Slot.Item);
+		ItemManagementSubsystem->OnEnhanceCompleted.AddUObject(this, &UEquipmentComponent::ReequipCurrentItem, static_cast<EEquipmentType>(SlotIndex));
+		return true;
+	}
+
+	return false;
 }
 
 bool UEquipmentComponent::RequestEquip(int32 InventorySlotIndex, int32 EquipmentSlotIndex)
@@ -80,12 +99,9 @@ bool UEquipmentComponent::TryEquip(FItemInstance& Item)
 		Swap(Item, EquipmentSlots[EquipmentData->EquipmentType].Slot.Item);
 		EquipCurrentItem(EquipmentData->EquipmentType);
 		OnEquipmentContentChanged.ExecuteIfBound();
-	}
+	} 
 	
-	//if (CanRemoveEquipment(EquipmentData->EquipmentType))
 	return true;
-
-	//return false;
 }
 
 bool UEquipmentComponent::TryEquip(int32 TargetIndex, FItemInstance& Item)
@@ -222,5 +238,14 @@ void UEquipmentComponent::UnequipCurrentItem(EEquipmentType EquipmentType)
 		{
 			UE_LOG(LogEquipment, Warning, TEXT("Failed to remove equipment GE from character"));
 		}
+	}
+}
+
+void UEquipmentComponent::ReequipCurrentItem(EEnhanceResult EnhanceResult, EEquipmentType EquipmentType)
+{
+	if (EnhanceResult == EEnhanceResult::Success)
+	{
+		UnequipCurrentItem(EquipmentType);
+		EquipCurrentItem(EquipmentType);
 	}
 }

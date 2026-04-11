@@ -76,3 +76,6 @@ cmake-build-*/
 # If using Crash Reports locally
 *.dmp
 *.mdmp
+
+# extra files
+Tools/

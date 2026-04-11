@@ -64,6 +64,8 @@ struct FEnhancementInfo
 {
 	GENERATED_BODY()
 
+	FEnhancementInfo() : EnhancementLevel(0) {}
+
 	int32 EnhancementLevel;
 	FItemStat EnhancedStat;
 };
@@ -78,10 +80,12 @@ struct FItemInstance
 	GENERATED_BODY()
 
 	FItemInstance();
+	FItemInstance(const FItemInstance& Other);
 	FItemInstance(UItemData* Item, int32 StackCount = 1);
 
 	/* Set item data for Instance */
 	bool SetItem(UItemData* Item, int32 StackCount = 1);
+	bool SplitFrom(FItemInstance& Other, int32 StackCount = 1);
 
 	/* Combine 2 Instances */
 	bool AddStack(FItemInstance& OtherInstance);
@@ -89,6 +93,7 @@ struct FItemInstance
 
 	bool IsValid() const { return DataAsset.IsValid(); }	
 	FItemStat GetTotalStat() const { return DataAsset->GetBaseStat() + EnhancementInfo.EnhancedStat; }
+	FItemDescription BuildDescriptionData() const;
 
 	FPrimaryAssetId ItemID;
 
@@ -96,7 +101,7 @@ struct FItemInstance
 	TWeakObjectPtr<UItemData> DataAsset;
 
 	UPROPERTY(EditAnywhere)
-	int32 StackCount;
+	int32 Amount;
 
 	UPROPERTY()
 	FEnhancementInfo EnhancementInfo;

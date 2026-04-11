@@ -7,6 +7,7 @@
 #include "Shared/Item/EquipmentItemData.h"
 #include "Inventory.h"
 #include "GameplayEffectTypes.h"
+#include "Shared/Item/ItemManagementSubsystem.h"
 #include "EquipmentComponent.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All)
@@ -51,6 +52,8 @@ public:
 
 	FEquipmentChangedDelegate OnEquipmentContentChanged;
 
+	bool RequestRegisterEnhanceTarget(int32 SlotIndex);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -60,6 +63,7 @@ protected:
 	bool CanRemoveEquipment(EEquipmentType EquipmentType);
 	void EquipCurrentItem(EEquipmentType EquipmentType);
 	void UnequipCurrentItem(EEquipmentType EquipmentType);
+	void ReequipCurrentItem(EEnhanceResult EnhanceResult, EEquipmentType EquipmentType);
 
 	UPROPERTY()
 	TMap<EEquipmentType, FEquipmentInfo> EquipmentSlots;

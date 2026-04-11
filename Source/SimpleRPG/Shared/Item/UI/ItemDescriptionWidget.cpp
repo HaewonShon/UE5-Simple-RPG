@@ -28,14 +28,16 @@ void UItemDescriptionWidget::SetDescription(const FItemDescription& Description)
 	}
 	else if (const FEquipmentDetail* EquipmentDetail = Description.Payload.TryGet<FEquipmentDetail>())
 	{
+		
 		Type->SetText(EquipmentDetail->TypeText);
 
 		FTextBuilder Builder;
-		for (const TPair<FText, FText>& Stat : EquipmentDetail->Stats)
+		for (const TPair<EStat, FText>& Stat : EquipmentDetail->Stats)
 		{
 			Builder.AppendLine(
-				FText::Format(FText::FromString(TEXT("{0}: {1}")),
-					Stat.Key, Stat.Value)
+				StaticEnum<EStat>()->GetDisplayNameTextByValue((int64)Stat.Key).ToString() 
+					+ FString(": ") 
+					+ Stat.Value.ToString()
 			);
 		}
 		DetailedText->SetText(Builder.ToText());

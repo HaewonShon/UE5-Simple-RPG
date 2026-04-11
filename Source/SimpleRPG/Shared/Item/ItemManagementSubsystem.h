@@ -8,13 +8,15 @@
 #include "ItemManagementSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnCachingCompleted)
-DECLARE_MULTICAST_DELEGATE(FOnEnhancementCompleted)
+DECLARE_MULTICAST_DELEGATE(FOnContentChanged)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnhanceCompleted, EEnhanceResult)
 
 UENUM()
 enum class EEnhanceResult : uint8
 {
 	Success,
 	Fail,
+	Invalid,
 };
 
 USTRUCT(BlueprintType)
@@ -35,19 +37,27 @@ struct FEnhanceTableRow : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	bool bCanEnhance;
-
-	UPROPERTY(EditDefaultsOnly)
 	float SuccessRate;
 
 	UPROPERTY(EditDefaultsOnly)
 	FItemStat Increase;
 
 	UPROPERTY(EditDefaultsOnly)
-	FEnhancementMaterial RequiredMaterials;
+	TArray<FEnhancementMaterial> RequiredMaterials;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 GoldCost;
+};
+
+USTRUCT()
+struct FEnhancementRequirementDisplay
+{
+	GENERATED_BODY()
+
+	FPrimaryAssetId ItemId;
+	int32 RequiredAmount;
+	int32 OwningAmount;
+	bool bHasEnoughAmount;
 };
 
 USTRUCT()
@@ -56,11 +66,14 @@ struct FEnhanceDisplayInfo
 	GENERATED_BODY()
 
 	float SuccessRate;
-	FItemStat Increase;
+	FItemDescription PreviewDescription;
+	bool bCanEnhanceNow;
 
-	// materials
+	// Requirements
+	TArray<FEnhancementRequirementDisplay> RequiredMaterials;
 	int32 OwningGold;
 	int32 GoldCost;
+	bool bHasEnoughGold;
 };
 
 /**
@@ -80,16 +93,24 @@ public:
 	bool IsCachingCompleted() const { return bCachingCompleted; }
 
 	/*** Item enhancement ***/
-	bool GetEnhanceData(class APlayerState* PS, FItemInstance& TargetItem, FEnhanceDisplayInfo& Out);
-	EEnhanceResult RequestEnhanceItem(class APlayerState* PS, FItemInstance& TargetItem);
-	
+	void SetEnhanceTargetItem(FItemInstance* Target);
+	FItemInstance* GetEnhanceTargetItem() { return EnhanceTarget; }
+
+	bool GetEnhanceData(class APlayerState* PS, FEnhanceDisplayInfo& Out);
+	void RequestEnhanceCurrentItem(class APlayerState* PS);
+
+	FOnContentChanged OnEnhanceTargetChanged;
+	FOnEnhanceCompleted OnEnhanceCompleted;
+
 protected:
 	void BuildCache();
 	TMap<FPrimaryAssetId, TObjectPtr<UItemData>> ItemCache;
 
 	bool bCachingCompleted;
 
-	// enhancement info table
 	TSoftObjectPtr<UDataTable> EnhanceDataTable;
+	/*** Returns Enhance Info based on equipment's level ***/
 	FEnhanceTableRow* GetEnhanceData(int32 Level);
+
+	FItemInstance* EnhanceTarget;
 };

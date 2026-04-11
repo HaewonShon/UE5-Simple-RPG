@@ -123,6 +123,11 @@ void ASimpleRPGPlayerController::BeginDialogue(ANPCCharacter* NPC)
 {
 	// Build UI, camera and begin dialogue
 	DialogueDisplayWidget = Cast<UDialogueWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Dialogue, DialogueDisplayWidgetClass, true));
+	if (!DialogueDisplayWidget)
+	{
+		UE_LOG(LogPlayerController, Error, TEXT("BeginDialogue Failed to create widget"));
+		return;
+	}
 
 	if (UDialogueSubsystem* DialogueSubsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())
 	{
@@ -171,35 +176,35 @@ void ASimpleRPGPlayerController::FinishDialogue()
 
 void ASimpleRPGPlayerController::OpenShop(class UShopComponent* ShopComponent)
 {
-	// close inventory UI if opened
-	if (bIsInvenetoryOn)
-	{
-		ToggleInventory();
-	}
-
 	// create shop ui widget
 	ShopWidget = Cast<UShopWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, ShopWidgetClass, false, false));
-	if (ShopWidget)
+	if (!ShopWidget)
 	{
-		ShopWidget->InitializeShop(ShopComponent);
-		ShopWidget->SetDescriptionWidgetRef(UISubsystem->GetItemDescriptionWidget());
-		ShopWidget->OnWidgetClosed.AddUObject(this, &ASimpleRPGPlayerController::CloseShop);
+		UE_LOG(LogPlayerController, Error, TEXT("OpenShop Failed to create widget"));
+		return;
 	}
 
+	ShopWidget->InitializeShop(ShopComponent);
+	ShopWidget->SetDescriptionWidgetRef(UISubsystem->GetItemDescriptionWidget());
+	ShopWidget->OnWidgetClosed.AddUObject(this, &ASimpleRPGPlayerController::CloseShop);
+	
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
 		PS->GetInventoryComponent()->SetShopMode(ShopComponent);
 		ShopComponent->SetPlayerStateRef(PS);
 	}
+
+	// open inventory UI
+	if (!bIsInvenetoryOn)
+	{
+		ToggleInventory();
+	}
+	// TODO : Set inventory widget position
 }
 
 void ASimpleRPGPlayerController::CloseShop()
 {
-	if (ShopWidget)
-	{
-		ShopWidget = nullptr;
-	}
-
+	ShopWidget = nullptr;
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
 		PS->GetInventoryComponent()->SetNormalMode();
@@ -213,23 +218,31 @@ void ASimpleRPGPlayerController::CloseShop()
 
 void ASimpleRPGPlayerController::OpenEnhancement(class UEnhancementComponent* EnhancementComponent)
 {
-	// close inventory UI if opened
-	if (bIsInvenetoryOn)
-	{
-		ToggleInventory();
-	}
-
 	// create enhancment UI
 	EnhancementWidget = Cast<UEnhancementWidget>(UISubsystem->AddWidgetToLayer(EWidgetLayer::Menu, EnhancementWidgetClass, false, false));
 	if (EnhancementWidget)
 	{
 		// TODO: register widget-related if required
+		EnhancementWidget->SetDescriptionWidgetRef(UISubsystem->GetItemDescriptionWidget());
+		EnhancementWidget->OnWidgetClosed.AddUObject(this, &ASimpleRPGPlayerController::CloseEnhancement);
 	}
-
 	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
 	{
-		EnhancementComponent->SetPlayerStateRef(PS);
+		PS->GetInventoryComponent()->SetEnhanceMode();
 	}
+
+	// open inventory UI
+	if (!bIsInvenetoryOn)
+	{
+		ToggleInventory();
+	}
+	// TODO : Set inventory widget position
+
+	if (!bIsCharacterInfoOn)
+	{
+		ToggleCharacterInfo();
+	}
+	// TODO : Set Character info widget position
 }
 
 void ASimpleRPGPlayerController::CloseEnhancement()
@@ -237,6 +250,11 @@ void ASimpleRPGPlayerController::CloseEnhancement()
 	if (EnhancementWidget)
 	{
 		EnhancementWidget = nullptr;
+	}
+
+	if (ASimpleRPGPlayerState* PS = GetPlayerState<ASimpleRPGPlayerState>())
+	{
+		PS->GetInventoryComponent()->SetNormalMode();
 	}
 
 	if (UDialogueSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UDialogueSubsystem>())

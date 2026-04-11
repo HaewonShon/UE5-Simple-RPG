@@ -33,9 +33,9 @@ void UCharacterInformationWidget::NativeConstruct()
 		TWeakObjectPtr<UItemSlotWidget> SlotWidget = EquipmentSlots[Index];
 		SlotWidget->SetSlotAddress({ ESlotType::Equipment, Index });
 		
-		SlotWidget->OnDrop.BindUObject(this, &UCharacterInformationWidget::OnSlotDropped);
-		SlotWidget->OnHovered.BindUObject(this, &UCharacterInformationWidget::OnSlotHovered);
-		SlotWidget->OnHoverEnded.BindUObject(this, &UCharacterInformationWidget::OnSlotHoverEnded);
+		SlotWidget->OnDrop.AddUObject(this, &UCharacterInformationWidget::OnSlotDropped);
+		SlotWidget->OnHovered.AddUObject(this, &UCharacterInformationWidget::OnSlotHovered);
+		SlotWidget->OnHoverEnded.AddUObject(this, &UCharacterInformationWidget::OnSlotHoverEnded);
 	}
 	
 

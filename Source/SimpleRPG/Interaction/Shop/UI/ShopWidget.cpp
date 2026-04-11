@@ -64,7 +64,7 @@ void UShopWidget::UpdateShopContents()
 		{
 			FSlotContent Content;
 			Content.ContentAsset = ShopItem.Item.DataAsset;
-			Content.Quantity = ShopItem.Item.StackCount;
+			Content.Quantity = ShopItem.Item.Amount;
 			Content.SlotAddress = FSlotAddress(ESlotType::Shop, Index);
 
 			UShopSlotWidget* SlotWidget = Cast<UShopSlotWidget>(GridWidget->GetSlotAt(Index));

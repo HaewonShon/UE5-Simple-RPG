@@ -41,13 +41,16 @@ struct FInventoryPage
 
 	const FItemInstance& GetItemInstance(int32 SlotIndex);
 	bool IsSlotEmpty(int32 SlotIndex) const;
+	int32 GetItemAmountById(const FPrimaryAssetId& ItemId) const;
+
+	bool CanAddItem(FItemInstance Item) const;
+	bool CanRemoveItem(const FPrimaryAssetId& ItemId, int32 Amount) const;
 
 	bool AddItem(FItemInstance& Item);
-	// Tester function if item can be added by simulating.
-	bool CanAddItem(FItemInstance Item) const;
 
-	bool RemoveItem(int32 SlotIndex);
-	bool RemoveItem(int32 SlotIndex, int32 Count);
+	bool RemoveItem(int32 SlotIndex, int32 Amounts = -1);
+	bool RemoveItem(const FPrimaryAssetId& ItemId, int32 Amount);
+	
 	void SwapItems(int32 Index1, int32 Index2);
 	bool HasEmptySlot() const;
 	int32 GetFirstEmptySlotIndex() const;

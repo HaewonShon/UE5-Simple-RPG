@@ -54,6 +54,22 @@ bool UInventoryComponent::RequestPurchaseItem(int32 ShopSlotIndex)
 	return true; // TODO : purchase temp return
 }
 
+bool UInventoryComponent::RequestRegisterEnhanceTarget(int32 SlotIndex)
+{
+	if (InventoryPage.Slots[SlotIndex].IsEmpty())
+	{
+		return false;
+	}
+
+	if (UItemManagementSubsystem* ItemManagementSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UItemManagementSubsystem>())
+	{
+		ItemManagementSubsystem->SetEnhanceTargetItem(&InventoryPage.Slots[SlotIndex].Item);
+		return true;
+	}
+
+	return false;
+}
+
 void UInventoryComponent::SetShopMode(UShopComponent* ShopCmopRef)
 {
 	InventoryMode = EInventoryMode::Shop;
@@ -64,6 +80,11 @@ void UInventoryComponent::SetShopMode(UShopComponent* ShopCmopRef)
 		UE_LOG(LogInventory, Warning, TEXT("Given shop component is not valid!"));
 		SetNormalMode();
 	}
+}
+
+void UInventoryComponent::SetEnhanceMode()
+{
+	InventoryMode = EInventoryMode::Enhancement;
 }
 
 void UInventoryComponent::SetNormalMode()
@@ -173,9 +194,11 @@ bool UInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 		return false;
 	}
 
+	FPrimaryAssetId ItemId = InventoryPage.Slots[SlotIndex].Item.ItemID;
 	if (InventoryPage.RemoveItem(SlotIndex, Count))
 	{
 		OnInventoryContentChanged.Broadcast();
+		OnItemCountChanged.Broadcast(ItemId);
 		return true;
 	}
 	return false;
@@ -183,6 +206,11 @@ bool UInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 
 void UInventoryComponent::SwapItems(int32 Index1, int32 Index2)
 {
+	if (InventoryMode != EInventoryMode::Normal)
+	{
+		return;
+	}
+
 	InventoryPage.SwapItems(Index1, Index2);
 	OnInventoryContentChanged.Broadcast();
 }
@@ -261,6 +289,11 @@ bool UInventoryComponent::RequestEquipItem(int32 SlotIndex)
 		return RequestSellItem(SlotIndex);
 	}
 
+	if (InventoryMode == EInventoryMode::Enhancement)
+	{
+		return RequestRegisterEnhanceTarget(SlotIndex);
+	}
+
 	if (EquipmentComponentRef->TryEquip(InventoryPage.Slots[SlotIndex].Item))
 	{
 		OnInventoryContentChanged.Broadcast();
@@ -302,7 +335,7 @@ FItemDescription UInventoryComponent::GetItemDescription(int32 SlotIndex)
 	const FInventorySlot& Slot = InventoryPage.Slots[SlotIndex];
 	if (!Slot.IsEmpty())
 	{
-		FItemDescription Description = Slot.Item.DataAsset->BuildDescriptionData();
+		FItemDescription Description = Slot.Item.BuildDescriptionData();
 		if(GetCurrentMode() == EInventoryMode::Shop)
 		{ 
 			Description.Price = FText::Format(FText::FromString(TEXT("Sell price: {0}G")), Slot.Item.DataAsset->SellPrice);
@@ -323,10 +356,27 @@ int32 UInventoryComponent::RequestItemCount(const FPrimaryAssetId& ItemId)
 		{
 			if (!Slot.IsEmpty() && Slot.Item.ItemID == ItemId)
 			{
-				Count += Slot.Item.StackCount;
+				Count += Slot.Item.Amount;
 			}
 		}
 	}
 
 	return Count;
+}
+
+bool UInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Amount)
+{
+	int32 OwningAmount = RequestItemCount(ItemId);
+	if (OwningAmount < Amount)
+	{
+		return false;
+	}
+
+	if (InventoryPage.RemoveItem(ItemId, Amount))
+	{
+		OnInventoryContentChanged.Broadcast();
+		OnItemCountChanged.Broadcast(ItemId);
+		return true;
+	}
+	return false;
 }
