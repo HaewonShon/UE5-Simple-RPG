@@ -63,11 +63,10 @@ FItemDescription UEquipmentComponent::GetItemDescription(EEquipmentType Equipmen
 	const FInventorySlot& Slot = GetEquipmentSlot(EquipmentType);
 	if (!Slot.IsEmpty())
 	{
-		return Slot.Item.DataAsset->BuildDescriptionData();
+		return Slot.Item.BuildDescriptionData();
 	}
 	return FItemDescription();
 }
-
 
 bool UEquipmentComponent::RequestRegisterEnhanceTarget(int32 SlotIndex)
 {

@@ -36,6 +36,10 @@ void UEnhancementWidget::ResetState()
 	State = EEnhanceState::Idle;
 	bHasResponsee = false;
 
+	ClearCurrentItemDisplay();
+	ClearPreviewItemDisplay();
+	ClearRequirementsDisplay();
+
 	UpdateContent();
 }
 
@@ -56,7 +60,7 @@ void UEnhancementWidget::OnSlotHovered(const FSlotAddress& SlotAddress)
 		return;
 	}
 
-	FItemDescription Description = TargetItem->DataAsset->BuildDescriptionData();
+	FItemDescription Description = TargetItem->BuildDescriptionData();
 
 	ItemDescriptionWidgetRef->SetVisibility(ESlateVisibility::HitTestInvisible);
 	ItemDescriptionWidgetRef->SetDescription(Description);
@@ -121,7 +125,6 @@ void UEnhancementWidget::NativeConstruct()
 	Event.BindUFunction(this, FName("ResetState"));
 	BindToAnimationFinished(SuccessAnim, Event);
 	BindToAnimationFinished(FailAnim, Event);
-
 }
 	
 void UEnhancementWidget::UpdateContent()

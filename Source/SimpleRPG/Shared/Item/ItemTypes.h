@@ -71,6 +71,8 @@ struct FItemStat
 {
 	GENERATED_BODY()
 
+	FItemStat() : AttackPower(0.f), Defense(0.f), CritChance(0.f), MaxHealth(0.f), HealthRegen(0.f) {}
+
 	FItemStat operator+(const FItemStat& OtherStat) const
 	{
 		FItemStat Result = *this;

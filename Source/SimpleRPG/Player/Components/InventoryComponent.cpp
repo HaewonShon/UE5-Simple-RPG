@@ -333,7 +333,7 @@ FItemDescription UInventoryComponent::GetItemDescription(int32 SlotIndex)
 	const FInventorySlot& Slot = InventoryPage.Slots[SlotIndex];
 	if (!Slot.IsEmpty())
 	{
-		FItemDescription Description = Slot.Item.DataAsset->BuildDescriptionData();
+		FItemDescription Description = Slot.Item.BuildDescriptionData();
 		if(GetCurrentMode() == EInventoryMode::Shop)
 		{ 
 			Description.Price = FText::Format(FText::FromString(TEXT("Sell price: {0}G")), Slot.Item.DataAsset->SellPrice);
