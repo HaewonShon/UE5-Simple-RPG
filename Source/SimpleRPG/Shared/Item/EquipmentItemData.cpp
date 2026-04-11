@@ -27,7 +27,7 @@ void UEquipmentItemData::Execute(AActor* Executer, const FSlotAddress& Address)
 		}
 	}
 	// request unequip from equipment
-	else
+	else if(Address.ContainerType == ESlotType::Equipment)
 	{
 		if (UEquipmentComponent* Equipment = Executer->GetComponentByClass<UEquipmentComponent>())
 		{

@@ -194,9 +194,11 @@ bool UInventoryComponent::RemoveItem(int32 SlotIndex, int32 Count)
 		return false;
 	}
 
+	FPrimaryAssetId ItemId = InventoryPage.Slots[SlotIndex].Item.ItemID;
 	if (InventoryPage.RemoveItem(SlotIndex, Count))
 	{
 		OnInventoryContentChanged.Broadcast();
+		OnItemCountChanged.Broadcast(ItemId);
 		return true;
 	}
 	return false;
@@ -373,6 +375,7 @@ bool UInventoryComponent::TryRemoveItem(const FPrimaryAssetId& ItemId, int32 Amo
 	if (InventoryPage.RemoveItem(ItemId, Amount))
 	{
 		OnInventoryContentChanged.Broadcast();
+		OnItemCountChanged.Broadcast(ItemId);
 		return true;
 	}
 	return false;
