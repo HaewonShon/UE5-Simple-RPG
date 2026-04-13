@@ -8,6 +8,7 @@
 #include "Shared/Item/ItemManagementSubsystem.h"
 #include "Shared/Reward/Reward.h"
 #include "EquipmentComponent.h"
+#include "AbilitySystemComponent.h"
 #include "Interaction/Shop/ShopComponent.h"
 #include "Shared/Item/ConsumableItemData.h"
 
@@ -24,12 +25,14 @@ bool UInventoryComponent::RequestUseItem(int32 SlotIndex)
 	{
 		return RequestSellItem(SlotIndex);
 	}
-	else
-	{
-		// Try Use Item
 
+	const UConsumableItemData* Item = Cast<UConsumableItemData>(InventoryPage.Slots[SlotIndex].Item.DataAsset);
+	if (!Item)
+	{
 		return false;
 	}
+
+	return TryUseItem(SlotIndex);
 }
  
 bool UInventoryComponent::RequestSellItem(int32 SlotIndex)
@@ -102,18 +105,61 @@ void UInventoryComponent::BeginPlay()
 	InventoryPage = FInventoryPage(SlotCountPerPage);
 
 	EquipmentComponentRef = Cast<ASimpleRPGPlayerState>(GetOwner())->GetComponentByClass<UEquipmentComponent>();
-	check(EquipmentComponentRef.IsValid());
+	AbilitySystemComponentRef = Cast<ASimpleRPGPlayerState>(GetOwner())->GetComponentByClass<UAbilitySystemComponent>();
+	check(EquipmentComponentRef.IsValid() && AbilitySystemComponentRef.IsValid());
 }
 
-void UInventoryComponent::TryUseItem(int32 SlotIndex)
+bool UInventoryComponent::TryUseItem(int32 SlotIndex)
 {
-	UConsumableItemData* Item = Cast<UConsumableItemData>(InventoryPage.Slots[SlotIndex].Item.DataAsset);
-	if (!Item)
+	FItemInstance& ItemInstance = InventoryPage.Slots[SlotIndex].Item;
+	UConsumableItemData* ItemData = Cast< UConsumableItemData>(ItemInstance.DataAsset);
+
+	if (ItemData || ItemInstance.Amount <= 0)
 	{
-		return;
+		UE_LOG(LogInventory, Warning, TEXT("consumable data class or amount is not valid"));
+		return false;
 	}
 
-	// TODO : Item usecase 정의하기ㄴ
+	// Apply Item stat to ASC
+	UAbilitySystemComponent* SourceASC = AbilitySystemComponentRef.Get();
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponentRef->MakeEffectContext();
+	EffectContext.AddSourceObject(SourceASC->GetAvatarActor());
+
+	TSubclassOf<UGameplayEffect> GEClass = ItemData->GetGameplayEffectClass();
+	if (!GEClass)
+	{
+		UE_LOG(LogInventory, Warning, TEXT("consumable GEClass is not valid"));
+		return false;
+	}
+
+	FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(GEClass, 1.0f, EffectContext);
+	if (!SpecHandle.IsValid())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("consumable specHandle is not valid"));
+		return false;
+	}
+
+	if (!ItemData->SetGameplayEffectSpecHandleData(SpecHandle))
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Failed to set consumbale GESpecHandleData"));
+		return false;
+	}
+
+	FActiveGameplayEffectHandle Handle = AbilitySystemComponentRef->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	if (!Handle.IsValid())
+	{
+		UE_LOG(LogInventory, Warning, TEXT("Failed to apply consumable item to the player"));
+		return false;
+	}
+	else
+	{
+		UE_LOG(LogInventory, Verbose, TEXT("Succeed to apply consumable item to the player"));
+		InventoryPage.RemoveItem(SlotIndex, 1);
+		OnInventoryContentChanged.Broadcast();
+		OnItemCountChanged.Broadcast(ItemData->GetPrimaryAssetId());
+
+		return true;
+	}
 }
 
 bool UInventoryComponent::CanAddItem(FItemInstance ItemInstance) const

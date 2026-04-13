@@ -33,7 +33,6 @@ public:
 
 	// Sets default values for this component's properties
 	UEquipmentComponent();
-	void SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC);
 	FInventorySlot& GetEquipmentSlot(int32 Index);
 	FInventorySlot& GetEquipmentSlot(EEquipmentType Type);
 	

@@ -49,7 +49,7 @@ struct FEquipmentDetail
 
 struct FConsumableDetail
 {
-	TArray<TPair<FText, FText>> Effects;
+	FText DetailText;
 };
 
 using FItemDetailPayload = TVariant<FItemDetail, FEquipmentDetail, FConsumableDetail>;

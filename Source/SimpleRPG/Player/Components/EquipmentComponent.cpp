@@ -35,12 +35,8 @@ void UEquipmentComponent::BeginPlay()
 	}
 
 	InventoryComponentRef = Cast<ASimpleRPGPlayerState>(GetOwner())->GetComponentByClass<UInventoryComponent>();
-	check(InventoryComponentRef.IsValid());
-}
-
-void UEquipmentComponent::SetAbilitySystemComponentRef(UAbilitySystemComponent* ASC)
-{
-	AbilitySystemComponentRef = ASC;
+	AbilitySystemComponentRef = Cast<ASimpleRPGPlayerState>(GetOwner())->GetComponentByClass<UAbilitySystemComponent>();
+	check(InventoryComponentRef.IsValid() && AbilitySystemComponentRef.IsValid());
 }
 
 FInventorySlot& UEquipmentComponent::GetEquipmentSlot(int32 Index)

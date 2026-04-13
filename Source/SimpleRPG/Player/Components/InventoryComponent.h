@@ -58,8 +58,8 @@ public:
 	bool RequestRemoveEquipment(int32 EquipmentIndex, int32 TargetIndex);
 
 	bool RequestUseItem(int32 SlotIndex);
-	bool RequestSellItem(int32 SlotIndex);
 	bool RequestPurchaseItem(int32 ShopSlotIndex);
+	bool RequestSellItem(int32 SlotIndex);
 
 	bool RequestRegisterEnhanceTarget(int32 SlotIndex);
 	FItemDescription GetItemDescription(int32 SlotIndex);
@@ -76,10 +76,13 @@ public:
 	EInventoryMode GetCurrentMode() const { return InventoryMode; }
 protected:
 	virtual void BeginPlay() override;
-	void TryUseItem(int32 SlotIndex);
+	bool TryUseItem(int32 SlotIndex);
 
 	UPROPERTY()
 	FInventoryPage InventoryPage;
+
+	UPROPERTY()
+	TWeakObjectPtr<class UAbilitySystemComponent> AbilitySystemComponentRef;
 
 	UPROPERTY()
 	TWeakObjectPtr<class UEquipmentComponent> EquipmentComponentRef;

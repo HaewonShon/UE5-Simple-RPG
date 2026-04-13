@@ -26,7 +26,6 @@ ASimpleRPGPlayerState::ASimpleRPGPlayerState()
 void ASimpleRPGPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
-	EquipmentComponent->SetAbilitySystemComponentRef(AbilitySystemComponent);
 	QuestManagerComponent->SetInventoryComponentRef(InventoryComponent);
 }
 

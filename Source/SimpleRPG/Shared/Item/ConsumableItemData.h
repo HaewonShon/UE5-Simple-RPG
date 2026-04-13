@@ -7,24 +7,10 @@
 #include "GameplayTagContainer.h"
 #include "ConsumableItemData.generated.h"
 
-
-USTRUCT(BlueprintType)
-struct FItemEffect
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	float Health;
-
-	UPROPERTY(EditDefaultsOnly)
-	float Mana;
-};
-
-
 /**
  *	Data Asset for consumable
  */
-UCLASS(BlueprintType, meta = (DisplayName = "Consumable Item Data Asset"))
+UCLASS(Abstract, BlueprintType, meta = (DisplayName = "Consumable Item Data Asset"))
 class SIMPLERPG_API UConsumableItemData : public UItemData
 {
 	GENERATED_BODY()
@@ -35,6 +21,6 @@ public:
 
 	virtual FItemDescription BuildDescriptionData() const override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Consumbale")
-	FItemEffect Effect;
+	virtual TSubclassOf<class UGameplayEffect> GetGameplayEffectClass() const { return nullptr; }
+	virtual bool SetGameplayEffectSpecHandleData(struct FGameplayEffectSpecHandle& SpecHandle) const { return false; }
 };

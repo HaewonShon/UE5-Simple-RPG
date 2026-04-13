@@ -3,10 +3,18 @@
 
 #include "ConsumableItemData.h"
 #include "Player/Components/InventoryComponent.h"
-//#include "Player/Components/EquipmentComponent.h"
 
 bool UConsumableItemData::CanExecute(AActor* Executer, const FSlotAddress& Address) const
 {
+	if (Address.ContainerType == ESlotType::Storage)
+	{
+		UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>();
+		if(Inventory && Inventory->GetCurrentMode() == EInventoryMode::Normal)
+		{
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -22,7 +30,7 @@ void UConsumableItemData::Execute(AActor* Executer, const FSlotAddress& Address)
 	{
 		if (UInventoryComponent* Inventory = Executer->GetComponentByClass<UInventoryComponent>())
 		{
-			//Inventory->RequestEquipment();
+			Inventory->RequestUseItem(Address.SlotIndex);
 		}
 	}
 }
@@ -35,8 +43,7 @@ FItemDescription UConsumableItemData::BuildDescriptionData() const
 	Description.Rarity = Rarity;
 
 	FConsumableDetail Detail;
-	if (Effect.Health != 0) Detail.Effects.Add({ FText::FromString("HP"), FText::AsNumber(Effect.Health) });
-	if (Effect.Mana != 0) Detail.Effects.Add({ FText::FromString("MP"), FText::AsNumber(Effect.Mana) });
+	Detail.DetailText = DescriptionText;
 
 	Description.Payload.Set<FConsumableDetail>(Detail);
 
