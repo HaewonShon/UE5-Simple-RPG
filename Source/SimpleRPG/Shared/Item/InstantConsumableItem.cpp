@@ -4,7 +4,7 @@
 #include "Shared/Item/InstantConsumableItem.h"
 #include "Shared/GameAbilitySystem/CharacterAttributeSet.h"
 
-namespace
+namespace InstantUtility
 {
 	void AddSetByCallerModifier(
 		TArray<FGameplayModifierInfo>& Modifiers,
@@ -27,14 +27,20 @@ UInstantGE::UInstantGE()
 {
 	DurationPolicy = EGameplayEffectDurationType::Instant;
 
-	AddSetByCallerModifier(Modifiers,
-		UCharacterAttributeSet::GetHealthAttribute(),
-		FGameplayTag::RequestGameplayTag("Attribute.Health"));
+	// TODO : Change hardcoded part(Health only current)
+	FGameplayModifierInfo& Modifier = Modifiers.AddDefaulted_GetRef();
+	Modifier.Attribute = UCharacterAttributeSet::GetHealthAttribute();
+	Modifier.ModifierOp = EGameplayModOp::Additive;
+
+	FSetByCallerFloat Caller;
+	Caller.DataTag = FGameplayTag::RequestGameplayTag("Attribute.Health");
+
+	Modifier.ModifierMagnitude = FGameplayEffectModifierMagnitude(Caller);
 }
 
 TSubclassOf<class UGameplayEffect> UInstantConsumableItem::GetGameplayEffectClass() const
 {
-	return TSubclassOf<class UInstantGE>();
+	return UInstantGE::StaticClass();
 }
 
 bool UInstantConsumableItem::SetGameplayEffectSpecHandleData(FGameplayEffectSpecHandle& SpecHandle) const

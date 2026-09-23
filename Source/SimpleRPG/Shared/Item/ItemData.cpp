@@ -6,6 +6,10 @@
 
 FItemInstance::FItemInstance()
 {
+	if(DataAsset.IsValid())
+	{
+		ItemID = DataAsset->GetPrimaryAssetId();
+	}
 }
 
 FItemInstance::FItemInstance(const FItemInstance& Other)

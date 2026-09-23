@@ -112,9 +112,9 @@ void UInventoryComponent::BeginPlay()
 bool UInventoryComponent::TryUseItem(int32 SlotIndex)
 {
 	FItemInstance& ItemInstance = InventoryPage.Slots[SlotIndex].Item;
-	UConsumableItemData* ItemData = Cast< UConsumableItemData>(ItemInstance.DataAsset);
+	UConsumableItemData* ItemData = Cast<UConsumableItemData>(ItemInstance.DataAsset);
 
-	if (ItemData || ItemInstance.Amount <= 0)
+	if (!ItemData || ItemInstance.Amount <= 0)
 	{
 		UE_LOG(LogInventory, Warning, TEXT("consumable data class or amount is not valid"));
 		return false;

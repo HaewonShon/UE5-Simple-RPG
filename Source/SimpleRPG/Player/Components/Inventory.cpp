@@ -55,6 +55,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 		UE_LOG(LogTemp, Warning, TEXT("Inventory does not have empty slot to add item"));
 		return false;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("AddItem GivenID: %s"), *ItemInstance.ItemID.ToString());
 
 	if (ItemInstance.DataAsset->bIsStackable)
 	{
@@ -63,6 +64,7 @@ bool FInventoryPage::AddItem(FItemInstance& ItemInstance)
 		{
 			if (!Slot.IsEmpty() && ItemInstance.ItemID == Slot.Item.ItemID)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("AddItem SelectedSlot: %s"), *Slot.Item.ItemID.ToString());
 				Slot.Item.AddStack(ItemInstance);
 				if (ItemInstance.Amount == 0)
 

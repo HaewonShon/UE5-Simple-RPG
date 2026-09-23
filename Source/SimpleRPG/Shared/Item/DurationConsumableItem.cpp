@@ -54,7 +54,7 @@ UDurationGE::UDurationGE()
 
 TSubclassOf<class UGameplayEffect> UDurationConsumableItem::GetGameplayEffectClass() const
 {
-	return TSubclassOf<class UDurationGE>();
+	return UDurationGE::StaticClass(); // TSubclassOf<class UDurationGE>();
 }
 
 bool UDurationConsumableItem::SetGameplayEffectSpecHandleData(FGameplayEffectSpecHandle& SpecHandle) const
